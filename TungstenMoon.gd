@@ -3,7 +3,6 @@ extends MeshInstance3D
 const G = 6.674E-11
 const rhoW = 19250.0 # kg/m^3
 @onready var LogicalM =  rhoW*(PI*4/3)*pow(mesh.radius,3)
-var xr_interface: XRInterface
 
 # position assumes relative to planet center, returns force vector
 func get_acceleration(dv_position: DVector3, v_thrust_acc: Vector3 = Vector3.ZERO) -> DVector3:
@@ -24,21 +23,8 @@ func set_from_logical_position(body: Spacecraft):
 	
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	# VR setup
-	xr_interface = XRServer.find_interface("OpenXR")
-	if xr_interface and xr_interface.is_initialized():
-		print("OpenXR initialised successfully")
+	pass
 		
-		# Turn off v-sync
-		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
-	
-		# Change our main viewport to putput to the HMD
-		get_viewport().use_xr = true
-	else:
-		print("OpenXR not initialized, please check if your headset is connected")
-		get_viewport().use_xr = false
-	# END VR Setup	
-	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
 	pass

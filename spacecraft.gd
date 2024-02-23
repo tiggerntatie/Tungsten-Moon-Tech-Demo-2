@@ -47,16 +47,6 @@ func process_physics(delta, dv_position, dv_velocity, v_th, mass_param):
 		DVector3.Mul(d6, DVector3.QAdd(k1v, DVector3.Mul(2, k2v), DVector3.Mul(2, k3v), k4v)))
 	dv_logical_position = DVector3.Add(dv_position,
 		DVector3.Mul(d6, DVector3.QAdd(k1r, DVector3.Mul(2, k2r), DVector3.Mul(2, k3r), k4r)))
-	
-	
-	#var dv_net_force = DVector3.Add(DVector3.FromVector3(v_thrust), dv_gravity_force)
-	#var dv_acceleration = DVector3.Div(dv_net_force, mass)
-	
-	#dv_logical_position = DVector3.Add(
-	#	DVector3.Add(dv_logical_position, DVector3.Mul(delta, dv_logical_velocity)),
-	#	DVector3.Mul(0.5*delta, dv_acceleration))
-	#dv_logical_velocity.add(DVector3.Mul(delta, dv_acceleration))
-	
 		
 
 # Called when the node enters the scene tree for the first time.
