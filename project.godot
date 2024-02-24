@@ -13,6 +13,8 @@ config_version=5
 config/name="Tungsten Moon Tech Demo 2"
 run/main_scene="res://moonspace.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
+run/max_fps=90
+run/low_processor_mode=true
 config/icon="res://icon.svg"
 
 [display]
