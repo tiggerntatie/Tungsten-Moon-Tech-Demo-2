@@ -32,7 +32,7 @@ transform = Transform3D(0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0, 0, 1, 0,
 
 [node name="Camera3D" type="Camera3D" parent="YawPivot/PitchPivot"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
-far = 600000.0
+far = 1e+06
 
 [node name="XROrigin3D" type="XROrigin3D" parent="YawPivot/PitchPivot"]
 transform = Transform3D(-4.10753e-08, -0.34202, -0.939693, -1.49502e-08, 0.939693, -0.34202, 1, 0, -4.37114e-08, 0.546482, -1.50145, 0)
