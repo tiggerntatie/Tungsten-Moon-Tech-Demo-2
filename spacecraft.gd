@@ -16,7 +16,8 @@ const SCROLL_SENS = 0.05	# m/unit
 @onready var HUDALT : Label = $"../HUD/ALT"
 @onready var HUDTHRUST : Label = $"../HUD/THRUST"
 @onready var HUDFUEL : ProgressBar = $"../HUD/FUEL"
-
+@onready var CAMERA : Camera3D = $YawPivot/PitchPivot/Camera3D
+@onready var XRCAMERA : XRCamera3D = $"YawPivot/PitchPivot/XROrigin3D/XRCamera3D"
 @onready var landed := false
 @onready var dv_logical_position := DVector3.new()
 @onready var dv_logical_velocity := DVector3.new(0,0,0)
@@ -74,6 +75,15 @@ func _process(delta):
 	var v_thrust_global = basis * v_thrust
 	var net_mass = mass - FULL_FUEL + fuel
 
+	# Camera dependent calculations
+	var view_distance = sqrt(pow(dv_logical_position.length(),2) + pow(MOON.mesh.radius,2)) / $"../TungstenMoon".scale_factor
+	var eyeball_offset : Vector3
+	if CAMERA.current:
+		CAMERA.far = view_distance
+		eyeball_offset = CAMERA.global_position
+	else:
+		XRCAMERA.far = view_distance
+		eyeball_offset = XRCAMERA.global_position
 
 	if landed:
 		if v_thrust_global.length_squared() > dv_gravity_force.length_squared():
@@ -83,7 +93,7 @@ func _process(delta):
 		dv_last_position = dv_logical_position
 		v_last_rotation = rotation
 		process_physics(delta, dv_logical_position, dv_logical_velocity, v_thrust_global, net_mass)
-		MOON.set_from_logical_position(self)
+		MOON.set_from_logical_position(self, eyeball_offset)
 		
 	# Inputs
 	if Input.is_action_pressed("Thrust Increase"):
@@ -97,10 +107,7 @@ func _process(delta):
 	
 	if Input.is_action_just_pressed("ui_cancel"):
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)	
-		
-	# Fuel Updates
-	
-		
+				
 	# HUD Updates
 	HUDVEL.text = str(dv_logical_velocity.length()).pad_decimals(1) + " m/s"
 	HUDALT.text = str(dv_logical_position.length() - MOON.mesh.radius).pad_decimals(1) + " m"
