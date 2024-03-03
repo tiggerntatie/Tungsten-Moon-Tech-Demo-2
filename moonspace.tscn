@@ -12,6 +12,8 @@
 shader = ExtResource("2_a8rae")
 shader_parameter/rotation = 0.0
 shader_parameter/viewport = Vector2(1920, 1080)
+shader_parameter/brightness_scale = 0.2
+shader_parameter/star_radius = 0.001
 
 [sub_resource type="Sky" id="Sky_quvyo"]
 sky_material = SubResource("ShaderMaterial_vrwfw")
@@ -61,7 +63,6 @@ shadow_enabled = true
 
 [node name="TungstenMoon" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -300001, -1000)
-visible = false
 material_override = SubResource("StandardMaterial3D_1qfhe")
 mesh = SubResource("SphereMesh_m83uq")
 script = ExtResource("4_gm01a")
