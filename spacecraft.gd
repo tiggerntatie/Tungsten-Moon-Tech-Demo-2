@@ -12,10 +12,10 @@ const MOUSE_SENS = 0.002	# m/unit and deg/unit
 const SCROLL_SENS = 0.05	# m/unit
 
 @onready var MOON : Node3D = $"../TungstenMoon"
-@onready var HUDVEL : Label = $"../HUD/VEL"
-@onready var HUDALT : Label = $"../HUD/ALT"
-@onready var HUDTHRUST : Label = $"../HUD/THRUST"
-@onready var HUDFUEL : ProgressBar = $"../HUD/FUEL"
+@onready var HUDVEL : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Velocity/VEL
+@onready var HUDALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Altitude/ALT
+@onready var HUDTHRUST : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Thrust/THRUST
+@onready var HUDFUEL : ProgressBar = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Fuel/FUEL
 @onready var CAMERA : Camera3D = $YawPivot/PitchPivot/Camera3D
 @onready var XRCAMERA : XRCamera3D = $"YawPivot/PitchPivot/XROrigin3D/XRCamera3D"
 @onready var landed := false

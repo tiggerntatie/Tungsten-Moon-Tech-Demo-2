@@ -24,7 +24,9 @@ func _ready():
 		CAMERA.current = true
 		XRCAMERA.current = false
 	# END VR Setup	
-
+	# Initialize sky shader
+	get_world_3d().environment.sky.sky_material.set("shader_parameter/viewport", get_viewport().size)
+	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
 	pass

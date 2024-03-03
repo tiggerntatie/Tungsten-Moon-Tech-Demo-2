@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://d3kot1052qj27"]
 
 [ext_resource type="Script" path="res://Screen.gd" id="1_l8x7h"]
-[ext_resource type="Theme" uid="uid://bqqnvxh1xieia" path="res://screen_theme.tres" id="2_opnsq"]
+[ext_resource type="PackedScene" uid="uid://cma70xnsskq6a" path="res://instrument_canvas.tscn" id="2_ldhwa"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pmj7f"]
 
@@ -22,25 +22,6 @@ material_override = SubResource("StandardMaterial3D_pmj7f")
 mesh = SubResource("PlaneMesh_vkxjn")
 
 [node name="SubViewport" type="SubViewport" parent="."]
-disable_3d = true
 size = Vector2i(800, 800)
 
-[node name="CanvasLayer" type="CanvasLayer" parent="SubViewport"]
-
-[node name="Label" type="Label" parent="SubViewport"]
-anchors_preset = -1
-offset_left = 100.0
-offset_top = 50.0
-theme = ExtResource("2_opnsq")
-text = "the text is here"
-uppercase = true
-
-[node name="Label2" type="Label" parent="SubViewport"]
-anchors_preset = -1
-offset_left = 100.0
-offset_top = 100.0
-offset_right = 738.0
-offset_bottom = 183.0
-theme = ExtResource("2_opnsq")
-text = "Second line of text"
-uppercase = true
+[node name="InstrumentCanvas" parent="SubViewport" instance=ExtResource("2_ldhwa")]

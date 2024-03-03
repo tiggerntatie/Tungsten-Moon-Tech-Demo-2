@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://c08vubwsc2swp"]
+[gd_scene load_steps=6 format=3 uid="uid://c08vubwsc2swp"]
 
 [ext_resource type="ArrayMesh" uid="uid://1woisy38wlky" path="res://RocketModel.obj" id="1_0nhhd"]
 [ext_resource type="Script" path="res://spacecraft.gd" id="1_mb81d"]
@@ -6,6 +6,11 @@
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_63e0r"]
 size = Vector3(7.7, 7.7, 7.7)
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_txxyl"]
+auto_exposure_enabled = true
+auto_exposure_min_sensitivity = 78.6
+auto_exposure_max_sensitivity = 575.4
 
 [node name="Spacecraft" type="RigidBody3D"]
 axis_lock_linear_x = true
@@ -33,6 +38,7 @@ transform = Transform3D(0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0, 0, 1, 0,
 
 [node name="Camera3D" type="Camera3D" parent="YawPivot/PitchPivot"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+attributes = SubResource("CameraAttributesPractical_txxyl")
 far = 100.0
 
 [node name="XROrigin3D" type="XROrigin3D" parent="YawPivot/PitchPivot"]

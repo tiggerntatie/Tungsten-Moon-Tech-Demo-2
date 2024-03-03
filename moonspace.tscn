@@ -2,28 +2,24 @@
 
 [ext_resource type="Texture2D" uid="uid://bes4acdkv68y3" path="res://rocky_trail_02_diff_4k.png" id="1_ifwq5"]
 [ext_resource type="Script" path="res://moonspace.gd" id="1_miwu0"]
+[ext_resource type="Shader" path="res://moonspace-sky.gdshader" id="2_a8rae"]
 [ext_resource type="Texture2D" uid="uid://deues776ra4xu" path="res://rocky_trail_02_nor_gl_4k.png" id="2_wjujm"]
 [ext_resource type="Texture2D" uid="uid://c4cov3rqjqb10" path="res://rocky_trail_02_rough_4k.png" id="3_60qiv"]
 [ext_resource type="Script" path="res://tungstenmoon.gd" id="4_gm01a"]
 [ext_resource type="PackedScene" uid="uid://c08vubwsc2swp" path="res://spacecraft.tscn" id="5_4lifu"]
-[ext_resource type="PackedScene" uid="uid://l1e0ygcssqj8" path="res://HUD.tscn" id="6_1jicn"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_tnoqu"]
-sky_top_color = Color(0, 0, 0, 1)
-sky_horizon_color = Color(0, 0, 0, 1)
-ground_bottom_color = Color(0, 0, 0, 1)
-ground_horizon_color = Color(0, 0, 0, 1)
-sun_angle_max = 10.32
-sun_curve = 0.0194111
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vrwfw"]
+shader = ExtResource("2_a8rae")
+shader_parameter/rotation = 0.0
+shader_parameter/viewport = null
 
 [sub_resource type="Sky" id="Sky_quvyo"]
-sky_material = SubResource("ProceduralSkyMaterial_tnoqu")
+sky_material = SubResource("ShaderMaterial_vrwfw")
 
 [sub_resource type="Environment" id="Environment_hfpdn"]
 background_mode = 2
 sky = SubResource("Sky_quvyo")
 tonemap_mode = 2
-glow_enabled = true
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1qfhe"]
 albedo_texture = ExtResource("1_ifwq5")
@@ -59,6 +55,8 @@ environment = SubResource("Environment_hfpdn")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.995884, 0.0157382, -0.0892556, 0, 0.984808, 0.173648, 0.0906325, 0.172934, -0.980755, -29, 5, -10)
+light_volumetric_fog_energy = 0.0
+light_angular_distance = 0.5
 shadow_enabled = true
 
 [node name="TungstenMoon" type="MeshInstance3D" parent="."]
@@ -79,5 +77,3 @@ shape = SubResource("ConcavePolygonShape3D_pvmg7")
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0)
 mass = 5000.0
 inertia = Vector3(1000, 1000, 1000)
-
-[node name="HUD" parent="." instance=ExtResource("6_1jicn")]
