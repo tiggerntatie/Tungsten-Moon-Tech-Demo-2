@@ -1,9 +1,8 @@
 shader_type sky;
 
 uniform float rotation;
-uniform vec2 viewport;
 uniform float brightness_scale = 0.5;
-uniform float star_radius = 0.0001; // degrees
+uniform float star_radius = 0.05; // degrees
 
 float hash(vec2 co)
 {
@@ -538,7 +537,8 @@ vec4(-0.21333699605600528,-0.7878896308466778,-0.5776826600462279,0.930520138400
 
 void sky() {	
 	//float thresh =  0.9999995;
-	float thresh = cos(radians(star_radius));
+	//float thresh = cos(radians(star_radius));
+	float thresh = radians(star_radius);
 	
 	int q = 0;
 	if (EYEDIR.x > 0.0) 
@@ -553,7 +553,7 @@ void sky() {
 	switch (q) {
 		case 111: 
 			for (int i=0; i < nvppp; i++) {
-				if (dot(EYEDIR, vppp[i].xyz) >= thresh) {
+				if (distance(EYEDIR, vppp[i].xyz) <= thresh) {
 					COLOR = vec3(0.5*vppp[i][3]);
 					i = nvppp;
 				}
@@ -561,7 +561,7 @@ void sky() {
 			break;
 		case 110: 
 			for (int i=0; i < nvppn; i++) {
-				if (dot(EYEDIR, vppn[i].xyz) >= thresh) {
+				if (distance(EYEDIR, vppn[i].xyz) <= thresh) {
 					COLOR = vec3(0.5*vppn[i][3]);
 					i = nvppn;
 				}
@@ -569,7 +569,7 @@ void sky() {
 			break;
 		case 101:
 			for (int i=0; i < nvpnp; i++) {
-				if (dot(EYEDIR, vpnp[i].xyz) >= thresh) {
+				if (distance(EYEDIR, vpnp[i].xyz) <= thresh) {
 					COLOR = vec3(0.5*vpnp[i][3]);
 					i = nvpnp;
 				}
@@ -577,7 +577,7 @@ void sky() {
 			break;
 		case 100:
 			for (int i=0; i < nvpnn; i++) {
-				if (dot(EYEDIR, vpnn[i].xyz) >= thresh) {
+				if (distance(EYEDIR, vpnn[i].xyz) <= thresh) {
 					COLOR = vec3(0.5*vpnn[i][3]);
 					i = nvpnn;
 				}
@@ -585,7 +585,7 @@ void sky() {
 			break;
 		case 11:
 			for (int i=0; i < nvnpp; i++) {
-				if (dot(EYEDIR, vnpp[i].xyz) >= thresh) {
+				if (distance(EYEDIR, vnpp[i].xyz) <= thresh) {
 					COLOR = vec3(0.5*vnpp[i][3]);
 					i = nvnpp;
 				}
@@ -593,7 +593,7 @@ void sky() {
 			break;
 		case 10:
 			for (int i=0; i < nvnpn; i++) {
-				if (dot(EYEDIR, vnpn[i].xyz) >= thresh) {
+				if (distance(EYEDIR, vnpn[i].xyz) <= thresh) {
 					COLOR = vec3(0.5*vnpn[i][3]);
 					i = nvnpn;
 				}
@@ -601,7 +601,7 @@ void sky() {
 			break;
 		case 1:
 			for (int i=0; i < nvnnp; i++) {
-				if (dot(EYEDIR, vnnp[i].xyz) >= thresh) {
+				if (distance(EYEDIR, vnnp[i].xyz) <= thresh) {
 					COLOR = vec3(0.5*vnnp[i][3]);
 					i = nvnnp;
 				}
@@ -609,7 +609,7 @@ void sky() {
 			break;		
 		case 0:
 			for (int i=0; i < nvnnn; i++) {
-				if (dot(EYEDIR, vnnn[i].xyz) >= thresh) {
+				if (distance(EYEDIR, vnnn[i].xyz) <= thresh) {
 					COLOR = vec3(0.5*vnnn[i][3]);
 					i = nvnnn;
 				}
