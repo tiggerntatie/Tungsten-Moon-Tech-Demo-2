@@ -1,21 +1,31 @@
-[gd_scene load_steps=15 format=3 uid="uid://b678pocn4yvj"]
+[gd_scene load_steps=16 format=3 uid="uid://b678pocn4yvj"]
 
 [ext_resource type="Texture2D" uid="uid://bes4acdkv68y3" path="res://rocky_trail_02_diff_4k.png" id="1_ifwq5"]
 [ext_resource type="Script" path="res://moonspace.gd" id="1_miwu0"]
-[ext_resource type="Shader" path="res://moonspace-sky.gdshader" id="2_a8rae"]
+[ext_resource type="Shader" path="res://moonspace-texture-sky.gdshader" id="2_66dtd"]
 [ext_resource type="Texture2D" uid="uid://deues776ra4xu" path="res://rocky_trail_02_nor_gl_4k.png" id="2_wjujm"]
 [ext_resource type="Texture2D" uid="uid://c4cov3rqjqb10" path="res://rocky_trail_02_rough_4k.png" id="3_60qiv"]
+[ext_resource type="Texture2D" uid="uid://et8tb63ftgu" path="res://tm_stars.png" id="3_ybnff"]
 [ext_resource type="Script" path="res://tungstenmoon.gd" id="4_gm01a"]
 [ext_resource type="PackedScene" uid="uid://c08vubwsc2swp" path="res://spacecraft.tscn" id="5_4lifu"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_6amlp"]
-shader = ExtResource("2_a8rae")
-shader_parameter/rotation = null
-shader_parameter/brightness_scale = 0.5
-shader_parameter/star_radius = 0.05
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qt1ai"]
+shader = ExtResource("2_66dtd")
+shader_parameter/sky_top_color = Color(0, 0, 0, 1)
+shader_parameter/sky_horizon_color = Color(0, 0, 0, 1)
+shader_parameter/sky_curve = 0.15
+shader_parameter/sky_energy = 1.0
+shader_parameter/sky_cover_modulate = Color(1, 1, 1, 1)
+shader_parameter/ground_bottom_color = Color(0, 0, 0, 1)
+shader_parameter/ground_horizon_color = Color(0, 0, 0, 1)
+shader_parameter/ground_curve = 0.02
+shader_parameter/ground_energy = 1.0
+shader_parameter/sun_angle_max = 0.5
+shader_parameter/sun_curve = 0.001
+shader_parameter/sky_cover = ExtResource("3_ybnff")
 
 [sub_resource type="Sky" id="Sky_quvyo"]
-sky_material = SubResource("ShaderMaterial_6amlp")
+sky_material = SubResource("ShaderMaterial_qt1ai")
 
 [sub_resource type="Environment" id="Environment_hfpdn"]
 background_mode = 2

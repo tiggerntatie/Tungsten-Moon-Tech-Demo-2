@@ -4,6 +4,8 @@ uniform float rotation;
 uniform float brightness_scale = 0.5;
 uniform float star_radius = 0.05; // degrees
 
+uniform usampler2D star_field : source_color, hint_default_transparent, filter_nearest;
+
 float hash(vec2 co)
 {
     return fract(sin(dot(co ,vec2(12.9898,78.233))) * 43758.5453);
@@ -538,91 +540,105 @@ vec4(-0.21333699605600528,-0.7878896308466778,-0.5776826600462279,0.930520138400
 void sky() {	
 	//float thresh =  0.9999995;
 	//float thresh = cos(radians(star_radius));
-	float thresh = radians(star_radius);
+	/**/
 	
-	int q = 0;
-	if (EYEDIR.x > 0.0) 
-		q = 1;
-	q = q * 10;
-	if (EYEDIR.y > 0.0)
-		q = q + 1;
-	q = q * 10;
-	if (EYEDIR.z > 0.0)
-		q = q + 1;
-	
-	switch (q) {
-		case 111: 
-			for (int i=0; i < nvppp; i++) {
-				if (distance(EYEDIR, vppp[i].xyz) <= thresh) {
-					COLOR = vec3(0.5*vppp[i][3]);
-					i = nvppp;
+	if (!AT_CUBEMAP_PASS) {
+		float thresh = radians(star_radius);
+		
+		int q = 0;
+		if (EYEDIR.x > 0.0) 
+			q = 1;
+		q = q * 10;
+		if (EYEDIR.y > 0.0)
+			q = q + 1;
+		q = q * 10;
+		if (EYEDIR.z > 0.0)
+			q = q + 1;
+		
+		switch (q) {
+			case 111: 
+				for (int i=0; i < nvppp; i++) {
+					if (distance(EYEDIR, vppp[i].xyz) <= thresh) {
+						COLOR = vec3(0.5*vppp[i][3]);
+						i = nvppp;
+					}
 				}
-			}
-			break;
-		case 110: 
-			for (int i=0; i < nvppn; i++) {
-				if (distance(EYEDIR, vppn[i].xyz) <= thresh) {
-					COLOR = vec3(0.5*vppn[i][3]);
-					i = nvppn;
+				break;
+			case 110: 
+				for (int i=0; i < nvppn; i++) {
+					if (distance(EYEDIR, vppn[i].xyz) <= thresh) {
+						COLOR = vec3(0.5*vppn[i][3]);
+						i = nvppn;
+					}
 				}
-			}
-			break;
-		case 101:
-			for (int i=0; i < nvpnp; i++) {
-				if (distance(EYEDIR, vpnp[i].xyz) <= thresh) {
-					COLOR = vec3(0.5*vpnp[i][3]);
-					i = nvpnp;
+				break;
+			case 101:
+				for (int i=0; i < nvpnp; i++) {
+					if (distance(EYEDIR, vpnp[i].xyz) <= thresh) {
+						COLOR = vec3(0.5*vpnp[i][3]);
+						i = nvpnp;
+					}
 				}
-			}
-			break;
-		case 100:
-			for (int i=0; i < nvpnn; i++) {
-				if (distance(EYEDIR, vpnn[i].xyz) <= thresh) {
-					COLOR = vec3(0.5*vpnn[i][3]);
-					i = nvpnn;
+				break;
+			case 100:
+				for (int i=0; i < nvpnn; i++) {
+					if (distance(EYEDIR, vpnn[i].xyz) <= thresh) {
+						COLOR = vec3(0.5*vpnn[i][3]);
+						i = nvpnn;
+					}
 				}
-			}
-			break;
-		case 11:
-			for (int i=0; i < nvnpp; i++) {
-				if (distance(EYEDIR, vnpp[i].xyz) <= thresh) {
-					COLOR = vec3(0.5*vnpp[i][3]);
-					i = nvnpp;
+				break;
+			case 11:
+				for (int i=0; i < nvnpp; i++) {
+					if (distance(EYEDIR, vnpp[i].xyz) <= thresh) {
+						COLOR = vec3(0.5*vnpp[i][3]);
+						i = nvnpp;
+					}
 				}
-			}
-			break;
-		case 10:
-			for (int i=0; i < nvnpn; i++) {
-				if (distance(EYEDIR, vnpn[i].xyz) <= thresh) {
-					COLOR = vec3(0.5*vnpn[i][3]);
-					i = nvnpn;
+				break;
+			case 10:
+				for (int i=0; i < nvnpn; i++) {
+					if (distance(EYEDIR, vnpn[i].xyz) <= thresh) {
+						COLOR = vec3(0.5*vnpn[i][3]);
+						i = nvnpn;
+					}
 				}
-			}
-			break;
-		case 1:
-			for (int i=0; i < nvnnp; i++) {
-				if (distance(EYEDIR, vnnp[i].xyz) <= thresh) {
-					COLOR = vec3(0.5*vnnp[i][3]);
-					i = nvnnp;
+				break;
+			case 1:
+				for (int i=0; i < nvnnp; i++) {
+					if (distance(EYEDIR, vnnp[i].xyz) <= thresh) {
+						COLOR = vec3(0.5*vnnp[i][3]);
+						i = nvnnp;
+					}
 				}
-			}
-			break;		
-		case 0:
-			for (int i=0; i < nvnnn; i++) {
-				if (distance(EYEDIR, vnnn[i].xyz) <= thresh) {
-					COLOR = vec3(0.5*vnnn[i][3]);
-					i = nvnnn;
+				break;		
+			case 0:
+				for (int i=0; i < nvnnn; i++) {
+					if (distance(EYEDIR, vnnn[i].xyz) <= thresh) {
+						COLOR = vec3(0.5*vnnn[i][3]);
+						i = nvnnn;
+					}
 				}
-			}
-			break;
+				break;
+		}
 	}
 	
+	/**/
+	/*
+	if (AT_CUBEMAP_PASS) {
+		COLOR = vec3(0.0,0.0,0.0);
+	} else {
+		COLOR = vec3(texture(star_field, SKY_COORDS).rgb)/255.0;
+	}
+	*/
 	
-	
-	if (LIGHT0_ENABLED) {
-		const float cosradius = cos(LIGHT0_SIZE/2.0);
-		if (dot(EYEDIR, LIGHT0_DIRECTION) >= cosradius) {
-			COLOR = LIGHT0_COLOR;
+	if (AT_CUBEMAP_PASS) {
+		COLOR = vec3(0.0,0.0,0.0);
+	} else {
+		if (LIGHT0_ENABLED) {
+			if (distance(EYEDIR, LIGHT0_DIRECTION) <= LIGHT0_SIZE/2.0) {
+				COLOR = LIGHT0_COLOR;
+			}
 		}
 	}
 }
