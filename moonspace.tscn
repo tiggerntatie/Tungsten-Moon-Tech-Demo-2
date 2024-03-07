@@ -13,8 +13,7 @@
 shader = ExtResource("2_a8rae")
 shader_parameter/sky_energy = 1.0
 shader_parameter/sky_cover_modulate = Color(1, 1, 1, 1)
-shader_parameter/sun_angle_max = 0.6
-shader_parameter/sun_curve = 0.005
+shader_parameter/sun_curve = 0.15
 shader_parameter/rotation = 0.0
 shader_parameter/star_field = ExtResource("3_ybnff")
 
@@ -54,14 +53,22 @@ data = PackedVector3Array(0, 300000, 0, 0, 300000, 0, 0, 299650, 14494, 0, 30000
 
 [node name="Level" type="Node3D"]
 script = ExtResource("1_miwu0")
+inertial_rotation_rate = 0.02
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_hfpdn")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLightSun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.995884, 0.0157382, -0.0892556, 0, 0.984808, 0.173649, 0.0906325, 0.172934, -0.980755, -29, 5, -10)
 light_volumetric_fog_energy = 0.0
 light_angular_distance = 0.5
+shadow_enabled = true
+
+[node name="DirectionalLightPlanet" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.989016, 0, -0.147809, 0, 1, 0, 0.147809, 0, -0.989016, 0, 0, 0)
+light_color = Color(0.466667, 0.52549, 0.305882, 1)
+light_energy = 0.2
+light_angular_distance = 4.0
 shadow_enabled = true
 
 [node name="TungstenMoon" type="MeshInstance3D" parent="."]

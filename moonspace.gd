@@ -3,7 +3,7 @@ extends Node3D
 @onready var CAMERA : Camera3D = $"./Spacecraft/YawPivot/PitchPivot/Camera3D"
 @onready var XRCAMERA : XRCamera3D = $"./Spacecraft/YawPivot/PitchPivot/XROrigin3D/XRCamera3D"
 @onready var ENVIRONMENT : WorldEnvironment = $WorldEnvironment
-@onready var SUNLIGHT : DirectionalLight3D = $DirectionalLight3D
+@onready var SUNLIGHT : DirectionalLight3D = $DirectionalLightSun
 var xr_interface: XRInterface
 ## Inertial reference rotation about y-axis, radians per second
 @export_range(-1,1) var inertial_rotation_rate : float = 0.000290888
