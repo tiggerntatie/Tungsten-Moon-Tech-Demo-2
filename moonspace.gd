@@ -2,7 +2,12 @@ extends Node3D
 
 @onready var CAMERA : Camera3D = $"./Spacecraft/YawPivot/PitchPivot/Camera3D"
 @onready var XRCAMERA : XRCamera3D = $"./Spacecraft/YawPivot/PitchPivot/XROrigin3D/XRCamera3D"
+@onready var ENVIRONMENT : WorldEnvironment = $WorldEnvironment
+@onready var SUNLIGHT : DirectionalLight3D = $DirectionalLight3D
 var xr_interface: XRInterface
+## Inertial reference rotation about y-axis, radians per second
+@export_range(-1,1) var inertial_rotation_rate : float = 0.000290888
+var current_rotation = PI
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -29,5 +34,8 @@ func _ready():
 	# END VR Setup	
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta):
+func _process(delta):
+	current_rotation += inertial_rotation_rate * delta
+	ENVIRONMENT.environment.sky.sky_material.set_shader_parameter("rotation", current_rotation)
+	SUNLIGHT.rotation.y = current_rotation
 	pass
