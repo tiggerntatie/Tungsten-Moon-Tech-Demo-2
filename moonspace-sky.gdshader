@@ -3,6 +3,7 @@ shader_type sky;
 uniform float sky_energy = 1.0; // In Lux.
 uniform vec4 sky_cover_modulate : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform sampler2D star_field : source_color, hint_default_transparent, filter_nearest;
+// https://opengameart.org/content/planet-texture-80004000px-planet8png
 uniform sampler2D planet_albedo : source_color, hint_default_transparent, filter_nearest;
 uniform float planet_dark_side_albedo_factor = 0.002;
 uniform vec4 planet_rotation = vec4(0.0, 0.0, 0.0, 0.0);
@@ -46,6 +47,8 @@ void sky() {
 				vec3 temp = cross(planet_rotation.xyz, v_rn) + planet_rotation.w * v_rn;
 				vec3 rotated_v_rn = v_rn + 2.0*cross(planet_rotation.xyz, temp);
 				vec2 v_ps = vec2(atan(rotated_v_rn.z, rotated_v_rn.x)/PI, asin(rotated_v_rn.y)/PI+0.5);
+				// grab the correct pixel color from the planet texture, but 
+				// take into account the overall albedo, planet illumination angle, and moon-shine brightness
 				sky = planet_default_light_energy * surface_illumination * shadow_factor * texture(planet_albedo, v_ps).rgb;
 			}
 		}
