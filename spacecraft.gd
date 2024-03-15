@@ -49,6 +49,24 @@ func process_physics(delta, dv_position, dv_velocity, v_th, mass_param):
 	dv_logical_position = DVector3.Add(dv_position,
 		DVector3.Mul(d6, DVector3.QAdd(k1r, DVector3.Mul(2, k2r), DVector3.Mul(2, k3r), k4r)))
 		
+# Set spacecraft logical position to lat/long and heading (cw from N) (all in degrees)
+# Also sets rotation to be level with local ground, pointing at heading
+func set_logical_position(lat: float, lon: float, radius: float, altitude: float, heading: float):
+	var phi: float = deg_to_rad(lon)
+	var theta: float = deg_to_rad(lat)
+	var gamma: float = deg_to_rad(-heading)
+	dv_logical_position.x = (radius + altitude) * cos(theta)*cos(phi)
+	dv_logical_position.y = (radius + altitude) * sin(theta)
+	dv_logical_position.z = (radius + altitude) * cos(theta)*(-sin(phi))
+	var q1 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, PI/2.0-theta,))
+	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, 0.0, phi-PI))
+	rotation = (q1*q2).get_euler()
+	print(rotation)
+	print("longitude ", lon, " latitude ", lat, " heading ", heading)
+	print("phi ", phi, " theta ", theta, " gamma ", gamma)
+	print(dv_logical_position.x, " ", dv_logical_position.y, " ", dv_logical_position.z)
+	MOON.set_from_logical_position(self)
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

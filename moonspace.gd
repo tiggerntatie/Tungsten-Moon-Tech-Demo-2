@@ -1,12 +1,23 @@
 extends Node3D
 
-@onready var CAMERA : Camera3D = $"./Spacecraft/YawPivot/PitchPivot/Camera3D"
-@onready var XRCAMERA : XRCamera3D = $"./Spacecraft/YawPivot/PitchPivot/XROrigin3D/XRCamera3D"
+@onready var SPACECRAFT : RigidBody3D = $Spacecraft
+@onready var CAMERA : Camera3D = $Spacecraft/YawPivot/PitchPivot/Camera3D
+@onready var XRCAMERA : XRCamera3D = $Spacecraft/YawPivot/PitchPivot/XROrigin3D/XRCamera3D
 @onready var ENVIRONMENT : WorldEnvironment = $WorldEnvironment
 @onready var SUNLIGHT : DirectionalLight3D = $DirectionalLightSun
 @onready var PLANETLIGHT : DirectionalLight3D = $DirectionalLightPlanet
+@onready var MOON : MeshInstance3D = $TungstenMoon
 @onready var planet_default_light_energy = PLANETLIGHT.light_energy
 var xr_interface: XRInterface
+
+## INITIAL SPACECRAFT POSITION
+@export_group("Spacecraft Start Position")
+## Longitude in degrees
+@export_range(-180.0, 180.0, 0.1, "degrees") var initial_longitude : float = 0.0
+## Latitude in degrees
+@export_range(-90.0, 90.0, 0.1, "degrees") var initial_latitude : float = 0.0
+## Heading in degrees (0-359.9, clockwise from North)
+@export_range(0.0, 359.9, 0.1, "degrees") var initial_heading : float = 0.0
 
 ## SOLAR SYSTEM PARAMETERS
 @export_group("Solar System")
@@ -24,7 +35,7 @@ var astronomy_starting_seconds : float
 ## Axis direction of apparent sun orbit around the planet
 @export var solar_orbit_axis_direction : Vector3 = Vector3(0.0, 1.0, 0.0)
 ## Initial rotation of planet around sun (radians)
-@export_range(0.0, 2*PI, 0.001) var solar_orbit_rotation = 0.0
+@export_range(0.0, TAU, 0.001) var solar_orbit_rotation = 0.0
 ## Constant parameters
 const G = 6.674E-11
 const solarDiameter : float = 1.4E9 # m
@@ -42,11 +53,11 @@ var solarOrbitRate : float
 ## Axis direction of apparent planet orbit around the moon
 @export var planet_orbit_axis_direction : Vector3 = Vector3(0.0, 1.0, 0.0)
 ## Initial rotation of moon around planet (radians)
-@export_range(0.0, 2*PI, 0.001) var planet_orbit_rotation = 0.0
+@export_range(0.0, TAU, 0.001) var planet_orbit_rotation = 0.0
 ## Axis direction of planet rotation
 @export var planet_axis_direction : Vector3 = Vector3(0.0, 1.0, 0.0)
 ## Initial rotation of the planet on its axis (radians)
-@export_range(0.0, 2*PI, 0.001) var planet_axis_rotation = 0.0
+@export_range(0.0, TAU, 0.001) var planet_axis_rotation = 0.0
 ## Rotational period of the planet about its axis (hours)
 @export_range(0.1, 100.0, 0.01) var planet_axis_period_hours : float = 20.0
 ## Constant Parameters
@@ -62,7 +73,7 @@ var planetAxisRate : float
 ## MOON PARAMETERS
 @export_subgroup("Moon Parameters")
 ## Initial rotation of the moon on its axis (radians)
-@export_range(0.0, 2*PI, 0.001) var moon_axis_rotation = 0.0
+@export_range(0.0, TAU, 0.001) var moon_axis_rotation = 0.0
 ## Rotational period of the moon about its axis (hours)
 @export_range(0.1, 500.0, 0.01) var moon_axis_period_hours : float = 100.0
 ## Computed parameters
@@ -73,10 +84,11 @@ var moonAxisRotation : float :
 	get:
 		return current_moon_rotation
 
-var current_moon_rotation
-var current_planet_rotation
-var current_planet_orbit_rotation
-var current_solar_rotation
+var current_moon_rotation : float
+var current_moon_rotation_count : int
+var current_planet_rotation : float
+var current_planet_orbit_rotation : float
+var current_solar_rotation : float
 
 
 # Called when the node enters the scene tree for the first time.
@@ -106,31 +118,49 @@ func _ready():
 	ENVIRONMENT.environment.sky.sky_material.set_shader_parameter("planet_default_light_energy", planet_default_light_energy)
 
 	# Compute solar system constants
-	moonAxisRate = 2*PI/(moon_axis_period_hours*3600)
-	planetAxisRate = 2*PI/(planet_axis_period_hours*3600)
-	solarOrbitRate = 2*PI/(solar_orbit_period_days*24*3600)
-	planetOrbitRate = 2*PI/(planet_orbit_period_hours*3600)
+	moonAxisRate = TAU/(moon_axis_period_hours*3600)
+	planetAxisRate = TAU/(planet_axis_period_hours*3600)
+	solarOrbitRate = TAU/(solar_orbit_period_days*24*3600)
+	planetOrbitRate = TAU/(planet_orbit_period_hours*3600)
 	solarDistance = pow(pow(solar_orbit_period_days*24*3600,2) / solarKeplerConstant, 1.0/3.0)
 	SUNLIGHT.light_angular_distance = rad_to_deg(solarDiameter/solarDistance)
 	planetDiameter = 2.0*pow((3.0*massEarth*planet_mass)/(4.0*densityEarth*PI), 1.0/3.0)
-	planetDistance = pow(G*massEarth*planet_mass*pow(planet_orbit_period_hours*3600.0/2.0/PI,2),1.0/3.0)
+	planetDistance = pow(G*massEarth*planet_mass*pow(planet_orbit_period_hours*3600.0/TAU,2),1.0/3.0)
 	PLANETLIGHT.light_angular_distance = rad_to_deg(planetDiameter/planetDistance)
 	# Initial solar system rotations
 	astronomy_starting_seconds = astronomy_starting_day*24*3600
 	current_moon_rotation = moon_axis_rotation + moonAxisRate*astronomy_starting_seconds
+	current_moon_rotation_count = floorf(current_moon_rotation / TAU)
+	current_moon_rotation = fmod(current_moon_rotation, TAU)
+	# now, base starting seconds on moon rotations
+	astronomy_starting_seconds = (current_moon_rotation_count * TAU + current_moon_rotation)/moonAxisRate
 	current_planet_rotation = planet_axis_rotation + planetAxisRate*astronomy_starting_seconds
 	current_solar_rotation = solar_orbit_rotation + solarOrbitRate*astronomy_starting_seconds
 	current_planet_orbit_rotation = planet_orbit_rotation + planetOrbitRate*astronomy_starting_seconds
-	
+	# Supply initial spacecraft position
+	SPACECRAFT.set_logical_position(
+		initial_latitude, 
+		initial_longitude, 
+		MOON.mesh.radius, 
+		10.0, 	# altitude
+		initial_heading)
+	 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	# update shader parameters 
 	# Rotate starfield to account for Tungsten Moon rotation
 	var step: float = delta * astronomy_speed_factor
 	current_moon_rotation += moonAxisRate * step
-	current_planet_orbit_rotation += planetOrbitRate * step
-	current_solar_rotation += solarOrbitRate * step
-	current_planet_rotation += planetAxisRate * step
+	if current_moon_rotation > TAU:
+		current_moon_rotation -= TAU
+		current_moon_rotation_count += 1
+	
+	# now, base starting seconds on moon rotations
+	astronomy_starting_seconds = (current_moon_rotation_count * TAU + current_moon_rotation)/moonAxisRate
+	current_planet_rotation = planet_axis_rotation + planetAxisRate*astronomy_starting_seconds
+	current_solar_rotation = solar_orbit_rotation + solarOrbitRate*astronomy_starting_seconds
+	current_planet_orbit_rotation = planet_orbit_rotation + planetOrbitRate*astronomy_starting_seconds
+
 	ENVIRONMENT.environment.sky.sky_material.set_shader_parameter("star_rotation", -current_moon_rotation)
 	# Position sun position to account for planet orbit and moon rotation
 	var qSunPosition = Quaternion(solar_orbit_axis_direction.normalized(), current_solar_rotation)
