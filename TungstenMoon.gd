@@ -4,6 +4,7 @@ const G = 6.674E-11
 const rhoW = 19250.0 # kg/m^3
 const SHRINK_ALTITUDE = 10000 # meters above ground
 const SHRINK_FACTOR = 4
+@onready var LEVEL : Node3D = $".."
 @onready var LogicalM =  rhoW*(PI*4/3)*pow(mesh.radius,3)
 var scale_factor : float = 1.0
 
@@ -33,7 +34,13 @@ func set_from_logical_position(body: Spacecraft, eyeball_offset: Vector3 = Vecto
 		if scale_factor > 1:
 			scale_factor = 1
 			scale = Vector3(1, 1, 1)
-	p.sub(DVector3.Div(body.dv_logical_position, scale_factor))
+	# p.sub(DVector3.Div(body.dv_logical_position, scale_factor))
+	# make a copy of logical position
+	var dv_unrotated_logical_position: DVector3 = body.dv_logical_position.copy()
+	# de-rotate it 
+	dv_unrotated_logical_position.rotate_y(-LEVEL.current_moon_rotation)
+	# scale it and create a new position
+	p.sub(DVector3.Div(dv_unrotated_logical_position, scale_factor))
 	#print(offset, " ", scale_factor)
 	position = p.vector3() + eyeball_offset
 	

@@ -48,6 +48,11 @@ func sub(v: DVector3) -> void:
 	y -= v.y
 	z -= v.z
 
+# vector rotate around y-axis
+func rotate_y(th: float) -> void:
+	x = x*cos(th) + z*sin(th)
+	z = - x*sin(th) + z*cos(th) 
+
 # magnitude squared
 func length_squared() -> float:
 	return pow(x,2) + pow(y,2) + pow(z,2)
@@ -63,6 +68,10 @@ func normalized() -> DVector3:
 # create a Vector3
 func vector3() -> Vector3:
 	return Vector3(x, y, z)
+
+# copy a DVector3
+func copy() -> DVector3:
+	return DVector3.new(x, y, z)
 
 func print():
 	print(x, ",", y, ",", z)

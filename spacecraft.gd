@@ -51,7 +51,8 @@ func process_physics(delta, dv_position, dv_velocity, v_th, mass_param):
 		
 # Set spacecraft logical position to lat/long and heading (cw from N) (all in degrees)
 # Also sets rotation to be level with local ground, pointing at heading
-func set_logical_position(lat: float, lon: float, radius: float, altitude: float, heading: float):
+# Also sets linear velocity to match moon rotation at the given altitude
+func set_logical_position(lat: float, lon: float, radius: float, altitude: float, heading: float, moon_rate: float):
 	# NOTE: Longitude zero is in the direction of +Z per Godot convention
 	# NOTE: Spacecraft rotation depends on spacecraft orientation facing +X
 	var phi: float = deg_to_rad(lon)
@@ -60,6 +61,9 @@ func set_logical_position(lat: float, lon: float, radius: float, altitude: float
 	dv_logical_position.x = (radius + altitude) * cos(theta)*sin(phi)
 	dv_logical_position.y = (radius + altitude) * sin(theta)
 	dv_logical_position.z = (radius + altitude) * cos(theta)*cos(phi)
+	var initial_velocity = (radius+altitude)*moon_rate
+	dv_logical_velocity.x = cos(theta)*cos(phi) * initial_velocity
+	dv_logical_velocity.z = cos(theta)*(-sin(phi)) * initial_velocity
 	var q1 : Quaternion = Quaternion.from_euler(Vector3(0.0, phi+PI/2.0, PI/2.0-theta))
 	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, 0.0))
 	rotation = (q1*q2).get_euler()
