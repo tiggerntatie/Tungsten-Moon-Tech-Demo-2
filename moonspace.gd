@@ -90,7 +90,6 @@ var current_planet_rotation : float
 var current_planet_orbit_rotation : float
 var current_solar_rotation : float
 
-
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	# VR setup
@@ -168,6 +167,7 @@ func _process(delta):
 	var qMoonPosition = Quaternion(Vector3(0.0, 1.0, 0.0), -current_moon_rotation)
 	SUNLIGHT.rotation = (qSunPosition*qMoonPosition).get_euler()
 	PLANETLIGHT.rotation = (qPlanetPosition*qMoonPosition).get_euler()
+
 	# Tell shader about the orientation and rotation state of the planet so it can be textured correctly
 	var planet_rotation: Quaternion = Quaternion(planet_axis_direction.normalized(), current_planet_rotation)
 	ENVIRONMENT.environment.sky.sky_material.set_shader_parameter("planet_rotation", planet_rotation)
