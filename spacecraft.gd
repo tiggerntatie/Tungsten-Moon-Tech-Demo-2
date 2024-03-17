@@ -11,6 +11,7 @@ const GEARTH = 9.80665 		# m/s^2
 const MOUSE_SENS = 0.002	# m/unit and deg/unit
 const SCROLL_SENS = 0.05	# m/unit
 
+@onready var LEVEL : Node3D = $".."
 @onready var MOON : Node3D = $"../TungstenMoon"
 @onready var HUDVEL : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Velocity/VEL
 @onready var HUDALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Altitude/ALT
@@ -48,7 +49,24 @@ func process_physics(delta, dv_position, dv_velocity, v_th, mass_param):
 		DVector3.Mul(d6, DVector3.QAdd(k1v, DVector3.Mul(2, k2v), DVector3.Mul(2, k3v), k4v)))
 	dv_logical_position = DVector3.Add(dv_position,
 		DVector3.Mul(d6, DVector3.QAdd(k1r, DVector3.Mul(2, k2r), DVector3.Mul(2, k3r), k4r)))
-		
+
+# Calculate new position and velocity for each step
+# Assuming the spacecraft is stationary, relative to moon surface
+func process_stationary_physics(delta: float, dv_pos: DVector3):
+	dv_pos.rotate_y(LEVEL.moon_axis_rate * delta)
+	dv_logical_velocity = get_landed_velocity(dv_pos, LEVEL.moon_axis_rate)
+	dv_pos.print()
+	
+# Return a DVector3 representing velocity at the current logical position, assuming no relative motion
+# with respect to the moon.	
+# dv_pos is logical position
+# rate is the moon rotation rate in radian/sec
+func get_landed_velocity(dv_pos: DVector3, rate: float):
+	var hradius: float = sqrt(dv_pos.x**2 + dv_pos.z**2)
+	var angle: float = atan2(dv_pos.x, dv_pos.z)
+	var vel: float = hradius*rate
+	return DVector3.new(vel*cos(angle), 0.0, vel*(-sin(angle)))
+
 # Set spacecraft logical position to lat/long and heading (cw from N) (all in degrees)
 # Also sets rotation to be level with local ground, pointing at heading
 # Also sets linear velocity to match moon rotation at the given altitude
@@ -61,16 +79,11 @@ func set_logical_position(lat: float, lon: float, radius: float, altitude: float
 	dv_logical_position.x = (radius + altitude) * cos(theta)*sin(phi)
 	dv_logical_position.y = (radius + altitude) * sin(theta)
 	dv_logical_position.z = (radius + altitude) * cos(theta)*cos(phi)
-	var initial_velocity = (radius+altitude)*moon_rate
-	dv_logical_velocity.x = cos(theta)*cos(phi) * initial_velocity
-	dv_logical_velocity.z = cos(theta)*(-sin(phi)) * initial_velocity
+	dv_logical_velocity = get_landed_velocity(dv_logical_position, moon_rate)
 	var q1 : Quaternion = Quaternion.from_euler(Vector3(0.0, phi+PI/2.0, PI/2.0-theta))
 	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, 0.0))
 	rotation = (q1*q2).get_euler()
-	#print(rotation)
-	#print("longitude ", lon, " latitude ", lat, " heading ", heading)
-	#print("phi ", phi, " theta ", theta, " gamma ", gamma)
-	#print(dv_logical_position.x, " ", dv_logical_position.y, " ", dv_logical_position.z)
+	angular_velocity = Vector3(0.0, moon_rate, 0.0)
 	MOON.set_from_logical_position(self)
 
 
@@ -79,7 +92,7 @@ func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	dv_logical_position =  MOON.get_logical_position(self)
 	dv_gravity_force = DVector3.Mul(mass, MOON.get_acceleration(dv_logical_position))
-	dv_last_position = dv_logical_position
+	dv_last_position = dv_logical_position.copy()
 	v_last_rotation = rotation
 	contact_monitor = true
 	max_contacts_reported = 1
@@ -112,12 +125,13 @@ func _process(delta):
 	if landed:
 		if v_thrust_global.length_squared() > dv_gravity_force.length_squared():
 			landed = false
-			lock_rotation = false
+		else:
+			process_stationary_physics(delta, dv_logical_position)
 	if not landed:
-		dv_last_position = dv_logical_position
+		dv_last_position = dv_logical_position.copy()
 		v_last_rotation = rotation
 		process_physics(delta, dv_logical_position, dv_logical_velocity, v_thrust_global, net_mass)
-		MOON.set_from_logical_position(self, eyeball_offset)
+	MOON.set_from_logical_position(self, eyeball_offset)
 		
 	# Inputs
 	if Input.is_action_pressed("Thrust Increase"):
@@ -140,17 +154,19 @@ func _process(delta):
 	
 
 func _on_body_entered(_body):
-	dv_logical_position = dv_last_position
-	MOON.set_from_logical_position(self)
-	dv_logical_velocity = DVector3.new()
-	rotation = v_last_rotation
-	lock_rotation = true
-	angular_velocity = Vector3.ZERO
-	landed = true 
-
+	if not landed:
+		dv_logical_position = dv_last_position.copy()
+		#MOON.set_from_logical_position(self)
+		#dv_logical_velocity = get_landed_velocity(dv_logical_position, LEVEL.moon_axis_rate)
+		rotation = v_last_rotation
+		#lock_rotation = true
+		angular_velocity = Vector3(0.0, LEVEL.moon_axis_rate, 0.0)
+		landed = true 
+		
 
 func _on_body_exited(_body):
-	landed = false
+	# landed = false
+	pass
 
 func IncreaseThrust():
 		if v_thrust.y == 0.0:

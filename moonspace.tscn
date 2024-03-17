@@ -58,6 +58,7 @@ data = PackedVector3Array(0, 300000, 0, 0, 300000, 0, 0, 299650, 14494, 0, 30000
 
 [node name="Level" type="Node3D"]
 script = ExtResource("1_miwu0")
+initial_longitude = 168.4
 solar_orbit_period_days = 293.731
 solar_orbit_axis_direction = Vector3(-0.1, 1, 0.2)
 solar_orbit_rotation = 3.152
