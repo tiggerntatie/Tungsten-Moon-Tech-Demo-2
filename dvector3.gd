@@ -49,9 +49,18 @@ func sub(v: DVector3) -> void:
 	z -= v.z
 
 # vector rotate around y-axis
-func rotate_y(th: float) -> void:
+func rotate_y(th: float, xz_radius: float = 0.0) -> void:
 	x = x*cos(th) + z*sin(th)
-	z = - x*sin(th) + z*cos(th) 
+	z = - x*sin(th) + z*cos(th)
+	# ensure correct radius in xz plane
+	if xz_radius > 0.0:
+		var old_xz_r = sqrt(pow(x,2) + pow(z,2))
+		x *= xz_radius / old_xz_r
+		z *= xz_radius / old_xz_r
+
+# radius in the xz plane
+func xz_length() -> float:
+	return sqrt(pow(x,2) + pow(z,2))
 
 # magnitude squared
 func length_squared() -> float:

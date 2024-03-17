@@ -20,7 +20,8 @@ func get_logical_position(body: Spacecraft) -> DVector3:
 	return DVector3.FromVector3(body.position - scale_factor*position)
 
 # update the planet position based on spacecraft logical position
-func set_from_logical_position(body: Spacecraft, eyeball_offset: Vector3 = Vector3.ZERO):
+# optional xz_radius enforces an invariant radius in xz plane after de-rotating
+func set_from_logical_position(body: Spacecraft, eyeball_offset: Vector3 = Vector3.ZERO, xz_radius: float = 0.0):
 	var p = DVector3.FromVector3(body.position)
 	#var offset = Vector3.ZERO
 	var r = body.dv_logical_position.length()
@@ -38,7 +39,7 @@ func set_from_logical_position(body: Spacecraft, eyeball_offset: Vector3 = Vecto
 	# make a copy of logical position
 	var dv_unrotated_logical_position: DVector3 = body.dv_logical_position.copy()
 	# de-rotate it 
-	dv_unrotated_logical_position.rotate_y(-LEVEL.current_moon_rotation)
+	dv_unrotated_logical_position.rotate_y(-LEVEL.current_moon_rotation, xz_radius)
 	# scale it and create a new position
 	p.sub(DVector3.Div(dv_unrotated_logical_position, scale_factor))
 	#print(offset, " ", scale_factor)
