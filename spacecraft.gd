@@ -69,6 +69,7 @@ func process_stationary_physics(delta: float, dv_pos: DVector3, xz_radius: float
 # rate is the moon rotation rate in radian/sec
 func get_landed_velocity(dv_pos: DVector3, hradius: float, rate: float):
 	var angle: float = atan2(dv_pos.x, dv_pos.z)
+	print("get_landed_velocity ", dv_pos.x, " ", dv_pos.z, " ", angle)
 	var vel: float = hradius*rate
 	return DVector3.new(vel*cos(angle), 0.0, vel*(-sin(angle)))
 
@@ -87,9 +88,10 @@ func set_logical_position(lat: float, lon: float, radius: float, altitude: float
 	dv_logical_velocity = get_landed_velocity(dv_logical_position, dv_logical_position.xz_length(), moon_rate)
 	var q1 : Quaternion = Quaternion.from_euler(Vector3(0.0, phi+PI/2.0, PI/2.0-theta))
 	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, 0.0))
-	rotation = (q1*q2).get_euler()
-	angular_velocity = Vector3(0.0, moon_rate, 0.0)
+	rotation = (q1*q2).get_euler()	# This rotates the ship to correspond to its unrotated position on the globe
+	#angular_velocity = Vector3(0.0, moon_rate, 0.0)  # NO! The default angular velocity for the ship is zero
 	MOON.set_from_logical_position(self)
+
 
 
 # Called when the node enters the scene tree for the first time.
@@ -102,8 +104,8 @@ func _ready():
 	contact_monitor = true
 	max_contacts_reported = 1
 
-func _printstatus():
-	print("fl: ", flying, " lnd: ", landed)
+func _printstatus(num: int):
+	print("#",num," fl: ", flying, " lnd: ", landed)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -117,6 +119,7 @@ func _process(delta):
 		delta_fuel = delta * v_thrust.y / (GEARTH * ISP)
 		fuel -= delta_fuel
 
+	# FIXME! this will fail as the moon has time to rotate
 	var v_thrust_global = basis * v_thrust
 	var net_mass = mass - FULL_FUEL + fuel
 
@@ -139,38 +142,50 @@ func _process(delta):
 	#dv_logical_position.print()
 
 	# transition to landed?
-	if flying:
-		if altitude_agl < 10.0:
-			#dv_logical_position = dv_last_position
-			#rotation = v_last_rotation
-			last_xz_radius = dv_logical_position.xz_length()
-			angular_velocity = Vector3(0.0, LEVEL.moon_axis_rate, 0.0)
-			v_thrust.y = 0.0
-			landed = true
-			flying = false
-			_printstatus()
-	if altitude_agl > 15.0:
-		if not flying:
-			flying = true
-			landed = false
-			_printstatus()
-
+	if flying and altitude_agl < 1.0:
+		#dv_logical_position = dv_last_position
+		#rotation = v_last_rotation
+		last_xz_radius = dv_logical_position.xz_length()
+		#angular_velocity = Vector3(0.0, LEVEL.moon_axis_rate, 0.0)
+		v_thrust.y = 0.0
+		landed = true
+		flying = false
+		_printstatus(1)
+		print("landing")
+		dv_logical_position.print()
+		print(MOON.position)
+		print(position)
+			
+	if not flying and not landed and altitude_agl > 2.0:
+		flying = true
+		landed = false
+		_printstatus(2)
+	
+	var _flag = false
 	if landed:
 		dv_gravity_force = DVector3.Mul(net_mass, MOON.get_acceleration(dv_logical_position))
 		if v_thrust_global.length_squared() > 1.1 * dv_gravity_force.length_squared():
+			# transition back to flying. Tentatively.
+			MOON.set_logical_position_from_physical(self, eyeball_offset)
+			dv_logical_velocity = get_landed_velocity(dv_logical_position, last_xz_radius, LEVEL.moon_axis_rate)
 			landed = false
-			_printstatus()
-		else:
-			process_stationary_physics(delta, dv_logical_position, last_xz_radius)
-			MOON.set_from_logical_position(self, eyeball_offset, last_xz_radius)
+			_printstatus(3)
+			print("unlanding")
+			dv_logical_position.print()
+			print(MOON.position)
+			print(position)
+			dv_logical_velocity.print()
+			_flag = true
 
-	#if flying:
-	#	dv_last_position = dv_logical_position.copy()
-	#	v_last_rotation = rotation
-			
-	if not landed:
+	if not landed:  # FIXME else may be appropriate here
 		process_physics(delta, dv_logical_position, dv_logical_velocity, v_thrust_global, net_mass)
 		MOON.set_from_logical_position(self, eyeball_offset)
+		if _flag:
+			print("one physics cycle later")
+			dv_logical_position.print()
+			print(MOON.position)
+			print(position)
+			dv_logical_velocity.print()
 		
 	# Inputs
 	if Input.is_action_pressed("Thrust Increase"):

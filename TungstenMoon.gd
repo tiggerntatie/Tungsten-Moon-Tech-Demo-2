@@ -45,6 +45,17 @@ func set_from_logical_position(body: Spacecraft, eyeball_offset: Vector3 = Vecto
 	#print(offset, " ", scale_factor)
 	position = p.vector3() + eyeball_offset
 	
+# update the spacecraft logical position, based on planet position
+# FIXME review eyeball_offset calculation before implementing. Should work at low altitude.. 
+func set_logical_position_from_physical(body: Spacecraft, eyeball_offset: Vector3 = Vector3.ZERO, xz_radius: float = 0.0):
+	var dv_temp_logical_position = DVector3.FromVector3(body.position)	# spacecraft position, roughly zero
+	var dv_raw_position = DVector3.FromVector3(position)
+	var moon_position = DVector3.Sub(DVector3.Div(dv_raw_position, scale.x), DVector3.FromVector3(eyeball_offset))	# Current logical moon position, correcting for eyeball offset
+	dv_temp_logical_position.sub(moon_position)		# now the UNrotated logical position
+	dv_temp_logical_position.rotate_y(LEVEL.current_moon_rotation, xz_radius)  # rotate the logical position according to moon rotation
+	body.dv_logical_position = dv_temp_logical_position	# stuff the logical position back on the spacecraft
+	
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	pass
