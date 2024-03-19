@@ -104,8 +104,6 @@ func _ready():
 	contact_monitor = true
 	max_contacts_reported = 1
 
-func _printstatus(num: int):
-	print("#",num," fl: ", flying, " lnd: ", landed)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -136,13 +134,11 @@ func _process(delta):
 	
 	GROUNDRADAR.target_position = to_local(MOON.position)
 	if GROUNDRADAR.is_colliding():
-		altitude_agl = GROUNDRADAR.get_collision_point().length()
+		altitude_agl = GROUNDRADAR.to_local(GROUNDRADAR.get_collision_point()).length()-GROUNDRADAR.position.y
 
-	#print(MOON.position)
-	#dv_logical_position.print()
 
 	# transition to landed?
-	if flying and altitude_agl < 1.0:
+	if flying and altitude_agl < 0.0:
 		#dv_logical_position = dv_last_position
 		#rotation = v_last_rotation
 		last_xz_radius = dv_logical_position.xz_length()
@@ -150,18 +146,17 @@ func _process(delta):
 		v_thrust.y = 0.0
 		landed = true
 		flying = false
-		_printstatus(1)
+		# rotate to match surface
+		var v_crossed = (basis*Vector3.UP).cross(GROUNDRADAR.get_collision_normal())
+		rotate(v_crossed.normalized(), asin(v_crossed.length()))
+		#print(rotation)
+		#print(GROUNDRADAR.get_collision_normal())
 		print("landing")
-		dv_logical_position.print()
-		print(MOON.position)
-		print(position)
 			
-	if not flying and not landed and altitude_agl > 2.0:
+	if not flying and not landed and altitude_agl > 0.1:
 		flying = true
 		landed = false
-		_printstatus(2)
 	
-	var _flag = false
 	if landed:
 		dv_gravity_force = DVector3.Mul(net_mass, MOON.get_acceleration(dv_logical_position))
 		if v_thrust_global.length_squared() > 1.1 * dv_gravity_force.length_squared():
@@ -169,23 +164,10 @@ func _process(delta):
 			MOON.set_logical_position_from_physical(self, eyeball_offset)
 			dv_logical_velocity = get_landed_velocity(dv_logical_position, last_xz_radius, LEVEL.moon_axis_rate)
 			landed = false
-			_printstatus(3)
 			print("unlanding")
-			dv_logical_position.print()
-			print(MOON.position)
-			print(position)
-			dv_logical_velocity.print()
-			_flag = true
-
-	if not landed:  # FIXME else may be appropriate here
+	else:  # FIXME else may be appropriate here
 		process_physics(delta, dv_logical_position, dv_logical_velocity, v_thrust_global, net_mass)
 		MOON.set_from_logical_position(self, eyeball_offset)
-		if _flag:
-			print("one physics cycle later")
-			dv_logical_position.print()
-			print(MOON.position)
-			print(position)
-			dv_logical_velocity.print()
 		
 	# Inputs
 	if Input.is_action_pressed("Thrust Increase"):
