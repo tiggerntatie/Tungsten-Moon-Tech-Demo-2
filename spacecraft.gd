@@ -10,6 +10,7 @@ const ISP = 300 			# s
 const GEARTH = 9.80665 		# m/s^2
 const MOUSE_SENS = 0.002	# m/unit and deg/unit
 const SCROLL_SENS = 0.05	# m/unit
+const JOY_SENS = 0.01		# m/unit
 
 @onready var LEVEL : Node3D = $".."
 @onready var MOON : Node3D = $"../TungstenMoon"
@@ -35,6 +36,12 @@ var v_last_rotation : Vector3
 var dv_last_position : DVector3
 var last_xz_radius : float
 var altitude_agl : float
+
+# UI State 
+var ui_in : bool = false
+var ui_rotation : bool = true
+var ui_thrust_lock : bool = false
+var ui_alternate_control : bool = false
 	
 # Calculate new position and velocity for each step
 # 4th order runge kutte integration
@@ -69,7 +76,6 @@ func process_stationary_physics(delta: float, dv_pos: DVector3, xz_radius: float
 # rate is the moon rotation rate in radian/sec
 func get_landed_velocity(dv_pos: DVector3, hradius: float, rate: float):
 	var angle: float = atan2(dv_pos.x, dv_pos.z)
-	print("get_landed_velocity ", dv_pos.x, " ", dv_pos.z, " ", angle)
 	var vel: float = hradius*rate
 	return DVector3.new(vel*cos(angle), 0.0, vel*(-sin(angle)))
 
@@ -79,7 +85,7 @@ func get_landed_velocity(dv_pos: DVector3, hradius: float, rate: float):
 func set_logical_position(lat: float, lon: float, radius: float, altitude: float, heading: float, moon_rate: float):
 	# NOTE: Longitude zero is in the direction of +Z per Godot convention
 	# NOTE: Spacecraft rotation depends on spacecraft orientation facing +X
-	var phi: float = deg_to_rad(lon)
+	var phi: float = deg_to_rad(lon) + LEVEL.current_moon_rotation
 	var theta: float = deg_to_rad(lat)
 	var gamma: float = deg_to_rad(-heading)
 	dv_logical_position.x = (radius + altitude) * cos(theta)*sin(phi)
@@ -117,8 +123,8 @@ func _process(delta):
 		delta_fuel = delta * v_thrust.y / (GEARTH * ISP)
 		fuel -= delta_fuel
 
-	# FIXME! this will fail as the moon has time to rotate
-	var v_thrust_global = basis * v_thrust
+	# Rotate thrust vector to match spacecraft axis, and again to account for axis system rotation
+	var v_thrust_global = (basis * v_thrust).rotated(Vector3.UP, LEVEL.current_moon_rotation)
 	var net_mass = mass - FULL_FUEL + fuel
 
 	# Camera dependent calculations
@@ -146,12 +152,9 @@ func _process(delta):
 		v_thrust.y = 0.0
 		landed = true
 		flying = false
-		# rotate to match surface
+		# rotate to match surface 
 		var v_crossed = (basis*Vector3.UP).cross(GROUNDRADAR.get_collision_normal())
 		rotate(v_crossed.normalized(), asin(v_crossed.length()))
-		#print(rotation)
-		#print(GROUNDRADAR.get_collision_normal())
-		print("landing")
 			
 	if not flying and not landed and altitude_agl > 0.1:
 		flying = true
@@ -164,32 +167,71 @@ func _process(delta):
 			MOON.set_logical_position_from_physical(self, eyeball_offset)
 			dv_logical_velocity = get_landed_velocity(dv_logical_position, last_xz_radius, LEVEL.moon_axis_rate)
 			landed = false
-			print("unlanding")
-	else:  # FIXME else may be appropriate here
+	else: 
 		process_physics(delta, dv_logical_position, dv_logical_velocity, v_thrust_global, net_mass)
 		MOON.set_from_logical_position(self, eyeball_offset)
 		
 	# Inputs
+	if Input.is_action_just_pressed("Toggle In Out"):
+		ui_in = not ui_in
+	if Input.is_action_just_pressed("Toggle Rotation"):
+		ui_rotation = not ui_rotation
+	if Input.is_action_just_pressed("Toggle Thrust Lock"):
+		ui_thrust_lock = not ui_thrust_lock
 	if Input.is_action_pressed("Thrust Increase"):
 		IncreaseThrust()
 	if Input.is_action_pressed("Thrust Decrease"):
 		DecreaseThrust()
-	v_torque.z = Input.get_axis("Pitch Forward", "Pitch Backward")
-	v_torque.y = Input.get_axis("Yaw Right", "Yaw Left")
-	v_torque.x = -Input.get_axis("Roll Right", "Roll Left")
-	apply_torque(basis * v_torque * 200)
+	if not ui_thrust_lock:
+		var thrust_input = Input.get_action_strength("Thrust Analog")
+		if thrust_input == 0.0:
+			v_thrust.y = 0.0
+		else:
+			v_thrust.y = THRUST_MIN * (1 - thrust_input) + THRUST_MAX * thrust_input	
+	if ui_in:
+		var horiz_vel = JOY_SENS * Input.get_axis("Viewpoint Left", "Viewpoint Right")
+		var forward_vel : float = 0.0
+		var upward_vel : float = 0.0
+		if ui_alternate_control:
+			upward_vel = JOY_SENS * Input.get_axis("Viewpoint Down", "Viewpoint Up")
+		else:
+			forward_vel = JOY_SENS * Input.get_axis("Viewpoint Backward", "Viewpoint Forward")
+		$YawPivot.rotation.y -= JOY_SENS * Input.get_axis("Viewpoint Pan Left", "Viewpoint Pan Right")
+		$YawPivot/PitchPivot.rotation.z += JOY_SENS * Input.get_axis("Viewpoint Pan Down", "Viewpoint Pan Up")
+		$YawPivot/PitchPivot.rotation.z = clamp($YawPivot/PitchPivot.rotation.z, -PI/2, PI/2)
+		var v_move = Quaternion.from_euler(
+			Vector3(0.0, $YawPivot.rotation.y, $YawPivot/PitchPivot.rotation.z))*Vector3(forward_vel, upward_vel, horiz_vel)
+		var new_eye = $YawPivot.position + v_move
+		if (new_eye.x < 1.05 and 
+			new_eye.x > 0.0 and
+			new_eye.y > 4.5 and
+			new_eye.y < 6.05 and 
+			new_eye.z > -0.75 and new_eye.z < 0.75 and 
+			new_eye.y < (-5.0/6.0)*new_eye.x + 6.675):
+			$YawPivot.position = new_eye
+	else:
+		v_torque.z = Input.get_axis("Pitch Forward", "Pitch Backward")
+		v_torque.y = Input.get_axis("Yaw Right Always", "Yaw Left Always")
+		if ui_alternate_control:
+			v_torque.y = Input.get_axis("Yaw Right", "Yaw Left")
+		else:
+			v_torque.x = -Input.get_axis("Roll Right", "Roll Left")
+			
+		apply_torque(basis * v_torque * 200)
 	
 	if Input.is_action_just_pressed("ui_cancel"):
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)	
 				
 	# HUD Updates
-	HUDVEL.text = str(dv_logical_velocity.length()).pad_decimals(1) + " m/s"
+	var hvel = dv_logical_position.vector3().normalized().cross(dv_logical_velocity.vector3()).length()
+	HUDVEL.text = str(hvel).pad_decimals(1) + " m/s"
 	HUDALT.text = str(altitude_agl).pad_decimals(1) + " m"
 	HUDTHRUST.text = str(v_thrust.y).pad_decimals(0) + " N"
 	HUDFUEL.value = 100.0*fuel/FULL_FUEL
 	
 func IncreaseThrust():
 		if v_thrust.y == 0.0:
+			ui_thrust_lock = true
 			v_thrust.y = THRUST_MIN
 		else:
 			v_thrust.y += THRUST_INC
@@ -203,28 +245,28 @@ func DecreaseThrust():
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("Thrust Max"):
-		v_thrust.y = THRUST_MAX
+	if event.is_action_pressed("Alternate Control"):
+		ui_alternate_control = true
+	elif event.is_action_released("Alternate Control"):
+		ui_alternate_control = false
+	elif event.is_action_pressed("Thrust Max"):
+		if Input.is_action_pressed("Ctrl Modifier"):
+			IncreaseThrust()
+		else:
+			v_thrust.y = THRUST_MAX
 	elif event.is_action_pressed("Thrust Cut"):
-		v_thrust.y = 0.0
+		if Input.is_action_pressed("Ctrl Modifier"):
+			DecreaseThrust()
+		else:
+			v_thrust.y = 0.0
 	elif event.is_action_pressed("Kill Rotation"):
 		angular_velocity = Vector3.ZERO
 	elif event is InputEventMouseMotion:
-		if Input.is_action_pressed("Mouse Modifier"):
-			$YawPivot.position.z += MOUSE_SENS * event.relative.x
-			$YawPivot.position.x -= MOUSE_SENS * event.relative.y
-		else:
-			$YawPivot.rotation.y -= MOUSE_SENS * event.relative.x
-			$YawPivot/PitchPivot.rotation.z -= MOUSE_SENS * event.relative.y
-	elif event is InputEventMouseButton:
-		var dir = 0
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			dir = SCROLL_SENS
-		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			dir = -SCROLL_SENS
-		$YawPivot.position.z -= dir * sin($YawPivot.rotation.y) * cos($YawPivot/PitchPivot.rotation.z)
-		$YawPivot.position.x += dir * cos($YawPivot.rotation.y) * cos($YawPivot/PitchPivot.rotation.z)
-		$YawPivot.position.y += dir * sin($YawPivot/PitchPivot.rotation.z)
-		
+		$YawPivot.rotation.y -= MOUSE_SENS * event.relative.x
+		$YawPivot/PitchPivot.rotation.z -= MOUSE_SENS * event.relative.y
+		$YawPivot/PitchPivot.rotation.z = clamp($YawPivot/PitchPivot.rotation.z, -PI/2, PI/2)
 	elif event.is_action_pressed("Restart"):
 		get_tree().reload_current_scene()
+	elif event.is_action_pressed("Quit"):
+		get_tree().quit()
+		

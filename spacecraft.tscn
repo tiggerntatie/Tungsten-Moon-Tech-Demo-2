@@ -55,6 +55,3 @@ spot_angle = 10.4289
 [node name="GroundRadar" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 5, 0)
 target_position = Vector3(0, -1000, 0)
-
-[connection signal="body_entered" from="." to="." method="_on_body_entered"]
-[connection signal="body_exited" from="." to="." method="_on_body_exited"]
