@@ -76,6 +76,27 @@ planet_orbit_rotation = 5.088
 planet_axis_direction = Vector3(0.7, 0.7, 0)
 planet_axis_period_hours = 11.7
 moon_axis_period_hours = 10.0
+scenario_list = [{
+"heading": 0.0,
+"lat": 0.0,
+"long": 161.0
+}, {
+"heading": 90.0,
+"lat": 30.0,
+"long": 225.0
+}, {
+"heading": 0.0,
+"lat": -80.0,
+"long": 45.0
+}, {
+"heading": 180.0,
+"lat": 85.0,
+"long": 0.0
+}, {
+"heading": 0.0,
+"lat": -10.0,
+"long": 280.0
+}]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_hfpdn")

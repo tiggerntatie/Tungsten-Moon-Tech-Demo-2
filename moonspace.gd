@@ -90,6 +90,21 @@ var current_planet_rotation : float
 var current_planet_orbit_rotation : float
 var current_solar_rotation : float
 
+## GAME STATE
+@export_group("Spacecraft Start Scenarios")
+@export var scenario_list : Array = [
+	{"long": 161.0, "lat": 0.0, "heading": 0.0},
+	{"long": 161.0, "lat": 0.0, "heading": 0.0},
+	{"long": 161.0, "lat": 0.0, "heading": 0.0},
+	{"long": 161.0, "lat": 0.0, "heading": 0.0},
+	{"long": 161.0, "lat": 0.0, "heading": 0.0},
+]
+var scenario_index : int = 0
+const CONFIG_FILE_NAME = "user://settings.cfg"
+@onready var config = ConfigFile.new()
+
+
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	# VR setup
@@ -107,6 +122,7 @@ func _ready():
 			get_viewport().use_xr = true
 			CAMERA.current = false
 			XRCAMERA.current = true
+			XRCAMERA.position = XRCAMERA.position   # reset head position
 	if not XRisup:
 		print("OpenXR not found or initialized; running in non-VR mode")
 		get_viewport().use_xr = false
@@ -136,15 +152,36 @@ func _ready():
 	current_planet_rotation = planet_axis_rotation + planet_axis_rate*astronomy_starting_seconds
 	current_solar_rotation = solar_orbit_rotation + solar_orbit_rate*astronomy_starting_seconds
 	current_planet_orbit_rotation = planet_orbit_rotation + planet_orbit_rate*astronomy_starting_seconds
+	
+	# Load state?
+	var err = config.load(CONFIG_FILE_NAME)
+	if err != OK: 
+		config.set_value("Scenario", "index", 0)
+		config.save(CONFIG_FILE_NAME)
+	else:
+		scenario_index = config.get_value("Scenario", "index", 0)
+		if scenario_index >= scenario_list.size():
+			scenario_index = 0
+			save_scenario(scenario_index)
+	load_scenario(scenario_index)
+	
+func save_scenario(index : int):
+	config.set_value("Scenario", "index", index)
+	config.save(CONFIG_FILE_NAME)
+
+func load_scenario(index : int):
 	# Supply initial spacecraft position
+	print("Locating to long: ", scenario_list[index]["long"], " lat: ", scenario_list[index]["lat"], " hdg: ", scenario_list[index]["heading"])
 	SPACECRAFT.set_logical_position(
-		initial_latitude, 
-		initial_longitude, 
+		scenario_list[index]["lat"], 
+		scenario_list[index]["long"], 
 		MOON.mesh.radius, 
-		10.0, 	# altitude
-		initial_heading,
+		1.0, 	# altitude
+		scenario_list[index]["heading"],
 		moon_axis_rate)
-	 
+	
+	
+	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	# update shader parameters 
@@ -175,3 +212,13 @@ func _process(delta):
 	# Adjust "planetlight" energy based on relative position of sun and planet
 	PLANETLIGHT.light_energy = planet_default_light_energy * qSunPosition.angle_to(qPlanetPosition) / PI
 	
+	# Handle UI
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("Load Prev Scenario"):
+		scenario_index = clamp(scenario_index - 1, 0, scenario_list.size()-1)
+		save_scenario(scenario_index)
+		load_scenario(scenario_index)
+	if event.is_action_pressed("Load Next Scenario"):
+		scenario_index = clamp(scenario_index + 1, 0, scenario_list.size()-1)
+		save_scenario(scenario_index)
+		load_scenario(scenario_index)
