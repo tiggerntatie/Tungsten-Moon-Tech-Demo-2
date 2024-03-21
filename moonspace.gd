@@ -10,15 +10,6 @@ extends Node3D
 @onready var planet_default_light_energy = PLANETLIGHT.light_energy
 var xr_interface: XRInterface
 
-## INITIAL SPACECRAFT POSITION
-@export_group("Spacecraft Start Position")
-## Longitude in degrees
-@export_range(-180.0, 180.0, 0.1, "degrees") var initial_longitude : float = 0.0
-## Latitude in degrees
-@export_range(-90.0, 90.0, 0.1, "degrees") var initial_latitude : float = 0.0
-## Heading in degrees (0-359.9, clockwise from North)
-@export_range(0.0, 359.9, 0.1, "degrees") var initial_heading : float = 0.0
-
 ## SOLAR SYSTEM PARAMETERS
 @export_group("Solar System")
 ## Speed factor. 1 = normal time, 10 = 10x speed up. Affects only astronomical positions.
@@ -43,6 +34,7 @@ const solar_kepler_constant : float = 2.95E-19 # s^2/m^3
 ## Computed parameters
 var solar_distance : float
 var solar_orbit_rate : float
+var solar_apparent_size : float # radians
 
 ## PLANET PARAMETERS
 @export_subgroup("Planet Parameters")
@@ -69,6 +61,7 @@ var planet_distance : float
 var planet_orbit_rate : float
 var shadow_angular_diameter : float # for rendering solar eclipses on planet surface
 var planet_axis_rate : float
+var planet_apparent_size : float # radians
 
 ## MOON PARAMETERS
 @export_subgroup("Moon Parameters")
@@ -131,17 +124,19 @@ func _ready():
 	# END VR Setup	
 	# Shader setup
 	ENVIRONMENT.environment.sky.sky_material.set_shader_parameter("planet_default_light_energy", planet_default_light_energy)
-
 	# Compute solar system constants
 	moon_axis_rate = TAU/(moon_axis_period_hours*3600)
 	planet_axis_rate = TAU/(planet_axis_period_hours*3600)
 	solar_orbit_rate = TAU/(solar_orbit_period_days*24*3600)
 	planet_orbit_rate = TAU/(planet_orbit_period_hours*3600)
 	solar_distance = pow(pow(solar_orbit_period_days*24*3600,2) / solar_kepler_constant, 1.0/3.0)
-	SUNLIGHT.light_angular_distance = rad_to_deg(solar_diameter/solar_distance)
+	solar_apparent_size = solar_diameter/solar_distance
+	ENVIRONMENT.environment.sky.sky_material.set_shader_parameter("sun_size_degrees", rad_to_deg(solar_apparent_size))
 	planet_diameter = 2.0*pow((3.0*mass_earth*planet_mass)/(4.0*density_earth*PI), 1.0/3.0)
 	planet_distance = pow(G*mass_earth*planet_mass*pow(planet_orbit_period_hours*3600.0/TAU,2),1.0/3.0)
-	PLANETLIGHT.light_angular_distance = rad_to_deg(planet_diameter/planet_distance)
+	planet_apparent_size = planet_diameter/planet_distance
+	print(planet_apparent_size)
+	ENVIRONMENT.environment.sky.sky_material.set_shader_parameter("planet_size_degrees", rad_to_deg(planet_apparent_size))
 	# Initial solar system rotations
 	astronomy_starting_seconds = astronomy_starting_day*24*3600
 	current_moon_rotation = moon_axis_rotation + moon_axis_rate*astronomy_starting_seconds
@@ -164,7 +159,7 @@ func _ready():
 			scenario_index = 0
 			save_scenario(scenario_index)
 	load_scenario(scenario_index)
-	
+		
 func save_scenario(index : int):
 	config.set_value("Scenario", "index", index)
 	config.save(CONFIG_FILE_NAME)
@@ -176,11 +171,20 @@ func load_scenario(index : int):
 		scenario_list[index]["lat"], 
 		scenario_list[index]["long"], 
 		MOON.mesh.radius, 
-		1.0, 	# altitude
+		10.0, 	# altitude
 		scenario_list[index]["heading"],
 		moon_axis_rate)
-	
-	
+
+func euler_to_unit_direction(d : Vector3) -> Vector3:
+	return Quaternion.from_euler(d)*Vector3(0.0,0.0,1.0)
+
+func body_is_visible(dv_log_pos : DVector3, moon_radius : float, body_direction : Vector3, body_app_diameter : float) -> bool:
+	var angle_to_body = acos(-(dv_log_pos.vector3().normalized()).dot(euler_to_unit_direction(body_direction)))
+	print("angle to body: ", angle_to_body)
+	angle_to_body += body_app_diameter/2.0
+	print("adjusted angle to body: ", angle_to_body)
+	print("logical distance to moon: ", dv_log_pos.length())
+	return angle_to_body > PI/2.0 or dv_log_pos.length()*sin(angle_to_body) > moon_radius
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -212,13 +216,19 @@ func _process(delta):
 	# Adjust "planetlight" energy based on relative position of sun and planet
 	PLANETLIGHT.light_energy = planet_default_light_energy * qSunPosition.angle_to(qPlanetPosition) / PI
 	
+	# turn sun and planet on or off, depending on visibility
+	#print("sun visible: ", body_is_visible(SPACECRAFT.dv_logical_position, MOON.mesh.radius, SUNLIGHT.rotation, solar_apparent_size))
+	print("planet visible: ", body_is_visible(SPACECRAFT.dv_logical_position, MOON.mesh.radius, PLANETLIGHT.rotation, planet_apparent_size))
+	
+	
 	# Handle UI
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("Load Prev Scenario"):
+func _input(event: InputEvent) -> void:
+	var p = event.is_action_pressed("Load Prev Scenario")
+	var n = event.is_action_pressed("Load Next Scenario")
+	if p:
 		scenario_index = clamp(scenario_index - 1, 0, scenario_list.size()-1)
-		save_scenario(scenario_index)
-		load_scenario(scenario_index)
-	if event.is_action_pressed("Load Next Scenario"):
+	elif n:
 		scenario_index = clamp(scenario_index + 1, 0, scenario_list.size()-1)
+	if p or n:
 		save_scenario(scenario_index)
-		load_scenario(scenario_index)
+		call_deferred("load_scenario", scenario_index)

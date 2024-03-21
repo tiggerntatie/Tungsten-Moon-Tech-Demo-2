@@ -19,6 +19,7 @@ script = ExtResource("1_mb81d")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.01, 0, 0, 0, -4.37114e-10, 0.01, 0, -0.01, -4.37114e-10, 0, 0, 0)
+layers = 3
 mesh = ExtResource("1_0nhhd")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
@@ -47,8 +48,8 @@ transform = Transform3D(-0.998172, -0.0541746, 0.0267866, -0.0538907, 0.998484, 
 
 [node name="SpotLight3D" type="SpotLight3D" parent="."]
 transform = Transform3D(-0.0290485, 0.182407, -0.982794, 0.00538906, 0.983223, 0.182328, 0.999564, -4.65865e-10, -0.0295442, 0, 5.69551, -0.27636)
-layers = 2
-light_cull_mask = 4294967294
+layers = 4
+light_cull_mask = 4293918724
 spot_range = 1.73332
 spot_angle = 10.4289
 

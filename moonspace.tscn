@@ -17,7 +17,9 @@ shader_parameter/sky_cover_modulate = Color(1, 1, 1, 1)
 shader_parameter/planet_dark_side_albedo_factor = 0.002
 shader_parameter/planet_rotation = Vector4(0, 0, 0, 0)
 shader_parameter/planet_default_light_energy = 1.0
+shader_parameter/planet_size_degrees = 20.0
 shader_parameter/sun_curve = 0.15
+shader_parameter/sun_size_degrees = 0.5
 shader_parameter/star_rotation = 0.0
 shader_parameter/star_field = ExtResource("3_ybnff")
 shader_parameter/planet_albedo = ExtResource("3_1b7u0")
@@ -66,7 +68,6 @@ absorbent = true
 
 [node name="Level" type="Node3D"]
 script = ExtResource("1_miwu0")
-initial_longitude = 161.0
 solar_orbit_period_days = 293.731
 solar_orbit_axis_direction = Vector3(-0.1, 1, 0.2)
 solar_orbit_rotation = 3.152
@@ -86,7 +87,7 @@ scenario_list = [{
 "long": 225.0
 }, {
 "heading": 0.0,
-"lat": -80.0,
+"lat": -10.0,
 "long": 45.0
 }, {
 "heading": 180.0,
@@ -102,20 +103,25 @@ scenario_list = [{
 environment = SubResource("Environment_hfpdn")
 
 [node name="DirectionalLightSun" type="DirectionalLight3D" parent="."]
-transform = Transform3D(-0.982802, -0.178168, -0.0485252, -0.183265, 0.908892, 0.374607, -0.0226387, 0.377057, -0.925914, -29, 5, -10)
+transform = Transform3D(-0.983317, -0.174928, -0.0498586, -0.181776, 0.935158, 0.304033, -0.00655825, 0.308024, -0.951357, -29, 5, -10)
+layers = 0
 light_volumetric_fog_energy = 0.0
-light_angular_distance = 0.5
+light_cull_mask = 4293918721
 shadow_enabled = true
+directional_shadow_max_distance = 1000.0
 
 [node name="DirectionalLightPlanet" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.373147, -0.119071, -0.9201, 0.236734, 0.971121, -0.0296662, 0.897061, -0.206749, 0.390559, 0, 0, 0)
+layers = 0
 light_color = Color(0.686275, 0.505882, 0.164706, 1)
 light_energy = 0.2
-light_angular_distance = 10.05
-shadow_enabled = true
+light_cull_mask = 4293918722
+directional_shadow_mode = 0
+directional_shadow_max_distance = 1000.0
 
 [node name="TungstenMoon" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -300001, -1000)
+layers = 3
 material_override = SubResource("StandardMaterial3D_1qfhe")
 mesh = SubResource("SphereMesh_m83uq")
 script = ExtResource("4_gm01a")

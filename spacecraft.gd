@@ -32,7 +32,6 @@ const JOY_SENS = 0.01		# m/unit
 var landed := false
 var flying := true
 
-var v_last_rotation : Vector3
 var dv_last_position : DVector3
 var last_xz_radius : float
 var altitude_agl : float
@@ -40,7 +39,7 @@ var altitude_agl : float
 # UI State 
 var ui_in : bool = false
 var ui_rotation : bool = true
-var ui_thrust_lock : bool = false
+var ui_thrust_lock : bool = true
 var ui_alternate_control : bool = false
 	
 # Calculate new position and velocity for each step
@@ -95,7 +94,6 @@ func set_logical_position(lat: float, lon: float, radius: float, altitude: float
 	var q1 : Quaternion = Quaternion.from_euler(Vector3(0.0, phi+PI/2.0, PI/2.0-theta))
 	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, 0.0))
 	rotation = (q1*q2).get_euler()	# This rotates the ship to correspond to its unrotated position on the globe
-	#angular_velocity = Vector3(0.0, moon_rate, 0.0)  # NO! The default angular velocity for the ship is zero
 	MOON.set_from_logical_position(self)
 
 
@@ -106,7 +104,6 @@ func _ready():
 	dv_logical_position =  MOON.get_logical_position(self)
 	dv_gravity_force = DVector3.Mul(mass, MOON.get_acceleration(dv_logical_position))
 	dv_last_position = dv_logical_position.copy()
-	v_last_rotation = rotation
 	contact_monitor = true
 	max_contacts_reported = 1
 
@@ -146,15 +143,14 @@ func _process(delta):
 	# transition to landed?
 	if flying and altitude_agl < 0.0:
 		#dv_logical_position = dv_last_position
-		#rotation = v_last_rotation
 		last_xz_radius = dv_logical_position.xz_length()
-		#angular_velocity = Vector3(0.0, LEVEL.moon_axis_rate, 0.0)
 		v_thrust.y = 0.0
 		landed = true
 		flying = false
 		# rotate to match surface 
 		var v_crossed = (basis*Vector3.UP).cross(GROUNDRADAR.get_collision_normal())
 		rotate(v_crossed.normalized(), asin(v_crossed.length()))
+		angular_velocity = Vector3.ZERO
 			
 	if not flying and not landed and altitude_agl > 0.1:
 		flying = true
@@ -171,13 +167,7 @@ func _process(delta):
 		process_physics(delta, dv_logical_position, dv_logical_velocity, v_thrust_global, net_mass)
 		MOON.set_from_logical_position(self, eyeball_offset)
 		
-	# Inputs
-	if Input.is_action_just_pressed("Toggle In Out"):
-		ui_in = not ui_in
-	if Input.is_action_just_pressed("Toggle Rotation"):
-		ui_rotation = not ui_rotation
-	if Input.is_action_just_pressed("Toggle Thrust Lock"):
-		ui_thrust_lock = not ui_thrust_lock
+	# Input Polling
 	if Input.is_action_pressed("Thrust Increase"):
 		IncreaseThrust()
 	if Input.is_action_pressed("Thrust Decrease"):
@@ -209,7 +199,8 @@ func _process(delta):
 			new_eye.z > -0.75 and new_eye.z < 0.75 and 
 			new_eye.y < (-5.0/6.0)*new_eye.x + 6.675):
 			$YawPivot.position = new_eye
-	else:
+		
+	elif not landed:   # no rotation while landed, please!
 		v_torque.z = Input.get_axis("Pitch Forward", "Pitch Backward")
 		v_torque.y = Input.get_axis("Yaw Right Always", "Yaw Left Always")
 		if ui_alternate_control:
@@ -217,10 +208,9 @@ func _process(delta):
 		else:
 			v_torque.x = -Input.get_axis("Roll Right", "Roll Left")
 			
-		apply_torque(basis * v_torque * 200)
+	# oddly, this has to be here to keep the ship rotating		
+	apply_torque(basis * v_torque * 200)
 	
-	if Input.is_action_just_pressed("ui_cancel"):
-		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)	
 				
 	# HUD Updates
 	var hvel = dv_logical_position.vector3().normalized().cross(dv_logical_velocity.vector3()).length()
@@ -230,35 +220,42 @@ func _process(delta):
 	HUDFUEL.value = 100.0*fuel/FULL_FUEL
 	
 func IncreaseThrust():
-		if v_thrust.y == 0.0:
-			ui_thrust_lock = true
-			v_thrust.y = THRUST_MIN
-		else:
-			v_thrust.y += THRUST_INC
-			if v_thrust.y > THRUST_MAX:
-				v_thrust.y = THRUST_MAX
+	ui_thrust_lock = true
+	if v_thrust.y == 0.0:
+		v_thrust.y = THRUST_MIN
+	else:
+		v_thrust.y += THRUST_INC
+		if v_thrust.y > THRUST_MAX:
+			v_thrust.y = THRUST_MAX
 
 func DecreaseThrust():
+	ui_thrust_lock = true
 	v_thrust.y -= THRUST_INC
 	if v_thrust.y < THRUST_MIN:
 		v_thrust.y = 0.0
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("Alternate Control"):
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("Toggle In Out"):
+		ui_in = not ui_in
+	elif event.is_action_pressed("Toggle Rotation"):
+		ui_rotation = not ui_rotation
+	elif event.is_action_pressed("Toggle Thrust Lock"):
+		ui_thrust_lock = not ui_thrust_lock
+	elif event.is_action_pressed("Alternate Control"):
 		ui_alternate_control = true
 	elif event.is_action_released("Alternate Control"):
 		ui_alternate_control = false
+	elif event.is_action_pressed("Thrust Increase"):
+		IncreaseThrust()
+	elif event.is_action_pressed("Thrust Decrease"):
+		DecreaseThrust()
 	elif event.is_action_pressed("Thrust Max"):
-		if Input.is_action_pressed("Ctrl Modifier"):
-			IncreaseThrust()
-		else:
-			v_thrust.y = THRUST_MAX
+		ui_thrust_lock = true
+		v_thrust.y = THRUST_MAX
 	elif event.is_action_pressed("Thrust Cut"):
-		if Input.is_action_pressed("Ctrl Modifier"):
-			DecreaseThrust()
-		else:
-			v_thrust.y = 0.0
+		ui_thrust_lock = true
+		v_thrust.y = 0.0
 	elif event.is_action_pressed("Kill Rotation"):
 		angular_velocity = Vector3.ZERO
 	elif event is InputEventMouseMotion:
@@ -269,4 +266,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_tree().reload_current_scene()
 	elif event.is_action_pressed("Quit"):
 		get_tree().quit()
+	elif Input.is_action_just_pressed("ui_cancel"):
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)	
+
 		

@@ -8,7 +8,9 @@ uniform sampler2D planet_albedo : source_color, hint_default_transparent, filter
 uniform float planet_dark_side_albedo_factor = 0.002;
 uniform vec4 planet_rotation = vec4(0.0, 0.0, 0.0, 0.0);
 uniform float planet_default_light_energy = 1.0; 
+uniform float planet_size_degrees = 10.0;
 uniform float sun_curve : hint_range(0, 1) = 0.15;
+uniform float sun_size_degrees = 0.5;
 uniform float star_rotation = 0.0;
 
 void sky() {
@@ -19,7 +21,7 @@ void sky() {
 	} else {
 		vec3 sky = vec3(0.0);
 		if (LIGHT0_ENABLED) {
-			float light0_radius = LIGHT0_SIZE/2.0;
+			float light0_radius = radians(sun_size_degrees/2.0);
 			float sun_angle = distance(EYEDIR, LIGHT0_DIRECTION);
 			float sun_angle_max = light0_radius * 1.3;
 			if (sun_angle < light0_radius) {
@@ -32,7 +34,7 @@ void sky() {
 			}
 		}
 		if (LIGHT1_ENABLED) {
-			float light1_radius = LIGHT1_SIZE/2.0;
+			float light1_radius = radians(planet_size_degrees/2.0);
 			float planet_radius = sqrt(2.0 - 2.0*cos(light1_radius));
 			float p_angle = distance(EYEDIR, LIGHT1_DIRECTION);
 			if (p_angle < light1_radius) {
