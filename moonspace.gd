@@ -8,6 +8,8 @@ extends Node3D
 @onready var PLANETLIGHT : DirectionalLight3D = $DirectionalLightPlanet
 @onready var MOON : MeshInstance3D = $TungstenMoon
 @onready var planet_default_light_energy = PLANETLIGHT.light_energy
+@onready var SUNLIGHT_CULLMASK := SUNLIGHT.light_cull_mask
+@onready var PLANETLIGHT_CULLMASK := PLANETLIGHT.light_cull_mask
 var xr_interface: XRInterface
 
 ## SOLAR SYSTEM PARAMETERS
@@ -16,8 +18,11 @@ var xr_interface: XRInterface
 @export_range(1.0, 10000.0, 1.0) var astronomy_speed_factor : float = 1.0
 ## Starting time in days. Allows starting the sim at a past or future point in time.
 @export var astronomy_starting_day : float = 0.0
+## Default star energy (full brightness)
+@export_range(0.0, 1.0, 0.01) var default_star_energy : float = 1.0
 ## Computed parameters
 var astronomy_starting_seconds : float
+
 
 ## SOLAR PARAMETERS
 @export_subgroup("Solar Parameters")
@@ -135,7 +140,6 @@ func _ready():
 	planet_diameter = 2.0*pow((3.0*mass_earth*planet_mass)/(4.0*density_earth*PI), 1.0/3.0)
 	planet_distance = pow(G*mass_earth*planet_mass*pow(planet_orbit_period_hours*3600.0/TAU,2),1.0/3.0)
 	planet_apparent_size = planet_diameter/planet_distance
-	print(planet_apparent_size)
 	ENVIRONMENT.environment.sky.sky_material.set_shader_parameter("planet_size_degrees", rad_to_deg(planet_apparent_size))
 	# Initial solar system rotations
 	astronomy_starting_seconds = astronomy_starting_day*24*3600
@@ -178,12 +182,9 @@ func load_scenario(index : int):
 func euler_to_unit_direction(d : Vector3) -> Vector3:
 	return Quaternion.from_euler(d)*Vector3(0.0,0.0,1.0)
 
-func body_is_visible(dv_log_pos : DVector3, moon_radius : float, body_direction : Vector3, body_app_diameter : float) -> bool:
-	var angle_to_body = acos(-(dv_log_pos.vector3().normalized()).dot(euler_to_unit_direction(body_direction)))
-	print("angle to body: ", angle_to_body)
+func body_is_visible(dv_log_pos : DVector3, moon_phys_pos : Vector3, moon_radius : float, body_direction : Vector3, body_app_diameter : float) -> bool:
+	var angle_to_body = acos((moon_phys_pos.normalized()).dot(euler_to_unit_direction(body_direction)))
 	angle_to_body += body_app_diameter/2.0
-	print("adjusted angle to body: ", angle_to_body)
-	print("logical distance to moon: ", dv_log_pos.length())
 	return angle_to_body > PI/2.0 or dv_log_pos.length()*sin(angle_to_body) > moon_radius
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -217,10 +218,26 @@ func _process(delta):
 	PLANETLIGHT.light_energy = planet_default_light_energy * qSunPosition.angle_to(qPlanetPosition) / PI
 	
 	# turn sun and planet on or off, depending on visibility
-	#print("sun visible: ", body_is_visible(SPACECRAFT.dv_logical_position, MOON.mesh.radius, SUNLIGHT.rotation, solar_apparent_size))
-	print("planet visible: ", body_is_visible(SPACECRAFT.dv_logical_position, MOON.mesh.radius, PLANETLIGHT.rotation, planet_apparent_size))
+	# at current time, using the visible attribute has bad side effects in the shader
+	if body_is_visible(SPACECRAFT.dv_logical_position, MOON.position, MOON.mesh.radius, SUNLIGHT.rotation, solar_apparent_size):
+		SUNLIGHT.light_cull_mask = SUNLIGHT_CULLMASK
+	else:
+		SUNLIGHT.light_cull_mask = 0
+	if body_is_visible(SPACECRAFT.dv_logical_position, MOON.position, MOON.mesh.radius, PLANETLIGHT.rotation, planet_apparent_size):
+		PLANETLIGHT.light_cull_mask = PLANETLIGHT_CULLMASK
+	else:
+		PLANETLIGHT.light_cull_mask = 0
+	var new_star_energy : float = default_star_energy
+	if SUNLIGHT.light_cull_mask != 0:
+		new_star_energy *= 0.1
+	if PLANETLIGHT.light_cull_mask != 0 and SUNLIGHT.light_cull_mask == 0:
+		new_star_energy *= 0.25
+	ENVIRONMENT.environment.sky.sky_material.set_shader_parameter("star_energy", new_star_energy)
+		
+
+		
 	
-	
+
 	# Handle UI
 func _input(event: InputEvent) -> void:
 	var p = event.is_action_pressed("Load Prev Scenario")

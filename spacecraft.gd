@@ -135,9 +135,11 @@ func _process(delta):
 		eyeball_offset = XRCAMERA.global_position
 		
 	
-	GROUNDRADAR.target_position = to_local(MOON.position)
+	GROUNDRADAR.target_position = to_local(MOON.position).normalized()*1000
 	if GROUNDRADAR.is_colliding():
 		altitude_agl = GROUNDRADAR.to_local(GROUNDRADAR.get_collision_point()).length()-GROUNDRADAR.position.y
+	else:
+		altitude_agl = NAN
 
 
 	# transition to landed?
@@ -215,7 +217,10 @@ func _process(delta):
 	# HUD Updates
 	var hvel = dv_logical_position.vector3().normalized().cross(dv_logical_velocity.vector3()).length()
 	HUDVEL.text = str(hvel).pad_decimals(1) + " m/s"
-	HUDALT.text = str(altitude_agl).pad_decimals(1) + " m"
+	if is_nan(altitude_agl):
+		HUDALT.text = str((dv_logical_position.length()-MOON.mesh.radius)/1000.0).pad_decimals(2) + " km"
+	else:
+		HUDALT.text = str(altitude_agl).pad_decimals(1) + " m"
 	HUDTHRUST.text = str(v_thrust.y).pad_decimals(0) + " N"
 	HUDFUEL.value = 100.0*fuel/FULL_FUEL
 	

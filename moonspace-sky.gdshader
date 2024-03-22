@@ -12,6 +12,7 @@ uniform float planet_size_degrees = 10.0;
 uniform float sun_curve : hint_range(0, 1) = 0.15;
 uniform float sun_size_degrees = 0.5;
 uniform float star_rotation = 0.0;
+uniform float star_energy = 1.0;
 
 void sky() {
 	bool sun_rendered = false;
@@ -59,7 +60,7 @@ void sky() {
 		if (!planet_rendered) {
 			vec2 rotated_sky = vec2(SKY_COORDS.x + (star_rotation/2.0/PI), SKY_COORDS.y);
 			vec4 sky_cover_texture =  texture(star_field, rotated_sky);
-			sky += (sky_cover_texture.rgb * sky_cover_modulate.rgb) * sky_cover_texture.a * sky_cover_modulate.a * sky_energy;
+			sky += (sky_cover_texture.rgb * sky_cover_modulate.rgb) * sky_cover_texture.a * sky_cover_modulate.a * sky_energy * star_energy;
 		}
 		COLOR = sky;
 	}

@@ -21,6 +21,7 @@ shader_parameter/planet_size_degrees = 20.0
 shader_parameter/sun_curve = 0.15
 shader_parameter/sun_size_degrees = 0.5
 shader_parameter/star_rotation = 0.0
+shader_parameter/star_energy = 1.0
 shader_parameter/star_field = ExtResource("3_ybnff")
 shader_parameter/planet_albedo = ExtResource("3_1b7u0")
 
