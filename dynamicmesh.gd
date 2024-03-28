@@ -2,6 +2,8 @@
 extends MeshInstance3D
 class_name MoonMeshFace
 
+
+
 func regenerate_mesh(moon_data : MoonData):
 	const face_normal_array : Array = [
 		Vector3(1,0,0), 
@@ -43,6 +45,7 @@ func regenerate_mesh(moon_data : MoonData):
 				var pointOnUnitSphere := pointOnUnitCube.normalized()
 				var pointOnMoon  := moon_data.point_on_moon(pointOnUnitSphere)
 				vertex_array[i] = pointOnMoon
+				uv_array[i] = Vector2(percent.x, percent.y)		# quick and easy uvs
 				if x != face_resolution-1 and y != face_resolution-1:
 				#if true:
 					index_array[tri_index+2] = i

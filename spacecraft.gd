@@ -13,7 +13,7 @@ const SCROLL_SENS = 0.05	# m/unit
 const JOY_SENS = 0.01		# m/unit
 
 @onready var LEVEL : Node3D = $".."
-@onready var MOON : Node3D = $"../TungstenMoon"
+@onready var MOON : Node3D = $"../Moon"
 @onready var GROUNDRADAR : RayCast3D = $GroundRadar
 @onready var COLLISIONSHAPE : CollisionShape3D = $CollisionShape3D
 @onready var HUDVEL : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Velocity/VEL
@@ -125,7 +125,7 @@ func _process(delta):
 	var net_mass = mass - FULL_FUEL + fuel
 
 	# Camera dependent calculations
-	var view_distance = sqrt(pow(dv_logical_position.length(),2) + pow(MOON.mesh.radius,2)) / $"../TungstenMoon".scale_factor
+	var view_distance = sqrt(pow(dv_logical_position.length(),2) + pow(MOON.physical_radius,2)) / MOON.scale_factor
 	var eyeball_offset : Vector3
 	if CAMERA.current:
 		CAMERA.far = view_distance
@@ -218,7 +218,7 @@ func _process(delta):
 	var hvel = dv_logical_position.vector3().normalized().cross(dv_logical_velocity.vector3()).length()
 	HUDVEL.text = str(hvel).pad_decimals(1) + " m/s"
 	if is_nan(altitude_agl):
-		HUDALT.text = str((dv_logical_position.length()-MOON.mesh.radius)/1000.0).pad_decimals(2) + " km"
+		HUDALT.text = str((dv_logical_position.length()-MOON.physical_radius)/1000.0).pad_decimals(2) + " km"
 	else:
 		HUDALT.text = str(altitude_agl).pad_decimals(1) + " m"
 	HUDTHRUST.text = str(v_thrust.y).pad_decimals(0) + " N"

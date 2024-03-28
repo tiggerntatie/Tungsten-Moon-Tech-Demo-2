@@ -6,7 +6,7 @@ extends Node3D
 @onready var ENVIRONMENT : WorldEnvironment = $WorldEnvironment
 @onready var SUNLIGHT : DirectionalLight3D = $DirectionalLightSun
 @onready var PLANETLIGHT : DirectionalLight3D = $DirectionalLightPlanet
-@onready var MOON : MeshInstance3D = $TungstenMoon
+@onready var MOON : Node3D = $Moon
 @onready var planet_default_light_energy = PLANETLIGHT.light_energy
 @onready var SUNLIGHT_CULLMASK := SUNLIGHT.light_cull_mask
 @onready var PLANETLIGHT_CULLMASK := PLANETLIGHT.light_cull_mask
@@ -91,11 +91,11 @@ var current_solar_rotation : float
 ## GAME STATE
 @export_group("Spacecraft Start Scenarios")
 @export var scenario_list : Array = [
-	{"long": 161.0, "lat": 0.0, "heading": 0.0},
-	{"long": 161.0, "lat": 0.0, "heading": 0.0},
-	{"long": 161.0, "lat": 0.0, "heading": 0.0},
-	{"long": 161.0, "lat": 0.0, "heading": 0.0},
-	{"long": 161.0, "lat": 0.0, "heading": 0.0},
+	{"long": 161.0, "lat": 89.9, "heading": 0.0, "altitude": 7.0},
+	{"long": 225.0, "lat": 30.0, "heading": 90.0, "altitude": 1558.0},
+	{"long": 45.0, "lat": -10.0, "heading": 0.0, "altitude": 7.0},
+	{"long": 0.0, "lat": 85.0, "heading": 180.0, "altitude": 302.0},
+	{"long": 280.0, "lat": -10.0, "heading": 0.0, "altitude": 7.0},
 ]
 var scenario_index : int = 0
 const CONFIG_FILE_NAME = "user://settings.cfg"
@@ -174,8 +174,8 @@ func load_scenario(index : int):
 	SPACECRAFT.set_logical_position(
 		scenario_list[index]["lat"], 
 		scenario_list[index]["long"], 
-		MOON.mesh.radius, 
-		10.0, 	# altitude
+		MOON.physical_radius, 
+		scenario_list[index]["altitude"],
 		scenario_list[index]["heading"],
 		moon_axis_rate)
 
@@ -219,11 +219,11 @@ func _process(delta):
 	
 	# turn sun and planet on or off, depending on visibility
 	# at current time, using the visible attribute has bad side effects in the shader
-	if body_is_visible(SPACECRAFT.dv_logical_position, MOON.position, MOON.mesh.radius, SUNLIGHT.rotation, solar_apparent_size):
+	if body_is_visible(SPACECRAFT.dv_logical_position, MOON.position, MOON.physical_radius, SUNLIGHT.rotation, solar_apparent_size):
 		SUNLIGHT.light_cull_mask = SUNLIGHT_CULLMASK
 	else:
 		SUNLIGHT.light_cull_mask = 0
-	if body_is_visible(SPACECRAFT.dv_logical_position, MOON.position, MOON.mesh.radius, PLANETLIGHT.rotation, planet_apparent_size):
+	if body_is_visible(SPACECRAFT.dv_logical_position, MOON.position, MOON.physical_radius, PLANETLIGHT.rotation, planet_apparent_size):
 		PLANETLIGHT.light_cull_mask = PLANETLIGHT_CULLMASK
 	else:
 		PLANETLIGHT.light_cull_mask = 0
