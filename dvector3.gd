@@ -1,6 +1,6 @@
 class_name DVector3
 
-extends Object
+extends RefCounted
 
 var x : float
 var y : float

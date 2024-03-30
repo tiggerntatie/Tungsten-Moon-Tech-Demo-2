@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://bes4acdkv68y3" path="res://rocky_trail_02_diff_4k.png" id="3_abeor"]
 [ext_resource type="Texture2D" uid="uid://deues776ra4xu" path="res://rocky_trail_02_nor_gl_4k.png" id="4_3sr2d"]
 [ext_resource type="Texture2D" uid="uid://c4cov3rqjqb10" path="res://rocky_trail_02_rough_4k.png" id="5_15gkp"]
-[ext_resource type="ArrayMesh" path="res://moon_dynamicmesh.res" id="6_fy1w6"]
+[ext_resource type="ArrayMesh" uid="uid://dkut04ig3ornp" path="res://moon_dynamicmesh.res" id="6_fy1w6"]
 [ext_resource type="Shape3D" uid="uid://dmg17qvwjptsm" path="res://moon_collisionshape.res" id="7_pc1tn"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_bi85l"]
