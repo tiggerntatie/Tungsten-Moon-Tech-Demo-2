@@ -13,7 +13,7 @@ const SCROLL_SENS = 0.05	# m/unit
 const JOY_SENS = 0.01		# m/unit
 
 @onready var LEVEL : Node3D = $".."
-@onready var MOON : Node3D = $"../Moon"
+@onready var MOON : Node3D = $"../SmartMoon"
 @onready var GROUNDRADAR : RayCast3D = $GroundRadar
 @onready var COLLISIONSHAPE : CollisionShape3D = $CollisionShape3D
 @onready var HUDVEL : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Velocity/VEL
@@ -135,7 +135,7 @@ func _process(delta):
 		eyeball_offset = XRCAMERA.global_position
 		
 	
-	GROUNDRADAR.target_position = to_local(MOON.position).normalized()*1000
+	GROUNDRADAR.target_position = to_local(MOON.position).normalized()*1000*MOON.scale.x
 	if GROUNDRADAR.is_colliding():
 		altitude_agl = GROUNDRADAR.to_local(GROUNDRADAR.get_collision_point()).length()-GROUNDRADAR.position.y
 	else:

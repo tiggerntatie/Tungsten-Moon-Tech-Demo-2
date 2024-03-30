@@ -6,7 +6,7 @@ extends Node3D
 @onready var ENVIRONMENT : WorldEnvironment = $WorldEnvironment
 @onready var SUNLIGHT : DirectionalLight3D = $DirectionalLightSun
 @onready var PLANETLIGHT : DirectionalLight3D = $DirectionalLightPlanet
-@onready var MOON : Node3D = $Moon
+@onready var MOON : Node3D = $SmartMoon
 @onready var planet_default_light_energy = PLANETLIGHT.light_energy
 @onready var SUNLIGHT_CULLMASK := SUNLIGHT.light_cull_mask
 @onready var PLANETLIGHT_CULLMASK := PLANETLIGHT.light_cull_mask
