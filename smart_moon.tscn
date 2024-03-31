@@ -9,27 +9,31 @@ script = ExtResource("1_ckxy8")
 moon_data = ExtResource("2_mx03q")
 
 [node name="FaceX+" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 0)
 script = ExtResource("2_4w4r6")
 face_normal = Vector3(1, 0, 0)
 
 [node name="FaceX-" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -300, 0, 0)
 script = ExtResource("2_4w4r6")
 face_normal = Vector3(-1, 0, 0)
 
 [node name="FaceY+" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 300, 0)
 script = ExtResource("2_4w4r6")
 face_normal = Vector3(0, 1, 0)
 
 [node name="FaceY-" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -300, 0)
 script = ExtResource("2_4w4r6")
 face_normal = Vector3(0, -1, 0)
 
 [node name="FaceZ+" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 300)
 script = ExtResource("2_4w4r6")
 face_normal = Vector3(0, 0, 1)
 
 [node name="FaceZ-" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -300)
 script = ExtResource("2_4w4r6")
 face_normal = Vector3(0, 0, -1)
-
-[connection signal="ready" from="." to="." method="_on_moon_data_ready"]

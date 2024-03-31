@@ -35,10 +35,14 @@ func on_data_changed():
 	emit_signal("changed")
 	
 # encapsulate moon point transformations here:
-func point_on_moon(point_on_sphere : Vector3) -> Vector3:
+func point_on_moon(point_on_sphere : Vector3, unit_sphere_out : bool = false) -> Vector3:
 	var elevation = noise_map.get_noise_3dv(point_on_sphere)   # returns from -1 to 1?
 	var elevation1 = (elevation + 1)/2.0*amplitude  # now (0..amplitude)
 	var elevation2 = elevation1 - flatten_percentage * amplitude	  # 
 	var elevation3 = max(0.0, elevation2)/(1.0-flatten_percentage)
 	#print(elevation, " ", elevation1, " ", elevation2, " ", elevation3)
-	return point_on_sphere * (radius + elevation3)
+	var output : Vector3 = point_on_sphere * (radius + elevation3)
+	if unit_sphere_out:
+		return output / radius
+	return output
+	

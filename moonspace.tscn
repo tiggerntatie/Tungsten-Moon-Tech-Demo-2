@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://b678pocn4yvj"]
+[gd_scene load_steps=11 format=3 uid="uid://b678pocn4yvj"]
 
 [ext_resource type="Script" path="res://moonspace.gd" id="1_miwu0"]
 [ext_resource type="Shader" path="res://moonspace-sky.gdshader" id="2_a8rae"]
@@ -6,7 +6,6 @@
 [ext_resource type="Texture2D" uid="uid://et8tb63ftgu" path="res://tm_stars.png" id="3_ybnff"]
 [ext_resource type="PackedScene" uid="uid://c08vubwsc2swp" path="res://spacecraft.tscn" id="5_4lifu"]
 [ext_resource type="PackedScene" uid="uid://l3t54y8k7j41" path="res://smart_moon.tscn" id="6_co76x"]
-[ext_resource type="PackedScene" uid="uid://d2vq8swkh3l81" path="res://moon.tscn" id="10_ob3sk"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qt1ai"]
 shader = ExtResource("2_a8rae")
@@ -46,6 +45,32 @@ planet_orbit_rotation = 5.088
 planet_axis_direction = Vector3(0.7, 0.7, 0)
 planet_axis_period_hours = 11.7
 moon_axis_period_hours = 10.0
+scenario_list = [{
+"altitude": 765.0,
+"heading": 0.0,
+"lat": 89.9,
+"long": 161.0
+}, {
+"altitude": 1558.0,
+"heading": 90.0,
+"lat": 30.0,
+"long": 225.0
+}, {
+"altitude": 7.0,
+"heading": 0.0,
+"lat": -10.0,
+"long": 45.0
+}, {
+"altitude": 302.0,
+"heading": 180.0,
+"lat": 85.0,
+"long": 0.0
+}, {
+"altitude": 7.0,
+"heading": 0.0,
+"lat": -10.0,
+"long": 280.0
+}]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_hfpdn")
@@ -67,10 +92,9 @@ light_cull_mask = 4293918722
 directional_shadow_mode = 0
 directional_shadow_max_distance = 1000.0
 
-[node name="Moon" parent="." instance=ExtResource("10_ob3sk")]
-visible = false
-
 [node name="SmartMoon" parent="." instance=ExtResource("6_co76x")]
+transform = Transform3D(1000, 0, 0, 0, 1000, 0, 0, 0, 1000, 0, -301000, 0)
+chunk_resolution_power = 5
 
 [node name="Spacecraft" parent="." instance=ExtResource("5_4lifu")]
 collision_layer = 0

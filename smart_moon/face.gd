@@ -1,34 +1,44 @@
+@tool
 extends Node3D
 class_name MoonSmartFace
 
 @export var face_normal : Vector3 = Vector3.ZERO
 @onready var SMOON = "$.."
-
+const MESH_PATH := "res://smart_moon/mesh_resources/"
 
 func _ready():
 	pass
 
+func resource_file_name(res_power : int, chunk_res_power : int, x : int, y : int) -> String:
+	return MESH_PATH + "mesh_" + str(face_normal.x) + str(face_normal.y) + str(face_normal.z) + "_" + str(res_power) + "_" + str(chunk_res_power) + "_" + str(x) + "_" + str(y) + ".res"
+
 func generate_meshes(moon_data : MoonData, resolution_power : int, chunk_resolution_power : int):
-	var radius = moon_data.radius*1000	# radius in km
+	var radius = moon_data.radius	# radius in km
 	var resolution := pow(2, resolution_power)
 	var chunk_resolution := pow(2, chunk_resolution_power)
 	position = face_normal * radius
-	# generate normal vectors radius long, in the face plane
-	var va := Vector3(position.z, position.x, position.y)
+	# remove old meshes
+	_clean_out_meshes()
+	# generate normal vectors unit length, in the face plane
+	var va := Vector3(position.y, position.z, position.x)
 	var vb := face_normal.cross(va)
-	var step := 1/resolution 
 	for y in range(resolution):
 		for x in range(resolution):
+			var resource_path = resource_file_name(resolution_power, chunk_resolution_power, x, y)
 			var chunk := MeshInstance3D.new()
-			var chunk_width = va.length()*2/resolution
-			# local position of each chunk
-			chunk.position = (x/resolution + step - 1)*2*va +  (y/resolution + step - 1)*2*vb
-			generate_chunk_mesh(chunk, moon_data, va, vb, chunk_width, chunk_resolution)
+			add_child(chunk)
+			chunk.position = ((x+0.5)/resolution - 0.5)*2*va +  ((y+0.5)/resolution - 0.5)*2*vb
+			if ResourceLoader.exists(resource_path):
+				call_deferred("_load_mesh", chunk, resource_path)
+			else:
+				# local, face-relative osition of each chunk
+				generate_chunk_mesh(chunk, moon_data, 2*va/resolution, 2*vb/resolution, chunk_resolution, resource_path)
 	
 
-func generate_chunk_mesh(chunk : MeshInstance3D, moon_data : MoonData, va : Vector3, vb : Vector3, width : float, resolution : int):
+func generate_chunk_mesh(chunk : MeshInstance3D, moon_data : MoonData, va : Vector3, vb : Vector3, resolution : int, path : String):
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
+	var radius = moon_data.radius	
 	var vertex_resolution := resolution + 1
 	var vertex_qty : int = pow(vertex_resolution, 2)
 	var square_qty : int = pow(resolution, 2)
@@ -36,21 +46,19 @@ func generate_chunk_mesh(chunk : MeshInstance3D, moon_data : MoonData, va : Vect
 	var uv_array := PackedVector2Array()
 	var normal_array := PackedVector3Array()
 	var index_array := PackedInt32Array()
-	
 	normal_array.resize(vertex_qty)
 	uv_array.resize(vertex_qty)
 	vertex_array.resize(vertex_qty)
 	index_array.resize(square_qty*6)
-	
 	var tri_index : int = 0
 	for y in range(vertex_resolution):
 		for x in range(vertex_resolution):
 			var i : int = x + y * vertex_resolution
-			var percent : Vector2 = Vector2(x, y) / vertex_resolution
-			var point_on_face : Vector3 = (percent.x-0.5)*2*va + (percent.y-0.5)*2*vb
-			var point_on_unit_sphere := (moon_data.radius*1000*face_normal + point_on_face).normalized()
-			var point_on_moon := moon_data.point_on_moon(point_on_unit_sphere)*1000		#km to m
-			var point_in_local_frame := point_on_moon - position
+			var percent : Vector2 = Vector2(x, y) / resolution
+			var point_on_face : Vector3 = (percent.x-0.5)*va + (percent.y-0.5)*vb 
+			var point_on_unit_sphere := (point_on_face+chunk.position+face_normal*radius).normalized()
+			var point_on_moon := moon_data.point_on_moon(point_on_unit_sphere) 
+			var point_in_local_frame : Vector3 = point_on_moon - chunk.position - face_normal*radius
 			vertex_array[i] = point_in_local_frame
 			uv_array[i] = Vector2(percent.x, percent.y)
 			if x != resolution and y != resolution:
@@ -85,16 +93,24 @@ func generate_chunk_mesh(chunk : MeshInstance3D, moon_data : MoonData, va : Vect
 	arrays[Mesh.ARRAY_TEX_UV] = uv_array
 	arrays[Mesh.ARRAY_INDEX] = index_array
 
-	call_deferred("_update_mesh", arrays)
-	
+	call_deferred("_update_mesh", arrays, chunk, path)
+
+# clear out old meshes
+func _clean_out_meshes():
+	for child in get_children():
+		child.queue_free()
+		
 # switch over carefully.. 
-func _update_mesh(arrays : Array):
-	var mesh3d := MeshInstance3D.new()
+func _update_mesh(arrays : Array, chunk : MeshInstance3D, path : String):
 	var _mesh := ArrayMesh.new()
 	_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	mesh3d.mesh = _mesh
-	add_child(mesh3d)
-		
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
+	_mesh.take_over_path(path)
+	ResourceSaver.save(_mesh, path)
+	chunk.set_mesh(_mesh)
+	chunk.create_multiple_convex_collisions()
+
+# load a mesh ressource
+func _load_mesh(chunk : MeshInstance3D, path : String):
+	var _mesh : ArrayMesh = ResourceLoader.load(path)
+	chunk.set_mesh(_mesh)
+	chunk.create_multiple_convex_collisions()

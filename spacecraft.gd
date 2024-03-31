@@ -94,6 +94,7 @@ func set_logical_position(lat: float, lon: float, radius: float, altitude: float
 	var q1 : Quaternion = Quaternion.from_euler(Vector3(0.0, phi+PI/2.0, PI/2.0-theta))
 	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, 0.0))
 	rotation = (q1*q2).get_euler()	# This rotates the ship to correspond to its unrotated position on the globe
+	fuel = FULL_FUEL	# FIXME this should be refilled some other way!
 	MOON.set_from_logical_position(self)
 
 
@@ -135,11 +136,13 @@ func _process(delta):
 		eyeball_offset = XRCAMERA.global_position
 		
 	
-	GROUNDRADAR.target_position = to_local(MOON.position).normalized()*1000*MOON.scale.x
+	GROUNDRADAR.target_position = to_local(MOON.position).normalized()*1000/MOON.scale_factor
 	if GROUNDRADAR.is_colliding():
 		altitude_agl = GROUNDRADAR.to_local(GROUNDRADAR.get_collision_point()).length()-GROUNDRADAR.position.y
+		#print("altitude_agl: ", altitude_agl)
 	else:
 		altitude_agl = NAN
+		#print("no radar contact")
 
 
 	# transition to landed?
@@ -267,8 +270,6 @@ func _input(event: InputEvent) -> void:
 		$YawPivot.rotation.y -= MOUSE_SENS * event.relative.x
 		$YawPivot/PitchPivot.rotation.z -= MOUSE_SENS * event.relative.y
 		$YawPivot/PitchPivot.rotation.z = clamp($YawPivot/PitchPivot.rotation.z, -PI/2, PI/2)
-	elif event.is_action_pressed("Restart"):
-		get_tree().reload_current_scene()
 	elif event.is_action_pressed("Quit"):
 		get_tree().quit()
 	elif Input.is_action_just_pressed("ui_cancel"):

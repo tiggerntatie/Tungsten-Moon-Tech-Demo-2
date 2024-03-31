@@ -1,29 +1,43 @@
+@tool
 extends Node3D
 
-@export var moon_data : MoonData
-@export_range(2, 8, 1) var resolution_power := 3
-@export_range(2, 8, 1) var chunk_resolution_power := 5
+@export var moon_data : MoonData:
+	set(val):
+		moon_data = val
+		on_data_changed()
+		if moon_data != null and not moon_data.is_connected("changed", self.on_data_changed):
+			moon_data.connect("changed", self.on_data_changed)
+
+@export_range(2, 8, 1) var resolution_power := 3:
+	set(val):
+		resolution_power = val
+		on_data_changed()
+		
+@export_range(2, 8, 1) var chunk_resolution_power := 5:
+	set(val):
+		chunk_resolution_power = val
+		on_data_changed()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass
+	scale = Vector3.ONE*MOON_SCALE
+	on_data_changed()
 			
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	pass
 
 
-func _on_moon_data_ready():
+func on_data_changed():
 	for face in get_children():
 		face.generate_meshes(moon_data, resolution_power, chunk_resolution_power)
-	print("all meshes generated")
 
 
 const G = 6.674E-11
 const rhoW = 19250.0 # kg/m^3
 const SHRINK_ALTITUDE = 10000 # meters above ground
 const SHRINK_FACTOR = 4
-const MOON_SCALE = 1	# Scaling to 300,000 meters is done in the mesh
+const MOON_SCALE = 1000	
 @onready var LEVEL : Node3D = get_node("/root/Level")
 @onready var physical_radius = $".".moon_data.radius*1000
 @onready var LogicalM =  rhoW*(PI*4/3)*pow(physical_radius,3)

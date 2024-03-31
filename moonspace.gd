@@ -233,19 +233,17 @@ func _process(delta):
 	if PLANETLIGHT.light_cull_mask != 0 and SUNLIGHT.light_cull_mask == 0:
 		new_star_energy *= 0.25
 	ENVIRONMENT.environment.sky.sky_material.set_shader_parameter("star_energy", new_star_energy)
-		
-
-		
-	
 
 	# Handle UI
 func _input(event: InputEvent) -> void:
 	var p = event.is_action_pressed("Load Prev Scenario")
 	var n = event.is_action_pressed("Load Next Scenario")
+	var r = event.is_action_pressed("Restart")
 	if p:
 		scenario_index = clamp(scenario_index - 1, 0, scenario_list.size()-1)
 	elif n:
 		scenario_index = clamp(scenario_index + 1, 0, scenario_list.size()-1)
 	if p or n:
 		save_scenario(scenario_index)
+	if p or n or r:
 		call_deferred("load_scenario", scenario_index)
