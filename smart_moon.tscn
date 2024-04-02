@@ -1,12 +1,23 @@
-[gd_scene load_steps=4 format=3 uid="uid://l3t54y8k7j41"]
+[gd_scene load_steps=8 format=3 uid="uid://l3t54y8k7j41"]
 
 [ext_resource type="Script" path="res://smart_moon/smart_moon.gd" id="1_ckxy8"]
 [ext_resource type="Script" path="res://smart_moon/face.gd" id="2_4w4r6"]
 [ext_resource type="Resource" uid="uid://cpyimrebtcomr" path="res://moon_data.tres" id="2_mx03q"]
+[ext_resource type="Texture2D" uid="uid://bes4acdkv68y3" path="res://rocky_trail_02_diff_4k.png" id="3_ot3oi"]
+[ext_resource type="Texture2D" uid="uid://deues776ra4xu" path="res://rocky_trail_02_nor_gl_4k.png" id="4_w8mvv"]
+[ext_resource type="Texture2D" uid="uid://c4cov3rqjqb10" path="res://rocky_trail_02_rough_4k.png" id="5_havaf"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_omoeu"]
+albedo_texture = ExtResource("3_ot3oi")
+roughness_texture = ExtResource("5_havaf")
+normal_enabled = true
+normal_texture = ExtResource("4_w8mvv")
+uv1_scale = Vector3(100, 100, 100)
 
 [node name="SmartMoon" type="Node3D"]
 script = ExtResource("1_ckxy8")
 moon_data = ExtResource("2_mx03q")
+material_override = SubResource("StandardMaterial3D_omoeu")
 
 [node name="FaceX+" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 0)

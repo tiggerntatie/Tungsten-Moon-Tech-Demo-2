@@ -17,6 +17,11 @@ extends Node3D
 	set(val):
 		chunk_resolution_power = val
 		on_data_changed()
+		
+@export var material_override : Material:
+	set(val):
+		material_override = val
+		on_data_changed()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

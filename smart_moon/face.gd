@@ -9,8 +9,8 @@ const MESH_PATH := "res://smart_moon/mesh_resources/"
 func _ready():
 	pass
 
-func resource_file_name(res_power : int, chunk_res_power : int, x : int, y : int) -> String:
-	return MESH_PATH + "mesh_" + str(face_normal.x) + str(face_normal.y) + str(face_normal.z) + "_" + str(res_power) + "_" + str(chunk_res_power) + "_" + str(x) + "_" + str(y) + ".res"
+func resource_file_name(res_power : int, chunk_res_power : int, res_type: String, x : int, y : int) -> String:
+	return MESH_PATH + res_type + "_" + str(face_normal.x) + str(face_normal.y) + str(face_normal.z) + "_" + str(res_power) + "_" + str(chunk_res_power) + "_" + str(x) + "_" + str(y) + ".res"
 
 func generate_meshes(moon_data : MoonData, resolution_power : int, chunk_resolution_power : int):
 	var radius = moon_data.radius	# radius in km
@@ -24,23 +24,28 @@ func generate_meshes(moon_data : MoonData, resolution_power : int, chunk_resolut
 	var vb := face_normal.cross(va)
 	for y in range(resolution):
 		for x in range(resolution):
-			var resource_path = resource_file_name(resolution_power, chunk_resolution_power, x, y)
+			var resource_path = resource_file_name(resolution_power, chunk_resolution_power, "mesh", x, y)
+			var collision_res_path = resource_file_name(resolution_power, chunk_resolution_power, "coll", x, y)
 			var chunk := MeshInstance3D.new()
+			chunk.material_override = get_parent_node_3d().material_override
+			chunk.set_layer_mask_value(1, true)	#lit by sun and planet
+			chunk.set_layer_mask_value(2, true)	
 			add_child(chunk)
 			chunk.position = ((x+0.5)/resolution - 0.5)*2*va +  ((y+0.5)/resolution - 0.5)*2*vb
-			if ResourceLoader.exists(resource_path):
-				call_deferred("_load_mesh", chunk, resource_path)
+			if ResourceLoader.exists(resource_path) and ResourceLoader.exists(collision_res_path): 
+				call_deferred("_load_mesh", chunk, resource_path, collision_res_path)
 			else:
 				# local, face-relative osition of each chunk
-				generate_chunk_mesh(chunk, moon_data, 2*va/resolution, 2*vb/resolution, chunk_resolution, resource_path)
+				generate_chunk_mesh(chunk, moon_data, 2*va/resolution, 2*vb/resolution, chunk_resolution, resource_path, collision_res_path)
 	
-
-func generate_chunk_mesh(chunk : MeshInstance3D, moon_data : MoonData, va : Vector3, vb : Vector3, resolution : int, path : String):
+# Note: we will actually build a mesh that is larger than requested, but only generate triangles in the desired mesh
+func generate_chunk_mesh(chunk : MeshInstance3D, moon_data : MoonData, va : Vector3, vb : Vector3, resolution : int, path : String, collpath : String):
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
 	var radius = moon_data.radius	
 	var vertex_resolution := resolution + 1
 	var vertex_qty : int = pow(vertex_resolution, 2)
+	var expand_vertex_qty : int = pow(vertex_resolution + 2, 2)  # <-- just did this
 	var square_qty : int = pow(resolution, 2)
 	var vertex_array := PackedVector3Array()
 	var uv_array := PackedVector2Array()
@@ -93,7 +98,7 @@ func generate_chunk_mesh(chunk : MeshInstance3D, moon_data : MoonData, va : Vect
 	arrays[Mesh.ARRAY_TEX_UV] = uv_array
 	arrays[Mesh.ARRAY_INDEX] = index_array
 
-	call_deferred("_update_mesh", arrays, chunk, path)
+	call_deferred("_update_mesh", arrays, chunk, path, collpath)
 
 # clear out old meshes
 func _clean_out_meshes():
@@ -101,16 +106,26 @@ func _clean_out_meshes():
 		child.queue_free()
 		
 # switch over carefully.. 
-func _update_mesh(arrays : Array, chunk : MeshInstance3D, path : String):
+func _update_mesh(arrays : Array, chunk : MeshInstance3D, path : String, collpath : String):
 	var _mesh := ArrayMesh.new()
 	_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	_mesh.take_over_path(path)
 	ResourceSaver.save(_mesh, path)
 	chunk.set_mesh(_mesh)
-	chunk.create_multiple_convex_collisions()
+	#chunk.create_multiple_convex_collisions() # trimesh uses few resources, but doesn't work correctly
+	chunk.create_trimesh_collision()
+	var coll = chunk.get_child(0).get_child(0).get_shape()	# retrieve staticbody/collision shape
+	coll.take_over_path(collpath)
+	ResourceSaver.save(coll, collpath)
 
 # load a mesh ressource
-func _load_mesh(chunk : MeshInstance3D, path : String):
+func _load_mesh(chunk : MeshInstance3D, path : String, collpath : String):
 	var _mesh : ArrayMesh = ResourceLoader.load(path)
 	chunk.set_mesh(_mesh)
-	chunk.create_multiple_convex_collisions()
+	var staticbody = StaticBody3D.new()
+	var collshape = CollisionShape3D.new()
+	staticbody.add_child(collshape)
+	var shape : Shape3D = ResourceLoader.load(collpath)
+	collshape.set_shape(shape)
+	chunk.add_child(staticbody)
+
