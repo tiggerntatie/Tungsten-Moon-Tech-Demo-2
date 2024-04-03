@@ -12,6 +12,9 @@ func _ready():
 func resource_file_name(res_power : int, chunk_res_power : int, res_type: String, x : int, y : int) -> String:
 	return MESH_PATH + res_type + "_" + str(face_normal.x) + str(face_normal.y) + str(face_normal.z) + "_" + str(res_power) + "_" + str(chunk_res_power) + "_" + str(x) + "_" + str(y) + ".res"
 
+# This function will generate meshes for a single cubic "face" of a sphere. Each face is divided into
+# a 2^resolution_power x 2^resolution_power grid of independent meshes. Meshes, once generated,
+# are saved to disk as resources. These will be loaded quickly in future runs.
 func generate_meshes(moon_data : MoonData, resolution_power : int, chunk_resolution_power : int):
 	var radius = moon_data.radius	# radius in km
 	var resolution := pow(2, resolution_power)
@@ -39,60 +42,82 @@ func generate_meshes(moon_data : MoonData, resolution_power : int, chunk_resolut
 				generate_chunk_mesh(chunk, moon_data, 2*va/resolution, 2*vb/resolution, chunk_resolution, resource_path, collision_res_path)
 	
 # Note: we will actually build a mesh that is larger than requested, but only generate triangles in the desired mesh
+# This function is much more complicated than typical examples because it is one mesh that will fit with its neighbors. The problem is 
+# ensuring that edge vertex normals match where two meshes come together. If they don't match, the seams between meshes become quite 
+# obvious. To make this work, calculations are done for a larger mesh, then only a smaller subset of that is used to generate the visible
+# mesh!
 func generate_chunk_mesh(chunk : MeshInstance3D, moon_data : MoonData, va : Vector3, vb : Vector3, resolution : int, path : String, collpath : String):
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
 	var radius = moon_data.radius	
 	var vertex_resolution := resolution + 1
-	var vertex_qty : int = pow(vertex_resolution, 2)
-	var expand_vertex_qty : int = pow(vertex_resolution + 2, 2)  # <-- just did this
+	var expand_resolution := resolution + 2
+	var expand_vertex_resolution := vertex_resolution + 2
+	var expand_vertex_qty : int = pow(expand_vertex_resolution, 2)
 	var square_qty : int = pow(resolution, 2)
+	var expand_square_qty : int = pow(resolution+2, 2)
 	var vertex_array := PackedVector3Array()
 	var uv_array := PackedVector2Array()
 	var normal_array := PackedVector3Array()
 	var index_array := PackedInt32Array()
-	normal_array.resize(vertex_qty)
-	uv_array.resize(vertex_qty)
-	vertex_array.resize(vertex_qty)
+	var expand_index_array := PackedInt32Array()
+	var visibles := Dictionary()
+	normal_array.resize(expand_vertex_qty)
+	uv_array.resize(expand_vertex_qty)
+	vertex_array.resize(expand_vertex_qty)
 	index_array.resize(square_qty*6)
-	var tri_index : int = 0
-	for y in range(vertex_resolution):
-		for x in range(vertex_resolution):
-			var i : int = x + y * vertex_resolution
-			var percent : Vector2 = Vector2(x, y) / resolution
+	expand_index_array.resize(expand_square_qty*6)
+	var expand_tri_index : int = 0
+	for y in range(expand_vertex_resolution):
+		for x in range(expand_vertex_resolution):
+			var i : int = x + y * expand_vertex_resolution
+			var percent : Vector2 = (Vector2(x, y) - Vector2.ONE) / resolution 
 			var point_on_face : Vector3 = (percent.x-0.5)*va + (percent.y-0.5)*vb 
 			var point_on_unit_sphere := (point_on_face+chunk.position+face_normal*radius).normalized()
 			var point_on_moon := moon_data.point_on_moon(point_on_unit_sphere) 
 			var point_in_local_frame : Vector3 = point_on_moon - chunk.position - face_normal*radius
 			vertex_array[i] = point_in_local_frame
 			uv_array[i] = Vector2(percent.x, percent.y)
-			if x != resolution and y != resolution:
-				index_array[tri_index+2] = i
-				index_array[tri_index+1] = i+vertex_resolution+1
-				index_array[tri_index] = i+vertex_resolution
+			# note if this vertex will be visible in this chunk
+			if x > 0 and y > 0 and x < expand_vertex_resolution-1 and y < expand_vertex_resolution-1:
+				visibles[i] = true
+			# assemble all triangles
+			if x != expand_resolution and y != expand_resolution:
+				expand_index_array[expand_tri_index+2] = i
+				expand_index_array[expand_tri_index+1] = i+expand_vertex_resolution+1
+				expand_index_array[expand_tri_index] = i+expand_vertex_resolution
 			
-				index_array[tri_index+5] = i
-				index_array[tri_index+4] = i+1
-				index_array[tri_index+3] = i+vertex_resolution+1
-				tri_index += 6
+				expand_index_array[expand_tri_index+5] = i
+				expand_index_array[expand_tri_index+4] = i+1
+				expand_index_array[expand_tri_index+3] = i+expand_vertex_resolution+1
+				expand_tri_index += 6
 	# generate vertex normals
-	for a in range(0, len(index_array), 3):			
+	for a in range(0, len(expand_index_array), 3):			
 		var b : int = a + 1
 		var c : int = a + 2
-		var ab : Vector3 = vertex_array[index_array[b]] - vertex_array[index_array[a]]
-		var bc : Vector3 = vertex_array[index_array[c]] - vertex_array[index_array[b]]
-		var ca : Vector3 = vertex_array[index_array[a]] - vertex_array[index_array[c]]
+		var ab : Vector3 = vertex_array[expand_index_array[b]] - vertex_array[expand_index_array[a]]
+		var bc : Vector3 = vertex_array[expand_index_array[c]] - vertex_array[expand_index_array[b]]
+		var ca : Vector3 = vertex_array[expand_index_array[a]] - vertex_array[expand_index_array[c]]
 		var cross_bc_ab : Vector3 = bc.cross(ab)
 		var cross_ca_bc : Vector3 = ca.cross(bc)
 		var cross_ab_ca : Vector3 = ab.cross(ca)
 		var cross_sum : Vector3 = cross_bc_ab + cross_ca_bc + cross_ab_ca
-		normal_array[index_array[a]] += cross_sum
-		normal_array[index_array[b]] += cross_sum
-		normal_array[index_array[c]] += cross_sum
+		normal_array[expand_index_array[a]] += cross_sum
+		normal_array[expand_index_array[b]] += cross_sum
+		normal_array[expand_index_array[c]] += cross_sum
 	# normalize the normals
 	for i in range(normal_array.size()):
 		normal_array[i] = normal_array[i].normalized()
-		
+	# filter expand_index_array triangles into index_array
+	var tri_index : int = 0
+	for a in range(0, len(expand_index_array),3):
+		var b : int = a + 1
+		var c : int = a + 2
+		if visibles.has(expand_index_array[a]) and visibles.has(expand_index_array[b]) and visibles.has(expand_index_array[c]):
+			index_array[tri_index] = expand_index_array[a]
+			index_array[tri_index+1] = expand_index_array[b]
+			index_array[tri_index+2] = expand_index_array[c]
+			tri_index += 3
 	arrays[Mesh.ARRAY_VERTEX] = vertex_array
 	arrays[Mesh.ARRAY_NORMAL] = normal_array
 	arrays[Mesh.ARRAY_TEX_UV] = uv_array
