@@ -94,6 +94,8 @@ func set_logical_position(lat: float, lon: float, radius: float, altitude: float
 	var q1 : Quaternion = Quaternion.from_euler(Vector3(0.0, phi+PI/2.0, PI/2.0-theta))
 	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, 0.0))
 	rotation = (q1*q2).get_euler()	# This rotates the ship to correspond to its unrotated position on the globe
+	flying = true
+	landed = false
 	fuel = FULL_FUEL	# FIXME this should be refilled some other way!
 	MOON.set_from_logical_position(self)
 
@@ -173,48 +175,52 @@ func _process(delta):
 		MOON.set_from_logical_position(self, eyeball_offset)
 		
 	# Input Polling
-	if Input.is_action_pressed("Thrust Increase"):
-		IncreaseThrust()
-	if Input.is_action_pressed("Thrust Decrease"):
-		DecreaseThrust()
-	if not ui_thrust_lock:
-		var thrust_input = Input.get_action_strength("Thrust Analog")
-		if thrust_input == 0.0:
-			v_thrust.y = 0.0
-		else:
-			v_thrust.y = THRUST_MIN * (1 - thrust_input) + THRUST_MAX * thrust_input	
-	if ui_in:
-		var horiz_vel = JOY_SENS * Input.get_axis("Viewpoint Left", "Viewpoint Right")
-		var forward_vel : float = 0.0
-		var upward_vel : float = 0.0
-		if ui_alternate_control:
-			upward_vel = JOY_SENS * Input.get_axis("Viewpoint Down", "Viewpoint Up")
-		else:
-			forward_vel = JOY_SENS * Input.get_axis("Viewpoint Backward", "Viewpoint Forward")
-		$YawPivot.rotation.y -= JOY_SENS * Input.get_axis("Viewpoint Pan Left", "Viewpoint Pan Right")
-		$YawPivot/PitchPivot.rotation.z += JOY_SENS * Input.get_axis("Viewpoint Pan Down", "Viewpoint Pan Up")
-		$YawPivot/PitchPivot.rotation.z = clamp($YawPivot/PitchPivot.rotation.z, -PI/2, PI/2)
-		var v_move = Quaternion.from_euler(
-			Vector3(0.0, $YawPivot.rotation.y, $YawPivot/PitchPivot.rotation.z))*Vector3(forward_vel, upward_vel, horiz_vel)
-		var new_eye = $YawPivot.position + v_move
-		if (new_eye.x < 1.05 and 
-			new_eye.x > 0.0 and
-			new_eye.y > 4.5 and
-			new_eye.y < 6.05 and 
-			new_eye.z > -0.75 and new_eye.z < 0.75 and 
-			new_eye.y < (-5.0/6.0)*new_eye.x + 6.675):
-			$YawPivot.position = new_eye
-		
-	elif not landed:   # no rotation while landed, please!
-		v_torque.z = Input.get_axis("Pitch Forward", "Pitch Backward")
-		v_torque.y = Input.get_axis("Yaw Right Always", "Yaw Left Always")
-		if ui_alternate_control:
-			v_torque.y = Input.get_axis("Yaw Right", "Yaw Left")
-		else:
-			v_torque.x = -Input.get_axis("Roll Right", "Roll Left")
+	var p = Input.is_action_just_pressed("Load Prev Scenario")
+	var n = Input.is_action_just_pressed("Load Next Scenario")
+	var r = Input.is_action_just_pressed("Restart")
+	# ignore other inputs if we are chhanging scenarios
+	if not LEVEL.scenario_input(p, n, r):
+		if Input.is_action_pressed("Thrust Increase"):
+			IncreaseThrust()
+		if Input.is_action_pressed("Thrust Decrease"):
+			DecreaseThrust()
+		if not ui_thrust_lock:
+			var thrust_input = Input.get_action_strength("Thrust Analog")
+			if thrust_input == 0.0:
+				v_thrust.y = 0.0
+			else:
+				v_thrust.y = THRUST_MIN * (1 - thrust_input) + THRUST_MAX * thrust_input	
+		if ui_in:
+			var horiz_vel = JOY_SENS * Input.get_axis("Viewpoint Left", "Viewpoint Right")
+			var forward_vel : float = 0.0
+			var upward_vel : float = 0.0
+			if ui_alternate_control:
+				upward_vel = JOY_SENS * Input.get_axis("Viewpoint Down", "Viewpoint Up")
+			else:
+				forward_vel = JOY_SENS * Input.get_axis("Viewpoint Backward", "Viewpoint Forward")
+			$YawPivot.rotation.y -= JOY_SENS * Input.get_axis("Viewpoint Pan Left", "Viewpoint Pan Right")
+			$YawPivot/PitchPivot.rotation.z += JOY_SENS * Input.get_axis("Viewpoint Pan Down", "Viewpoint Pan Up")
+			$YawPivot/PitchPivot.rotation.z = clamp($YawPivot/PitchPivot.rotation.z, -PI/2, PI/2)
+			var v_move = Quaternion.from_euler(
+				Vector3(0.0, $YawPivot.rotation.y, $YawPivot/PitchPivot.rotation.z))*Vector3(forward_vel, upward_vel, horiz_vel)
+			var new_eye = $YawPivot.position + v_move
+			if (new_eye.x < 1.05 and 
+				new_eye.x > 0.0 and
+				new_eye.y > 4.5 and
+				new_eye.y < 6.05 and 
+				new_eye.z > -0.75 and new_eye.z < 0.75 and 
+				new_eye.y < (-5.0/6.0)*new_eye.x + 6.675):
+				$YawPivot.position = new_eye
 			
-	# oddly, this has to be here to keep the ship rotating		
-	apply_torque(basis * v_torque * 200)
+		elif not landed:   # no rotation while landed, please!
+			v_torque.z = Input.get_axis("Pitch Forward", "Pitch Backward")
+			v_torque.y = Input.get_axis("Yaw Right Always", "Yaw Left Always")
+			if ui_alternate_control:
+				v_torque.y = Input.get_axis("Yaw Right", "Yaw Left")
+			else:
+				v_torque.x = -Input.get_axis("Roll Right", "Roll Left")
+			# oddly, this has to be here to keep the ship rotating		
+			apply_torque(basis * v_torque * 200)
 	
 				
 	# HUD Updates

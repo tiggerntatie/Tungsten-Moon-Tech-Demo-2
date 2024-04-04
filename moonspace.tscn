@@ -46,12 +46,12 @@ planet_axis_direction = Vector3(0.7, 0.7, 0)
 planet_axis_period_hours = 11.7
 moon_axis_period_hours = 10.0
 scenario_list = [{
-"altitude": 765.0,
+"altitude": 10.0,
 "heading": 0.0,
 "lat": 89.9,
 "long": 161.0
 }, {
-"altitude": 1558.0,
+"altitude": 1565.0,
 "heading": 90.0,
 "lat": 30.0,
 "long": 225.0
