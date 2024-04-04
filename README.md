@@ -56,7 +56,6 @@ These starting positions provide various combinations of sun and/or planet shine
 * This may be hard on your GPU. 
 
 ## Road Map
-* Currently, the moon is modeled as a single, huge, spherical mesh with randomly generated terrain. It would be nice to have a more detailed, yet performance optimized, mesh.
 * Add landing pads at various locations.
 * Rebuild the spacecraft from the ground up with better detail and ergonomics.
 * Support for VR controllers to interact with the cockpit.
