@@ -93,4 +93,13 @@ func set_logical_position_from_physical(body: Spacecraft, eyeball_offset: Vector
 	dv_temp_logical_position.sub(moon_position)		# now the UNrotated logical position
 	dv_temp_logical_position.rotate_y(LEVEL.current_moon_rotation, xz_radius)  # rotate the logical position according to moon rotation
 	body.dv_logical_position = dv_temp_logical_position	# stuff the logical position back on the spacecraft
-	
+
+# convert a physical position to logical
+# is there no need to in
+func get_logical_from_physical(pos : Vector3) -> DVector3:
+	var dv_temp_logical_position = DVector3.FromVector3(pos)
+	var dv_raw_position = DVector3.FromVector3(position)
+	var moon_position = DVector3.Div(dv_raw_position, scale.x/MOON_SCALE)
+	dv_temp_logical_position.sub(moon_position)
+	dv_temp_logical_position.rotate_y(LEVEL.current_moon_rotation)
+	return dv_temp_logical_position

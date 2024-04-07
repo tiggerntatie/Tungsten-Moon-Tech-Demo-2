@@ -82,9 +82,10 @@ func vector3() -> Vector3:
 # copy a DVector3
 func copy() -> DVector3:
 	return DVector3.new(x, y, z)
-
-func print():
-	print(x, ",", y, ",", z)
+	
+# get a string
+func _to_string() -> String:
+	return str(x) + "," + str(y) + "," + str(z)
 
 func _init(_x = 0.0, _y = 0.0, _z = 0.0):
 	x = _x

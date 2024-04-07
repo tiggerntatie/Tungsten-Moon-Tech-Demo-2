@@ -11,6 +11,10 @@ const GEARTH = 9.80665 		# m/s^2
 const MOUSE_SENS = 0.002	# m/unit and deg/unit
 const SCROLL_SENS = 0.05	# m/unit
 const JOY_SENS = 0.01		# m/unit
+const VERT_SPRING_K = 50000 # N/m
+const HORIZ_SPRING_K = 10000 # N/m
+const SPRING_K : Vector3 = Vector3(50000, 50000, 50000)
+const SPRING_DAMP : Vector3 = Vector3(10000, 10000, 10000)
 
 @onready var LEVEL : Node3D = $".."
 @onready var MOON : Node3D = $"../SmartMoon"
@@ -28,13 +32,19 @@ const JOY_SENS = 0.01		# m/unit
 @onready var v_thrust := Vector3.ZERO
 @onready var v_torque := Vector3.ZERO
 @onready var fuel : float = FULL_FUEL
+@onready var damp_mode = false
 
-var landed := false
-var flying := true
+# projected impact point in global coordinates
+var v_impact_point := Vector3.INF
+var v_impact_normal := Vector3.INF
+# UNROTATED captured logical position
+var dv_captured_logical_position : DVector3
+#var v_captured_impact_point := Vector3.INF
 
 var dv_last_position : DVector3
 var last_xz_radius : float
-var altitude_agl : float
+var altitude_agl : float = NAN
+#var v_altitude_agl : Vector3 = Vector3.INF
 
 # UI State 
 var ui_in : bool = false
@@ -94,8 +104,9 @@ func set_logical_position(lat: float, lon: float, radius: float, altitude: float
 	var q1 : Quaternion = Quaternion.from_euler(Vector3(0.0, phi+PI/2.0, PI/2.0-theta))
 	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, 0.0))
 	rotation = (q1*q2).get_euler()	# This rotates the ship to correspond to its unrotated position on the globe
-	flying = true
-	landed = false
+	#flying = true
+	#landed = false
+	dv_captured_logical_position = null
 	fuel = FULL_FUEL	# FIXME this should be refilled some other way!
 	MOON.set_from_logical_position(self)
 
@@ -124,7 +135,7 @@ func _process(delta):
 		fuel -= delta_fuel
 
 	# Rotate thrust vector to match spacecraft axis, and again to account for axis system rotation
-	var v_thrust_global = (basis * v_thrust).rotated(Vector3.UP, LEVEL.current_moon_rotation)
+	var v_thrust_global : Vector3 = (basis * v_thrust).rotated(Vector3.UP, LEVEL.current_moon_rotation)
 	var net_mass = mass - FULL_FUEL + fuel
 
 	# Camera dependent calculations
@@ -140,39 +151,42 @@ func _process(delta):
 	
 	GROUNDRADAR.target_position = to_local(MOON.position).normalized()*1000/MOON.scale_factor
 	if GROUNDRADAR.is_colliding():
-		altitude_agl = GROUNDRADAR.to_local(GROUNDRADAR.get_collision_point()).length()-GROUNDRADAR.position.y
-		#print("altitude_agl: ", altitude_agl)
+		v_impact_point = GROUNDRADAR.get_collision_point()
+		v_impact_normal = GROUNDRADAR.get_collision_normal()
+		altitude_agl = GROUNDRADAR.to_local(v_impact_point).length()-GROUNDRADAR.position.y
 	else:
 		altitude_agl = NAN
-		#print("no radar contact")
 
-
-	# transition to landed?
-	if flying and altitude_agl < 0.0:
-		#dv_logical_position = dv_last_position
-		last_xz_radius = dv_logical_position.xz_length()
-		v_thrust.y = 0.0
-		landed = true
-		flying = false
+	# compute an impact restoring force
+	if altitude_agl < -2.0:
+		# too much. reload the scenario!
+		LEVEL.scenario_input(false, false, true)
+	if altitude_agl <= 0.0:
+		if dv_captured_logical_position == null:
+			dv_captured_logical_position = dv_logical_position.copy()
+			dv_captured_logical_position.rotate_y(-LEVEL.current_moon_rotation) # UNrotate
+		var dv_captured = dv_captured_logical_position.copy()
+		dv_captured.rotate_y(LEVEL.current_moon_rotation)
+		var dv_position_delta = DVector3.Sub(dv_logical_position, dv_captured)
+		# too much spring action.. reload scenario
+		if dv_position_delta.length() > 1.0:
+			LEVEL.scenario_input(false, false, true)
+		var dv_restoring_force = DVector3.Mul(-SPRING_K.y, dv_position_delta)
+		var dv_local_velocity = DVector3.Sub(dv_logical_velocity, get_landed_velocity(dv_logical_position, dv_logical_position.xz_length(), LEVEL.moon_axis_rate))
+		dv_restoring_force.add(DVector3.Mul(-SPRING_DAMP.y, dv_local_velocity))
 		# rotate to match surface 
-		var v_crossed = (basis*Vector3.UP).cross(GROUNDRADAR.get_collision_normal())
-		rotate(v_crossed.normalized(), asin(v_crossed.length()))
-		angular_velocity = Vector3.ZERO
-			
-	if not flying and not landed and altitude_agl > 0.1:
-		flying = true
-		landed = false
+		var v_crossed = (basis*Vector3.UP).cross(v_impact_normal)
+		angular_velocity = v_crossed
+
+		#print("restoring force: ", v_restoring_force)
+		v_thrust_global += dv_restoring_force.vector3()
+	elif altitude_agl > 0.0:
+		dv_captured_logical_position = null
+
+
 	
-	if landed:
-		dv_gravity_force = DVector3.Mul(net_mass, MOON.get_acceleration(dv_logical_position))
-		if v_thrust_global.length_squared() > 1.1 * dv_gravity_force.length_squared():
-			# transition back to flying. Tentatively.
-			MOON.set_logical_position_from_physical(self, eyeball_offset)
-			dv_logical_velocity = get_landed_velocity(dv_logical_position, last_xz_radius, LEVEL.moon_axis_rate)
-			landed = false
-	else: 
-		process_physics(delta, dv_logical_position, dv_logical_velocity, v_thrust_global, net_mass)
-		MOON.set_from_logical_position(self, eyeball_offset)
+	process_physics(delta, dv_logical_position, dv_logical_velocity, v_thrust_global, net_mass)
+	MOON.set_from_logical_position(self, eyeball_offset)
 		
 	# Input Polling
 	var p = Input.is_action_just_pressed("Load Prev Scenario")
@@ -211,8 +225,7 @@ func _process(delta):
 				new_eye.z > -0.75 and new_eye.z < 0.75 and 
 				new_eye.y < (-5.0/6.0)*new_eye.x + 6.675):
 				$YawPivot.position = new_eye
-			
-		elif not landed:   # no rotation while landed, please!
+		else:
 			v_torque.z = Input.get_axis("Pitch Forward", "Pitch Backward")
 			v_torque.y = Input.get_axis("Yaw Right Always", "Yaw Left Always")
 			if ui_alternate_control:
@@ -270,8 +283,13 @@ func _input(event: InputEvent) -> void:
 	elif event.is_action_pressed("Thrust Cut"):
 		ui_thrust_lock = true
 		v_thrust.y = 0.0
-	elif event.is_action_pressed("Kill Rotation"):
-		angular_velocity = Vector3.ZERO
+	elif event.is_action_pressed("Rotation Damp Toggle"):
+		damp_mode = not damp_mode
+		if damp_mode:
+			angular_damp = 1
+		else:
+			angular_damp = 0
+			
 	elif event is InputEventMouseMotion:
 		$YawPivot.rotation.y -= MOUSE_SENS * event.relative.x
 		$YawPivot/PitchPivot.rotation.z -= MOUSE_SENS * event.relative.y
