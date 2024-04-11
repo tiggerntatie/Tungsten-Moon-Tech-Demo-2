@@ -24,6 +24,7 @@ const SPRING_DAMP : Vector3 = Vector3(10000, 10000, 10000)
 @onready var HUDALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Altitude/ALT
 @onready var HUDTHRUST : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Thrust/THRUST
 @onready var HUDFUEL : ProgressBar = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Fuel/FUEL
+@onready var HUDSTAB : ColorRect = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Stabilizer/STAB
 @onready var CAMERA : Camera3D = $YawPivot/PitchPivot/Camera3D
 @onready var XRCAMERA : XRCamera3D = $"YawPivot/PitchPivot/XROrigin3D/XRCamera3D"
 @onready var dv_logical_position := DVector3.new()
@@ -70,13 +71,6 @@ func process_physics(delta, dv_position, dv_velocity, v_th, mass_param):
 		DVector3.Mul(d6, DVector3.QAdd(k1v, DVector3.Mul(2, k2v), DVector3.Mul(2, k3v), k4v)))
 	dv_logical_position = DVector3.Add(dv_position,
 		DVector3.Mul(d6, DVector3.QAdd(k1r, DVector3.Mul(2, k2r), DVector3.Mul(2, k3r), k4r)))
-
-# Calculate new position and velocity for each step
-# Assuming the spacecraft is stationary, relative to moon surface
-# xz_radius is used to guarantee radius in xz plane is invariant with each iteration
-func process_stationary_physics(delta: float, dv_pos: DVector3, xz_radius: float):
-	dv_pos.rotate_y(LEVEL.moon_axis_rate * delta, xz_radius)
-	dv_logical_velocity = get_landed_velocity(dv_pos, xz_radius, LEVEL.moon_axis_rate)
 	
 # Return a DVector3 representing velocity at the current logical position, assuming no relative motion
 # with respect to the moon.	
@@ -245,6 +239,7 @@ func _process(delta):
 		HUDALT.text = str(altitude_agl).pad_decimals(1) + " m"
 	HUDTHRUST.text = str(v_thrust.y).pad_decimals(0) + " N"
 	HUDFUEL.value = 100.0*fuel/FULL_FUEL
+	HUDSTAB.visible = damp_mode
 	
 func IncreaseThrust():
 	ui_thrust_lock = true
