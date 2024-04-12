@@ -11,6 +11,7 @@ extends MeshInstance3D
 var size : float
 var is_high_precision := false
 var saved_relative_position
+var cubic_position : Vector3 = Vector3.ZERO
 @onready var parent : MoonSmartFace = get_parent()
 @onready var moon : Node3D = parent.get_parent()
 @onready var dv_face_position := parent.dv_position

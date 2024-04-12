@@ -42,6 +42,11 @@ func generate_meshes(moon_data : MoonData, resolution_power : int, chunk_resolut
 			chunk.set_layer_mask_value(1, true)	#lit by sun and planet
 			chunk.set_layer_mask_value(2, true)	
 			chunk.dv_position = DVector3.FromVector3(((x+0.5)/resolution - 0.5)*2*va +  ((y+0.5)/resolution - 0.5)*2*vb)
+			chunk.cubic_position = chunk.position	# preserve original cubic position
+			var dv_normalized_from_center : DVector3 = DVector3.Add(chunk.dv_position, DVector3.FromVector3(position)).normalized()
+			chunk.dv_position = DVector3.Sub(DVector3.FromVector3(position), DVector3.Mul(radius, dv_normalized_from_center))
+			# now chunk.cubic_position is original position on cube face and
+			# chunk.position is the chunk's position on the surface of the sphere
 			add_child(chunk)
 			if ResourceLoader.exists(resource_path) and ResourceLoader.exists(collision_res_path): 
 				call_deferred("_load_mesh", chunk, resource_path, collision_res_path)
@@ -57,7 +62,7 @@ func generate_meshes(moon_data : MoonData, resolution_power : int, chunk_resolut
 func generate_chunk_mesh(chunk : MeshInstance3D, moon_data : MoonData, va : Vector3, vb : Vector3, resolution : int, path : String, collpath : String):
 	var arrays := []
 	arrays.resize(Mesh.ARRAY_MAX)
-	var radius = moon_data.radius	
+	var radius : float = moon_data.radius	
 	var vertex_resolution := resolution + 1
 	var expand_resolution := resolution + 2
 	var expand_vertex_resolution := vertex_resolution + 2
@@ -80,10 +85,10 @@ func generate_chunk_mesh(chunk : MeshInstance3D, moon_data : MoonData, va : Vect
 		for x in range(expand_vertex_resolution):
 			var i : int = x + y * expand_vertex_resolution
 			var percent : Vector2 = (Vector2(x, y) - Vector2.ONE) / resolution 
-			var point_on_face : Vector3 = (percent.x-0.5)*va + (percent.y-0.5)*vb 
-			var point_on_unit_sphere := (point_on_face+chunk.position+face_normal*radius).normalized()
-			var point_on_moon := moon_data.point_on_moon(point_on_unit_sphere) 
-			var point_in_local_frame : Vector3 = point_on_moon - chunk.position - face_normal*radius
+			var point_on_face : Vector3 = (percent.x-0.5)*va + (percent.y-0.5)*vb # position on cube face
+			var point_on_unit_sphere : Vector3 = (point_on_face + chunk.cubic_position + position).normalized()
+			var point_on_moon := moon_data.point_on_moon(point_on_unit_sphere) 	# adjusted for elevation, etc.
+			var point_in_local_frame : Vector3 = point_on_moon - chunk.position - position	# relative to position of chunk
 			vertex_array[i] = point_in_local_frame
 			uv_array[i] = Vector2(percent.x, percent.y)
 			# note if this vertex will be visible in this chunk
