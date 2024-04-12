@@ -5,9 +5,16 @@ class_name MoonSmartFace
 @export var face_normal : Vector3 = Vector3.ZERO
 @onready var SMOON = "$.."
 const MESH_PATH := "res://smart_moon/mesh_resources/"
+@onready var dv_position : DVector3 = DVector3.FromVector3(position):
+	set (val):
+		dv_position = val
+		position = val.vector3()
 
-func _ready():
-	pass
+
+func reset_high_precision_chunks():
+	print("face reset_high_precision_chunks")
+	for chunk : MeshChunk in get_children():
+		chunk.reset_high_precision()
 
 func resource_file_name(res_power : int, chunk_res_power : int, res_type: String, x : int, y : int) -> String:
 	return MESH_PATH + res_type + "_" + str(face_normal.x) + str(face_normal.y) + str(face_normal.z) + "_" + str(res_power) + "_" + str(chunk_res_power) + "_" + str(x) + "_" + str(y) + ".res"
@@ -17,8 +24,8 @@ func resource_file_name(res_power : int, chunk_res_power : int, res_type: String
 # are saved to disk as resources. These will be loaded quickly in future runs.
 func generate_meshes(moon_data : MoonData, resolution_power : int, chunk_resolution_power : int):
 	var radius = moon_data.radius	# radius in km
-	var resolution := pow(2, resolution_power)
-	var chunk_resolution := pow(2, chunk_resolution_power)
+	var resolution := 2**resolution_power
+	var chunk_resolution := 2**chunk_resolution_power
 	position = face_normal * radius
 	# remove old meshes
 	_clean_out_meshes()
@@ -29,12 +36,13 @@ func generate_meshes(moon_data : MoonData, resolution_power : int, chunk_resolut
 		for x in range(resolution):
 			var resource_path = resource_file_name(resolution_power, chunk_resolution_power, "mesh", x, y)
 			var collision_res_path = resource_file_name(resolution_power, chunk_resolution_power, "coll", x, y)
-			var chunk := MeshInstance3D.new()
+			var chunk := MeshChunk.new()
+			chunk.size = va.length()/resolution*2.2	# distance at which high precision positioning must be used
 			chunk.material_override = get_parent_node_3d().material_override
 			chunk.set_layer_mask_value(1, true)	#lit by sun and planet
 			chunk.set_layer_mask_value(2, true)	
+			chunk.dv_position = DVector3.FromVector3(((x+0.5)/resolution - 0.5)*2*va +  ((y+0.5)/resolution - 0.5)*2*vb)
 			add_child(chunk)
-			chunk.position = ((x+0.5)/resolution - 0.5)*2*va +  ((y+0.5)/resolution - 0.5)*2*vb
 			if ResourceLoader.exists(resource_path) and ResourceLoader.exists(collision_res_path): 
 				call_deferred("_load_mesh", chunk, resource_path, collision_res_path)
 			else:
@@ -53,9 +61,9 @@ func generate_chunk_mesh(chunk : MeshInstance3D, moon_data : MoonData, va : Vect
 	var vertex_resolution := resolution + 1
 	var expand_resolution := resolution + 2
 	var expand_vertex_resolution := vertex_resolution + 2
-	var expand_vertex_qty : int = pow(expand_vertex_resolution, 2)
-	var square_qty : int = pow(resolution, 2)
-	var expand_square_qty : int = pow(resolution+2, 2)
+	var expand_vertex_qty : int = expand_vertex_resolution*expand_vertex_resolution
+	var square_qty : int = resolution*resolution
+	var expand_square_qty : int = (resolution+2)*(resolution+2)
 	var vertex_array := PackedVector3Array()
 	var uv_array := PackedVector2Array()
 	var normal_array := PackedVector3Array()

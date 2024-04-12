@@ -25,7 +25,6 @@ extends Node3D
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	scale = Vector3.ONE*MOON_SCALE
 	on_data_changed()
 			
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -34,8 +33,10 @@ func _process(delta):
 
 
 func on_data_changed():
+	scale = Vector3.ONE*MOON_SCALE
 	for face in get_children():
 		face.generate_meshes(moon_data, resolution_power, chunk_resolution_power)
+	reset_high_precision_chunks()
 
 
 const G = 6.674E-11
@@ -47,6 +48,37 @@ const MOON_SCALE = 1000
 @onready var physical_radius = $".".moon_data.radius*1000
 @onready var LogicalM =  rhoW*(PI*4/3)*pow(physical_radius,3)
 var scale_factor : float = 1.0
+var high_precision_chunks: Dictionary = {}
+
+# maintain a high fidelity version of moon position
+@onready var dv_position : DVector3 = DVector3.FromVector3(position):
+	set (val):
+		dv_position = val
+		update_high_precision_chunks()
+		position = val.vector3()
+
+func update_high_precision_chunks():
+	for chunk : MeshChunk in high_precision_chunks.keys():
+		var dv_temp := DVector3.Add(chunk.dv_face_position, chunk.dv_position)
+		dv_temp.multiply_scalar(scale.x)
+		dv_temp.add(dv_position)
+		chunk.global_position = dv_temp.vector3()
+
+func scale_high_precision_chunks():
+	for chunk : MeshChunk in high_precision_chunks.keys():
+		if chunk.is_set_as_top_level():
+			chunk.scale = scale		# match to planet scale
+
+func reset_high_precision_chunks():
+	high_precision_chunks.clear()
+	for face : MoonSmartFace in get_children():
+		face.reset_high_precision_chunks()
+
+
+func reset_scenario():
+	print("MOON.reset_scenario()")
+	reset_high_precision_chunks()
+	
 
 # position assumes relative to planet center, returns force vector
 func get_acceleration(dv_position: DVector3, v_thrust_acc: Vector3 = Vector3.ZERO) -> DVector3:
@@ -71,10 +103,13 @@ func set_from_logical_position(body: Spacecraft, eyeball_offset: Vector3 = Vecto
 			scale_factor = SHRINK_FACTOR
 			var scalef = MOON_SCALE/scale_factor
 			scale = Vector3(scalef, scalef, scalef)
+			scale_high_precision_chunks()
 	elif r - SHRINK_ALTITUDE <= physical_radius: # below transition region
-		if scale_factor > 1:
-			scale_factor = 1
+		if scale_factor > 1.0:
+			scale_factor = 1.0
 			scale = Vector3(MOON_SCALE, MOON_SCALE, MOON_SCALE)
+			scale_high_precision_chunks()
+	
 	# p.sub(DVector3.Div(body.dv_logical_position, scale_factor))
 	# make a copy of logical position
 	var dv_unrotated_logical_position: DVector3 = body.dv_logical_position.copy()
@@ -82,7 +117,7 @@ func set_from_logical_position(body: Spacecraft, eyeball_offset: Vector3 = Vecto
 	dv_unrotated_logical_position.rotate_y(-LEVEL.current_moon_rotation, xz_radius)
 	# scale it and create a new position
 	p.sub(DVector3.Div(dv_unrotated_logical_position, scale_factor))
-	position = p.vector3() + eyeball_offset
+	dv_position = DVector3.Add(p, DVector3.FromVector3(eyeball_offset))
 	
 # update the spacecraft logical position, based on planet position
 # FIXME review eyeball_offset calculation before implementing. Should work at low altitude.. 

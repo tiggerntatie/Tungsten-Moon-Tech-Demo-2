@@ -48,10 +48,10 @@ var altitude_agl : float = NAN
 #var v_altitude_agl : Vector3 = Vector3.INF
 
 # UI State 
-var ui_in : bool = false
-var ui_rotation : bool = true
-var ui_thrust_lock : bool = true
-var ui_alternate_control : bool = false
+var ui_in : bool
+var ui_rotation : bool
+var ui_thrust_lock : bool
+var ui_alternate_control : bool
 	
 # Calculate new position and velocity for each step
 # 4th order runge kutte integration
@@ -82,6 +82,19 @@ func get_landed_velocity(dv_pos: DVector3, hradius: float, rate: float):
 	var vel: float = hradius*rate
 	return DVector3.new(vel*cos(angle), 0.0, vel*(-sin(angle)))
 
+# reset the spacecraft internal state
+func reset_spacecraft():
+	dv_captured_logical_position = null
+	fuel = FULL_FUEL	# FIXME this should be refilled some other way!
+	v_thrust = Vector3.ZERO
+	v_torque = Vector3.ZERO
+	damp_mode = false
+	ui_in = false
+	ui_rotation = true
+	ui_thrust_lock = true
+	ui_alternate_control = false
+
+
 # Set spacecraft logical position to lat/long and heading (cw from N) (all in degrees)
 # Also sets rotation to be level with local ground, pointing at heading
 # Also sets linear velocity to match moon rotation at the given altitude
@@ -98,10 +111,7 @@ func set_logical_position(lat: float, lon: float, radius: float, altitude: float
 	var q1 : Quaternion = Quaternion.from_euler(Vector3(0.0, phi+PI/2.0, PI/2.0-theta))
 	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, 0.0))
 	rotation = (q1*q2).get_euler()	# This rotates the ship to correspond to its unrotated position on the globe
-	#flying = true
-	#landed = false
-	dv_captured_logical_position = null
-	fuel = FULL_FUEL	# FIXME this should be refilled some other way!
+	reset_spacecraft()
 	MOON.set_from_logical_position(self)
 
 
@@ -114,6 +124,7 @@ func _ready():
 	dv_last_position = dv_logical_position.copy()
 	contact_monitor = true
 	max_contacts_reported = 1
+	reset_spacecraft()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

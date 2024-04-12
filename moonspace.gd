@@ -178,6 +178,7 @@ func load_scenario(index : int):
 		scenario_list[index]["altitude"],
 		scenario_list[index]["heading"],
 		moon_axis_rate)
+	MOON.reset_scenario()
 
 func euler_to_unit_direction(d : Vector3) -> Vector3:
 	return Quaternion.from_euler(d)*Vector3(0.0,0.0,1.0)
