@@ -33,7 +33,14 @@ const SPRING_DAMP : Vector3 = Vector3(10000, 10000, 10000)
 @onready var v_thrust := Vector3.ZERO
 @onready var v_torque := Vector3.ZERO
 @onready var fuel : float = FULL_FUEL
-@onready var damp_mode = false
+@onready var damp_mode = false:
+	set(val):
+		damp_mode = val
+		if damp_mode:
+			angular_damp = 1
+		else:
+			angular_damp = 0
+		
 
 # projected impact point in global coordinates
 var v_impact_point := Vector3.INF
@@ -291,10 +298,6 @@ func _input(event: InputEvent) -> void:
 		v_thrust.y = 0.0
 	elif event.is_action_pressed("Rotation Damp Toggle"):
 		damp_mode = not damp_mode
-		if damp_mode:
-			angular_damp = 1
-		else:
-			angular_damp = 0
 			
 	elif event is InputEventMouseMotion:
 		$YawPivot.rotation.y -= MOUSE_SENS * event.relative.x
