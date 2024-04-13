@@ -18,7 +18,7 @@ uv1_scale = Vector3(100, 100, 100)
 transform = Transform3D(1000, 0, 0, 0, 1000, 0, 0, 0, 1000, 0, 0, 0)
 script = ExtResource("1_ckxy8")
 moon_data = ExtResource("2_mx03q")
-chunk_resolution_power = 6
+chunk_resolution_power = 7
 material_override = SubResource("StandardMaterial3D_omoeu")
 
 [node name="FaceX+" type="Node3D" parent="."]
