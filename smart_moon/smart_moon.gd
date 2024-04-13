@@ -76,14 +76,14 @@ func reset_high_precision_chunks():
 
 
 func reset_scenario():
-	print("MOON.reset_scenario()")
+	#print("MOON.reset_scenario()")
 	reset_high_precision_chunks()
 	
 
-# position assumes relative to planet center, returns force vector
-func get_acceleration(dv_position: DVector3, v_thrust_acc: Vector3 = Vector3.ZERO) -> DVector3:
-	var dv_acc = dv_position.normalized()
-	dv_acc.multiply_scalar(-G*LogicalM/pow(dv_position.length(),2))
+# position assumes relative to planet center (assumed at origin), returns force vector
+func get_acceleration(dv_body_position: DVector3, v_thrust_acc: Vector3 = Vector3.ZERO) -> DVector3:
+	var dv_acc = dv_body_position.normalized()
+	dv_acc.multiply_scalar(-G*LogicalM/pow(dv_body_position.length(),2))
 	dv_acc.add(DVector3.FromVector3(v_thrust_acc))
 	return dv_acc
 
