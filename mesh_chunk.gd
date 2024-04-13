@@ -28,25 +28,27 @@ func reset_high_precision():
 
 func evaluate_precision():
 	var high_precision = global_position.length() < size*moon.scale.x
-	print(global_position, " ", size, " ", moon.scale.x)
+	#print(global_position, " ", size, " ", moon.scale.x)
 	if high_precision:
-		print("is high precision")
+		#print("is high precision")
 		if not is_high_precision:
-			print("adding high precision")
+			#print("adding high precision")
 			is_high_precision = true
 			top_level = true	# position updates manually set at global level
 			moon.high_precision_chunks[self] = null
 	else:
 		if is_high_precision:
-			print("removing high precision")
+			#print("removing high precision")
 			is_high_precision = false
 			top_level = false	# position updates set from parent
 			moon.high_precision_chunks.erase(self)
 	
 
 func start_timer():
-	var timer := get_tree().create_timer(60.0)
-	timer.timeout.connect(_on_timer_timeout)
+	var scene := get_tree()
+	if scene != null:
+		var timer := scene.create_timer(60.0)
+		timer.timeout.connect(_on_timer_timeout)
 	
 func _on_timer_timeout():
 	evaluate_precision()
