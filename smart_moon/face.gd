@@ -12,7 +12,7 @@ const MESH_PATH := "res://smart_moon/mesh_resources/"
 
 
 func reset_high_precision_chunks():
-	print("face reset_high_precision_chunks")
+	#print("face reset_high_precision_chunks")
 	for chunk : MeshChunk in get_children():
 		chunk.reset_high_precision()
 
@@ -44,7 +44,7 @@ func generate_meshes(moon_data : MoonData, resolution_power : int, chunk_resolut
 			chunk.dv_position = DVector3.FromVector3(((x+0.5)/resolution - 0.5)*2*va +  ((y+0.5)/resolution - 0.5)*2*vb)
 			chunk.cubic_position = chunk.position	# preserve original cubic position
 			var dv_normalized_from_center : DVector3 = DVector3.Add(chunk.dv_position, DVector3.FromVector3(position)).normalized()
-			chunk.dv_position = DVector3.Sub(DVector3.FromVector3(position), DVector3.Mul(radius, dv_normalized_from_center))
+			chunk.dv_position = DVector3.Sub(DVector3.Mul(radius, dv_normalized_from_center), dv_position)
 			# now chunk.cubic_position is original position on cube face and
 			# chunk.position is the chunk's position on the surface of the sphere
 			add_child(chunk)
