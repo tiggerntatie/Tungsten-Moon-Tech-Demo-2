@@ -93,12 +93,11 @@ func get_logical_position(body: Spacecraft) -> DVector3:
 
 # update the planet position based on spacecraft logical position
 # optional xz_radius enforces an invariant radius in xz plane after de-rotating
-func set_from_logical_position(body: Spacecraft, eyeball_offset: Vector3 = Vector3.ZERO, xz_radius: float = 0.0):
+func set_from_logical_position(body: Spacecraft, xz_radius: float = 0.0):
 	var p = DVector3.FromVector3(body.position)
 	#var offset = Vector3.ZERO
 	var r = body.dv_logical_position.length()
 	if  r - SHRINK_ALTITUDE > physical_radius: # above transition region
-		#offset = eyeball_offset
 		if scale_factor < SHRINK_FACTOR:
 			scale_factor = SHRINK_FACTOR
 			var scalef = MOON_SCALE/scale_factor
@@ -117,14 +116,13 @@ func set_from_logical_position(body: Spacecraft, eyeball_offset: Vector3 = Vecto
 	dv_unrotated_logical_position.rotate_y(-LEVEL.current_moon_rotation, xz_radius)
 	# scale it and create a new position
 	p.sub(DVector3.Div(dv_unrotated_logical_position, scale_factor))
-	dv_position = DVector3.Add(p, DVector3.FromVector3(eyeball_offset))
+	dv_position = p
 	
 # update the spacecraft logical position, based on planet position
-# FIXME review eyeball_offset calculation before implementing. Should work at low altitude.. 
-func set_logical_position_from_physical(body: Spacecraft, eyeball_offset: Vector3 = Vector3.ZERO, xz_radius: float = 0.0):
+func set_logical_position_from_physical(body: Spacecraft, xz_radius: float = 0.0):
 	var dv_temp_logical_position = DVector3.FromVector3(body.position)	# spacecraft position, roughly zero
 	var dv_raw_position = DVector3.FromVector3(position)
-	var moon_position = DVector3.Sub(DVector3.Div(dv_raw_position, scale.x/MOON_SCALE), DVector3.FromVector3(eyeball_offset))	# Current logical moon position, correcting for eyeball offset
+	var moon_position = DVector3.Div(dv_raw_position, scale.x/MOON_SCALE)	# Current logical moon position, correcting for eyeball offset
 	dv_temp_logical_position.sub(moon_position)		# now the UNrotated logical position
 	dv_temp_logical_position.rotate_y(LEVEL.current_moon_rotation, xz_radius)  # rotate the logical position according to moon rotation
 	body.dv_logical_position = dv_temp_logical_position	# stuff the logical position back on the spacecraft

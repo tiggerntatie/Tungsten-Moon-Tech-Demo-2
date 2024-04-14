@@ -6,6 +6,8 @@ var x : float
 var y : float
 var z : float
 
+static var ZERO := DVector3.new(0.0,0.0,0.0)
+
 static func Add(a: DVector3, b: DVector3) -> DVector3:
 	return DVector3.new(a.x+b.x, a.y+b.y, a.z+b.z)
 
@@ -48,6 +50,9 @@ func sub(v: DVector3) -> void:
 	y -= v.y
 	z -= v.z
 
+func dot(v: DVector3) -> float:
+	return x*v.x + y*v.y + z*v.z
+
 # vector rotate around y-axis
 func rotate_y(th: float, xz_radius: float = 0.0) -> void:
 	var xn = x*cos(th) + z*sin(th)
@@ -74,7 +79,7 @@ func length() -> float:
 # normalize
 func normalized() -> DVector3:
 	return DVector3.Div(self, length())
-	
+
 # create a Vector3
 func vector3() -> Vector3:
 	return Vector3(x, y, z)

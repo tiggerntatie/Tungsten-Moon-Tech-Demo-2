@@ -2,7 +2,7 @@ extends Node3D
 
 @onready var SPACECRAFT : RigidBody3D = $Spacecraft
 @onready var CAMERA : Camera3D = $Spacecraft/YawPivot/PitchPivot/Camera3D
-@onready var XRCAMERA : XRCamera3D = $Spacecraft/YawPivot/PitchPivot/XROrigin3D/XRCamera3D
+@onready var XRCAMERA : XRCamera3D = $Spacecraft/XROrigin3D/XRCamera3D
 @onready var ENVIRONMENT : WorldEnvironment = $WorldEnvironment
 @onready var SUNLIGHT : DirectionalLight3D = $DirectionalLightSun
 @onready var PLANETLIGHT : DirectionalLight3D = $DirectionalLightPlanet

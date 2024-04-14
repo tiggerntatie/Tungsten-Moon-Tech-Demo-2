@@ -1,0 +1,52 @@
+[gd_scene load_steps=8 format=3 uid="uid://l3t54y8k7j41"]
+
+[ext_resource type="Script" path="res://smart_moon/smart_moon.gd" id="1_xw7yp"]
+[ext_resource type="Resource" uid="uid://cpyimrebtcomr" path="res://smart_moon/moon_data.tres" id="2_mwm2u"]
+[ext_resource type="Texture2D" uid="uid://bes4acdkv68y3" path="res://smart_moon/rocky_trail_02_diff_4k.png" id="3_r84ol"]
+[ext_resource type="Texture2D" uid="uid://deues776ra4xu" path="res://smart_moon/rocky_trail_02_nor_gl_4k.png" id="4_4w4eg"]
+[ext_resource type="Texture2D" uid="uid://c4cov3rqjqb10" path="res://smart_moon/rocky_trail_02_rough_4k.png" id="5_ak41s"]
+[ext_resource type="Script" path="res://smart_moon/face.gd" id="6_appy7"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_omoeu"]
+albedo_texture = ExtResource("3_r84ol")
+roughness_texture = ExtResource("5_ak41s")
+normal_enabled = true
+normal_texture = ExtResource("4_4w4eg")
+uv1_scale = Vector3(100, 100, 100)
+
+[node name="SmartMoon" type="Node3D"]
+transform = Transform3D(1000, 0, 0, 0, 1000, 0, 0, 0, 1000, 0, 0, 0)
+script = ExtResource("1_xw7yp")
+moon_data = ExtResource("2_mwm2u")
+chunk_resolution_power = 7
+material_override = SubResource("StandardMaterial3D_omoeu")
+
+[node name="FaceX+" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 0)
+script = ExtResource("6_appy7")
+face_normal = Vector3(1, 0, 0)
+
+[node name="FaceX-" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -300, 0, 0)
+script = ExtResource("6_appy7")
+face_normal = Vector3(-1, 0, 0)
+
+[node name="FaceY+" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 300, 0)
+script = ExtResource("6_appy7")
+face_normal = Vector3(0, 1, 0)
+
+[node name="FaceY-" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -300, 0)
+script = ExtResource("6_appy7")
+face_normal = Vector3(0, -1, 0)
+
+[node name="FaceZ+" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 300)
+script = ExtResource("6_appy7")
+face_normal = Vector3(0, 0, 1)
+
+[node name="FaceZ-" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -300)
+script = ExtResource("6_appy7")
+face_normal = Vector3(0, 0, -1)

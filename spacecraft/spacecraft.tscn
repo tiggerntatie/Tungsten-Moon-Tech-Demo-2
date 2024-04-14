@@ -1,0 +1,59 @@
+[gd_scene load_steps=5 format=3 uid="uid://c08vubwsc2swp"]
+
+[ext_resource type="Script" path="res://spacecraft/spacecraft.gd" id="1_b8yyq"]
+[ext_resource type="ArrayMesh" uid="uid://1woisy38wlky" path="res://spacecraft/RocketModel.obj" id="2_o0qaw"]
+[ext_resource type="PackedScene" uid="uid://d3kot1052qj27" path="res://spacecraft/instrument_panel.tscn" id="3_da1pl"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_63e0r"]
+size = Vector3(7.7, 7.7, 7.7)
+
+[node name="Spacecraft" type="RigidBody3D"]
+axis_lock_linear_x = true
+axis_lock_linear_y = true
+axis_lock_linear_z = true
+mass = 1000.0
+gravity_scale = 0.0
+inertia = Vector3(100000, 100000, 100000)
+continuous_cd = true
+script = ExtResource("1_b8yyq")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.01, 0, 0, 0, -4.37114e-10, 0.01, 0, -0.01, -4.37114e-10, 0, 0, 0)
+layers = 3
+mesh = ExtResource("2_o0qaw")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.612574, 3.92809, -0.0324347)
+shape = SubResource("BoxShape3D_63e0r")
+
+[node name="XROrigin3D" type="XROrigin3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, -2.30926e-14, 1, 0, 1, 0, -4.37114e-08, 1.08654, 5.54487, -0.566513)
+
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+transform = Transform3D(1, 2.30926e-14, -7.10543e-14, 0, 0.999999, -1.61559e-27, 7.10543e-15, 2.01948e-28, 0.999999, 0, 0, 0)
+far = 600000.0
+
+[node name="YawPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.03445, 5.706, -0.574646)
+
+[node name="PitchPivot" type="Node3D" parent="YawPivot"]
+transform = Transform3D(0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Camera3D" type="Camera3D" parent="YawPivot/PitchPivot"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
+fov = 37.8493
+far = 300000.0
+
+[node name="InstrumentPanel" parent="." instance=ExtResource("3_da1pl")]
+transform = Transform3D(-0.276959, 0.148034, -0.15453, 0.151618, 0.314105, 0.0291598, 0.151015, -0.0438671, -0.312682, 1.22267, 5.37564, -0.678727)
+
+[node name="SpotLight3D" type="SpotLight3D" parent="."]
+transform = Transform3D(0.319227, 0.283706, -0.904215, -0.058802, 0.958229, 0.279893, 0.945852, -0.0361798, 0.322575, 0.574802, 5.54455, -0.459084)
+layers = 4
+light_cull_mask = 4293918724
+spot_range = 1.07501
+spot_angle = 10.4289
+
+[node name="GroundRadar" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 5, 0)
+target_position = Vector3(0, -1000, 0)

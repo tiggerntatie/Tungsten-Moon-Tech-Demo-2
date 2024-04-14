@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="MoonData" load_steps=3 format=3 uid="uid://cpyimrebtcomr"]
+
+[ext_resource type="Script" path="res://smart_moon/moondata.gd" id="1_aen0c"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_bi85l"]
+frequency = 0.8432
+fractal_type = 2
+fractal_octaves = 10
+domain_warp_frequency = 5.0
+domain_warp_fractal_octaves = 4
+
+[resource]
+script = ExtResource("1_aen0c")
+radius = 300.0
+resolution_power = 8
+noise_map = SubResource("FastNoiseLite_bi85l")
+amplitude = 5.0
+flatten_percentage = 0.65
