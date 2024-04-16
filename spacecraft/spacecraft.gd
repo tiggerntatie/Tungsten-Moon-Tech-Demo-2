@@ -151,7 +151,7 @@ func _ready():
 
 
 # Called physics every frame. 'delta' is the elapsed time since the previous frame.
-func _physics_process(delta):
+func _process(delta):
 	var delta_fuel = 0.0
 	v_torque = Vector3.ZERO		# all torques to zero - we will add them as we discover them
 
