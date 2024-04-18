@@ -31,6 +31,10 @@ window/size/viewport_height=800
 
 project/assembly_name="Tungsten Moon Tech Demo 2"
 
+[editor]
+
+movie_writer/movie_file="C:/playground/Godot Projects/Tungsten-Moon-Tech-Demo-2/playtime.avi"
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/godot-xr-tools/plugin.cfg")

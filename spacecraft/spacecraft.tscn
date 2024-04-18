@@ -1,8 +1,14 @@
-[gd_scene load_steps=5 format=3 uid="uid://c08vubwsc2swp"]
+[gd_scene load_steps=11 format=3 uid="uid://c08vubwsc2swp"]
 
 [ext_resource type="Script" path="res://spacecraft/spacecraft.gd" id="1_b8yyq"]
 [ext_resource type="ArrayMesh" uid="uid://1woisy38wlky" path="res://spacecraft/RocketModel.obj" id="2_o0qaw"]
 [ext_resource type="PackedScene" uid="uid://d3kot1052qj27" path="res://spacecraft/instrument_panel.tscn" id="3_da1pl"]
+[ext_resource type="PackedScene" uid="uid://bdwmserhqai5h" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_physics_hand_low.tscn" id="3_k0geh"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/misc/vr_common_shader_cache.tscn" id="3_m2ksy"]
+[ext_resource type="Script" path="res://addons/godot-xr-tools/functions/function_pickup.gd" id="4_ltj2u"]
+[ext_resource type="PackedScene" uid="uid://btf05hjpw6k05" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_physics_hand_low.tscn" id="5_16q6j"]
+[ext_resource type="PackedScene" uid="uid://cn7xh5rtkwr8q" path="res://spacecraft/controls/throttle/throttle.tscn" id="6_7of32"]
+[ext_resource type="PackedScene" uid="uid://bft3xyxs31ci3" path="res://addons/godot-xr-tools/functions/function_pose_detector.tscn" id="6_bteek"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_63e0r"]
 size = Vector3(7.7, 7.7, 7.7)
@@ -33,6 +39,25 @@ transform = Transform3D(-4.37114e-08, 0, -1, -2.30926e-14, 1, 0, 1, 0, -4.37114e
 transform = Transform3D(1, 2.30926e-14, -7.10543e-14, 0, 0.999999, -1.61559e-27, 7.10543e-15, 2.01948e-28, 0.999999, 0, 0, 0)
 far = 600000.0
 
+[node name="VRCommonShaderCache" parent="XROrigin3D/XRCamera3D" instance=ExtResource("3_m2ksy")]
+
+[node name="XRLeft" type="XRController3D" parent="XROrigin3D"]
+tracker = &"left_hand"
+
+[node name="LeftPhysicsHand" parent="XROrigin3D/XRLeft" instance=ExtResource("3_k0geh")]
+
+[node name="XRToolsFunctionPickup" type="Node3D" parent="XROrigin3D/XRLeft"]
+script = ExtResource("4_ltj2u")
+grab_collision_mask = 327684
+ranged_enable = false
+
+[node name="FunctionPoseDetector" parent="XROrigin3D/XRLeft" instance=ExtResource("6_bteek")]
+
+[node name="XRRight" type="XRController3D" parent="XROrigin3D"]
+tracker = &"right_hand"
+
+[node name="RightPhysicsHand" parent="XROrigin3D/XRRight" instance=ExtResource("5_16q6j")]
+
 [node name="YawPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.03445, 5.706, -0.574646)
 
@@ -57,3 +82,6 @@ spot_angle = 10.4289
 [node name="GroundRadar" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 5, 0)
 target_position = Vector3(0, -1000, 0)
+
+[node name="Throttle" parent="." instance=ExtResource("6_7of32")]
+transform = Transform3D(-0.309757, -0.201179, -0.929289, 0.949615, -0.0163544, -0.312992, 0.0477693, -0.979418, 0.196108, 1.20676, 5.54214, -0.709688)
