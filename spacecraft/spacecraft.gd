@@ -5,6 +5,7 @@ extends RigidBody3D
 const THRUST_INC = 10.0 	# Newtons
 const THRUST_MAX = 20000 	# Newtons
 const THRUST_MIN = 5000 	# Newtons
+const THRUST_STEP_MULTIPLIER = 0.2 # 
 const FULL_FUEL = 2000 		# kg
 const ISP = 300 			# s
 const GEARTH = 9.80665 		# m/s^2
@@ -30,6 +31,7 @@ const SPRING_DAMP : Vector3 = Vector3(10000, 10000, 10000)
 @onready var XRORIGIN : XROrigin3D = $XROrigin3D
 @onready var YAWPIVOT : Node3D = $YawPivot
 @onready var PITCHPIVOT : Node3D = $YawPivot/PitchPivot
+@onready var THROTTLE : Node3D = $Throttle
 @onready var dv_logical_position := DVector3.new()
 @onready var dv_logical_velocity := DVector3.new(0,0,0)
 @onready var dv_gravity_force := DVector3.new()
@@ -54,7 +56,7 @@ var v_impact_normal := Vector3.INF
 # UNROTATED captured logical position
 var dv_captured_logical_position : DVector3
 #var v_captured_impact_point := Vector3.INF
-
+var thrust : float = 0.0
 var dv_last_position : DVector3
 var last_xz_radius : float
 var altitude_agl : float = NAN
@@ -99,6 +101,7 @@ func get_landed_velocity(dv_pos: DVector3, hradius: float, rate: float):
 func reset_spacecraft():
 	dv_captured_logical_position = null
 	fuel = FULL_FUEL	# FIXME this should be refilled some other way!
+	thrust = 0.0
 	v_thrust = Vector3.ZERO
 	v_torque = Vector3.ZERO
 	damp_mode = true
@@ -157,6 +160,7 @@ func _process(delta):
 
 	# Fuel calculations
 	if fuel <= 0.0:
+		thrust = 0.0
 		v_thrust.y = 0.0
 		fuel = 0.0
 	else:
@@ -229,15 +233,15 @@ func _process(delta):
 	# ignore other inputs if we are chhanging scenarios
 	if not LEVEL.scenario_input(p, n, r):
 		if Input.is_action_pressed("Thrust Increase"):
-			IncreaseThrust()
-		if Input.is_action_pressed("Thrust Decrease"):
-			DecreaseThrust()
+			increase_thrust(delta)
+		elif Input.is_action_pressed("Thrust Decrease"):
+			decrease_thrust(delta)
+		elif Input.is_action_pressed("Thrust Max"):
+			set_thrust(1.0)
+		elif Input.is_action_pressed("Thrust Cut"):
+			set_thrust(0.0)
 		if not ui_thrust_lock:
-			var thrust_input = Input.get_action_strength("Thrust Analog")
-			if thrust_input == 0.0:
-				v_thrust.y = 0.0
-			else:
-				v_thrust.y = THRUST_MIN * (1 - thrust_input) + THRUST_MAX * thrust_input	
+			set_thrust(Input.get_action_strength("Thrust Analog"), false)
 		if ui_in:
 			v_torque = Vector3.ZERO
 			var horiz_vel = JOY_SENS * Input.get_axis("Viewpoint Left", "Viewpoint Right")
@@ -282,20 +286,27 @@ func _process(delta):
 	HUDFUEL.value = 100.0*fuel/FULL_FUEL
 	HUDSTAB.visible = damp_mode
 	
-func IncreaseThrust():
+func increase_thrust(step : float):
 	ui_thrust_lock = true
-	if v_thrust.y == 0.0:
-		v_thrust.y = THRUST_MIN
-	else:
-		v_thrust.y += THRUST_INC
-		if v_thrust.y > THRUST_MAX:
-			v_thrust.y = THRUST_MAX
+	thrust = clamp(thrust+step*THRUST_STEP_MULTIPLIER, 0.0, 1.0)
+	THROTTLE._set_throttle_slider(thrust)
+ 
+func decrease_thrust(step : float):
+	ui_thrust_lock = true
+	thrust = clamp(thrust-step*THRUST_STEP_MULTIPLIER, 0.0, 1.0)
+	THROTTLE._set_throttle_slider(thrust)
 
-func DecreaseThrust():
-	ui_thrust_lock = true
-	v_thrust.y -= THRUST_INC
-	if v_thrust.y < THRUST_MIN:
+func set_thrust(value : float, lock : bool = true):
+	ui_thrust_lock = lock
+	thrust = value
+	THROTTLE._set_throttle_slider(thrust)
+	
+
+func _on_throttle_output_changed(value):
+	if value == 0.0:
 		v_thrust.y = 0.0
+	else:
+		v_thrust.y = THRUST_MIN + (THRUST_MAX - THRUST_MIN)*value
 
 
 func _input(event: InputEvent) -> void:
@@ -309,16 +320,6 @@ func _input(event: InputEvent) -> void:
 		ui_alternate_control = true
 	elif event.is_action_released("Alternate Control"):
 		ui_alternate_control = false
-	elif event.is_action_pressed("Thrust Increase"):
-		IncreaseThrust()
-	elif event.is_action_pressed("Thrust Decrease"):
-		DecreaseThrust()
-	elif event.is_action_pressed("Thrust Max"):
-		ui_thrust_lock = true
-		v_thrust.y = THRUST_MAX
-	elif event.is_action_pressed("Thrust Cut"):
-		ui_thrust_lock = true
-		v_thrust.y = 0.0
 	elif event.is_action_pressed("Rotation Damp Toggle"):
 		damp_mode = not damp_mode
 			
@@ -332,3 +333,4 @@ func _input(event: InputEvent) -> void:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)	
 
 		
+

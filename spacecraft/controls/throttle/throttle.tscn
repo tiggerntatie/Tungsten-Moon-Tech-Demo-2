@@ -1,6 +1,7 @@
-[gd_scene load_steps=18 format=3 uid="uid://cn7xh5rtkwr8q"]
+[gd_scene load_steps=16 format=3 uid="uid://cn7xh5rtkwr8q"]
 
 [ext_resource type="Script" path="res://addons/godot-xr-tools/interactables/interactable_slider.gd" id="1_5vjbw"]
+[ext_resource type="Script" path="res://spacecraft/controls/throttle/throttle.gd" id="1_ggwtq"]
 [ext_resource type="Script" path="res://addons/godot-xr-tools/interactables/interactable_handle.gd" id="2_hb8f6"]
 [ext_resource type="PackedScene" uid="uid://c25yxb0vt53vc" path="res://addons/godot-xr-tools/objects/grab_points/grab_point_hand_left.tscn" id="2_qsbaf"]
 [ext_resource type="Animation" uid="uid://dqa0h82y3qn1t" path="res://addons/godot-xr-tools/hands/animations/left/Grip 1.res" id="3_lacfc"]
@@ -8,34 +9,28 @@
 [ext_resource type="PackedScene" uid="uid://ca3daqmpo0tua" path="res://addons/godot-xr-tools/objects/grab_points/grab_point_redirect.tscn" id="6_bnox4"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_0ijdc"]
-size = Vector3(0.03, 0.1, 0.01)
+size = Vector3(0.1, 0.3, 0.02)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ui2y2"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_dfwlf"]
 material = SubResource("StandardMaterial3D_ui2y2")
-size = Vector3(0.03, 0.1, 0.01)
+size = Vector3(0.1, 0.3, 0.02)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_jecxo"]
-size = Vector3(0.01, 0.01, 0.03)
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_ak1nc"]
+height = 0.1
+radius = 0.02
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_cboox"]
-radius = 0.015
+[sub_resource type="CylinderMesh" id="CylinderMesh_h522r"]
+top_radius = 0.02
+bottom_radius = 0.02
+height = 0.06
+radial_segments = 16
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0457e"]
-
-[sub_resource type="BoxMesh" id="BoxMesh_rhuoe"]
-material = SubResource("StandardMaterial3D_0457e")
-size = Vector3(0.01, 0.01, 0.03)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lqmg0"]
-
-[sub_resource type="SphereMesh" id="SphereMesh_poa7a"]
-material = SubResource("StandardMaterial3D_lqmg0")
-radius = 0.015
-height = 0.03
-radial_segments = 15
-rings = 8
+[sub_resource type="CylinderMesh" id="CylinderMesh_fe1uw"]
+top_radius = 0.02
+bottom_radius = 0.02
+height = 0.1
 
 [sub_resource type="Resource" id="Resource_pt8a0"]
 script = ExtResource("4_1110c")
@@ -47,6 +42,7 @@ radius = 0.015
 
 [node name="Throttle" type="Node3D"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+script = ExtResource("1_ggwtq")
 
 [node name="Frame" type="StaticBody3D" parent="."]
 
@@ -59,32 +55,29 @@ transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, -7.630
 mesh = SubResource("BoxMesh_dfwlf")
 
 [node name="SliderOrigin" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.04, 0, 0.00198339)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.099946, 2.62032e-09, 0.00198339)
 
 [node name="XRToolsInteractableSlider" type="Node3D" parent="SliderOrigin"]
 script = ExtResource("1_5vjbw")
-slider_limit_max = 0.08
+slider_limit_max = 0.2
 
 [node name="SliderBody" type="StaticBody3D" parent="SliderOrigin/XRToolsInteractableSlider"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.0375797)
 
-[node name="BarShape" type="CollisionShape3D" parent="SliderOrigin/XRToolsInteractableSlider/SliderBody"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.02)
-shape = SubResource("BoxShape3D_jecxo")
-
 [node name="HandleShape" type="CollisionShape3D" parent="SliderOrigin/XRToolsInteractableSlider/SliderBody"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.75089e-05, -7.45058e-09, -0.000541404)
-shape = SubResource("SphereShape3D_cboox")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.75089e-05, -0.000525236, 0.0289617)
+shape = SubResource("CylinderShape3D_ak1nc")
 
 [node name="BarMesh" type="MeshInstance3D" parent="SliderOrigin/XRToolsInteractableSlider/SliderBody"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.02)
-mesh = SubResource("BoxMesh_rhuoe")
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 0.25, 0, -1, -1.09278e-08, 0, 8.86265e-10, 0.000275385)
+mesh = SubResource("CylinderMesh_h522r")
 
 [node name="HandleMesh" type="MeshInstance3D" parent="SliderOrigin/XRToolsInteractableSlider/SliderBody"]
-mesh = SubResource("SphereMesh_poa7a")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.000525229, 0.0295031)
+mesh = SubResource("CylinderMesh_fe1uw")
 
 [node name="GrabPointHandLeft" parent="SliderOrigin/XRToolsInteractableSlider/SliderBody/HandleMesh" instance=ExtResource("2_qsbaf")]
-transform = Transform3D(-0.818433, 0.0778529, -0.569304, -0.0639114, -0.996965, -0.0444569, -0.571037, 0, 0.820924, 0.0526598, -0.0482723, -0.0545822)
+transform = Transform3D(-0.753526, -0.262894, -0.602566, 0.20532, -0.964824, 0.164186, -0.624534, -6.28988e-08, 0.780998, 0.0364589, -0.0666344, -0.065562)
 hand_pose = SubResource("Resource_pt8a0")
 
 [node name="HandleOrigin" type="Node3D" parent="SliderOrigin/XRToolsInteractableSlider"]
@@ -95,10 +88,14 @@ collision_layer = 262144
 collision_mask = 0
 freeze = true
 script = ExtResource("2_hb8f6")
+snap_distance = 0.1
 picked_up_layer = 0
+release_mode = 1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="SliderOrigin/XRToolsInteractableSlider/HandleOrigin/XRToolsInteractableHandle"]
 shape = SubResource("SphereShape3D_e6iek")
 
 [node name="GrabPointRedirectLeft" parent="SliderOrigin/XRToolsInteractableSlider/HandleOrigin/XRToolsInteractableHandle" node_paths=PackedStringArray("target") instance=ExtResource("6_bnox4")]
 target = NodePath("../../../SliderBody/HandleMesh/GrabPointHandLeft")
+
+[connection signal="slider_moved" from="SliderOrigin/XRToolsInteractableSlider" to="." method="_on_throttle_slider_moved"]

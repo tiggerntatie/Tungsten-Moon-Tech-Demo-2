@@ -36,7 +36,6 @@ shape = SubResource("BoxShape3D_63e0r")
 transform = Transform3D(-4.37114e-08, 0, -1, -2.30926e-14, 1, 0, 1, 0, -4.37114e-08, 1.08654, 5.54487, -0.566513)
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
-transform = Transform3D(1, 2.30926e-14, -7.10543e-14, 0, 0.999999, -1.61559e-27, 7.10543e-15, 2.01948e-28, 0.999999, 0, 0, 0)
 far = 600000.0
 
 [node name="VRCommonShaderCache" parent="XROrigin3D/XRCamera3D" instance=ExtResource("3_m2ksy")]
@@ -70,13 +69,13 @@ fov = 37.8493
 far = 300000.0
 
 [node name="InstrumentPanel" parent="." instance=ExtResource("3_da1pl")]
-transform = Transform3D(-0.276959, 0.148034, -0.15453, 0.151618, 0.314105, 0.0291598, 0.151015, -0.0438671, -0.312682, 1.22267, 5.37564, -0.678727)
+transform = Transform3D(-0.310347, 0.154323, -0.048673, 0.151618, 0.314105, 0.0291598, 0.0565385, 0.00477134, -0.34537, 1.28147, 5.31345, -0.562522)
 
 [node name="SpotLight3D" type="SpotLight3D" parent="."]
-transform = Transform3D(0.319227, 0.283706, -0.904215, -0.058802, 0.958229, 0.279893, 0.945852, -0.0361798, 0.322575, 0.574802, 5.54455, -0.459084)
+transform = Transform3D(0.0833087, 0.352459, -0.932112, -0.064964, 0.935295, 0.347856, 0.994404, 0.0315743, 0.100815, 0.574802, 5.54278, -0.456192)
 layers = 4
 light_cull_mask = 4293918724
-spot_range = 1.07501
+spot_range = 1.05963
 spot_angle = 10.4289
 
 [node name="GroundRadar" type="RayCast3D" parent="."]
@@ -84,4 +83,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 5, 0)
 target_position = Vector3(0, -1000, 0)
 
 [node name="Throttle" parent="." instance=ExtResource("6_7of32")]
-transform = Transform3D(-0.309757, -0.201179, -0.929289, 0.949615, -0.0163544, -0.312992, 0.0477693, -0.979418, 0.196108, 1.20676, 5.54214, -0.709688)
+transform = Transform3D(-0.268748, -0.191108, -0.944062, 0.963162, -0.043508, -0.265378, 0.00964142, -0.980604, 0.19576, 1.1871, 5.52689, -0.769352)
+
+[connection signal="throttle_output_changed" from="Throttle" to="." method="_on_throttle_output_changed"]
