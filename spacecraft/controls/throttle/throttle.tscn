@@ -81,7 +81,7 @@ transform = Transform3D(-0.753526, -0.262894, -0.602566, 0.20532, -0.964824, 0.1
 hand_pose = SubResource("Resource_pt8a0")
 
 [node name="HandleOrigin" type="Node3D" parent="SliderOrigin/XRToolsInteractableSlider"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.0376041)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.0650348)
 
 [node name="XRToolsInteractableHandle" type="RigidBody3D" parent="SliderOrigin/XRToolsInteractableSlider/HandleOrigin"]
 collision_layer = 262144

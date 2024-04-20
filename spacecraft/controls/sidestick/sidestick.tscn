@@ -1,0 +1,115 @@
+[gd_scene load_steps=18 format=3 uid="uid://neklbt0jds8q"]
+
+[ext_resource type="Script" path="res://addons/godot-xr-tools/interactables/interactable_joystick.gd" id="1_qwgnm"]
+[ext_resource type="PackedScene" uid="uid://ctw7nbntd5pcj" path="res://addons/godot-xr-tools/objects/grab_points/grab_point_hand_right.tscn" id="2_lc13g"]
+[ext_resource type="Animation" uid="uid://daqddcrbpam0c" path="res://addons/godot-xr-tools/hands/animations/right/Grip 1.res" id="3_es5y4"]
+[ext_resource type="Script" path="res://addons/godot-xr-tools/hands/poses/hand_pose_settings.gd" id="4_c5fwa"]
+[ext_resource type="Script" path="res://addons/godot-xr-tools/interactables/interactable_handle.gd" id="5_reqxm"]
+[ext_resource type="PackedScene" uid="uid://ca3daqmpo0tua" path="res://addons/godot-xr-tools/objects/grab_points/grab_point_redirect.tscn" id="6_pmdlv"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_lbxbi"]
+size = Vector3(0.15, 0.05, 0.15)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vc1ik"]
+albedo_color = Color(0.0352941, 0.0352941, 0.0352941, 1)
+metallic = 0.8
+roughness = 0.74
+
+[sub_resource type="BoxMesh" id="BoxMesh_7xuyl"]
+material = SubResource("StandardMaterial3D_vc1ik")
+size = Vector3(0.15, 0.05, 0.15)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_g4l75"]
+height = 0.1
+radius = 0.01
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_0mcja"]
+radius = 0.02
+height = 0.1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jqwx5"]
+albedo_color = Color(0.172549, 0.172549, 0.172549, 1)
+metallic = 1.0
+roughness = 0.2
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_tpodn"]
+material = SubResource("StandardMaterial3D_jqwx5")
+top_radius = 0.01
+bottom_radius = 0.01
+height = 0.1
+radial_segments = 16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xchms"]
+albedo_color = Color(0.776471, 0.545098, 0, 1)
+metallic = 0.2
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_vde5a"]
+material = SubResource("StandardMaterial3D_xchms")
+radius = 0.02
+height = 0.1
+radial_segments = 16
+
+[sub_resource type="Resource" id="Resource_fvqlp"]
+script = ExtResource("4_c5fwa")
+open_pose = ExtResource("3_es5y4")
+closed_pose = ExtResource("3_es5y4")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_dovx5"]
+radius = 0.02
+height = 0.1
+
+[node name="SideStick" type="Node3D"]
+
+[node name="Frame" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Frame"]
+shape = SubResource("BoxShape3D_lbxbi")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Frame"]
+mesh = SubResource("BoxMesh_7xuyl")
+
+[node name="SideStickOrigin" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+
+[node name="XRToolsInteractableJoystick" type="Node3D" parent="SideStickOrigin"]
+script = ExtResource("1_qwgnm")
+default_on_release = true
+
+[node name="SideStickBody" type="StaticBody3D" parent="SideStickOrigin/XRToolsInteractableJoystick"]
+
+[node name="BarCollision" type="CollisionShape3D" parent="SideStickOrigin/XRToolsInteractableJoystick/SideStickBody"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0.07)
+shape = SubResource("CylinderShape3D_g4l75")
+
+[node name="HandleCollision" type="CollisionShape3D" parent="SideStickOrigin/XRToolsInteractableJoystick/SideStickBody"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0.16)
+shape = SubResource("CapsuleShape3D_0mcja")
+
+[node name="BarMesh" type="MeshInstance3D" parent="SideStickOrigin/XRToolsInteractableJoystick/SideStickBody"]
+transform = Transform3D(1, 0, 0, 0, 0.0239486, 0.999713, 0, -0.999713, 0.0239486, 0, 0, 0.07)
+mesh = SubResource("CylinderMesh_tpodn")
+
+[node name="HandleMesh" type="MeshInstance3D" parent="SideStickOrigin/XRToolsInteractableJoystick/SideStickBody"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0.16)
+mesh = SubResource("CapsuleMesh_vde5a")
+
+[node name="GrabPointHandRight" parent="SideStickOrigin/XRToolsInteractableJoystick/SideStickBody/HandleMesh" instance=ExtResource("2_lc13g")]
+transform = Transform3D(0.999918, -0.00517652, 0.0116706, -0.00505689, -0.999935, -0.0102569, 0.011723, 0.010197, -0.999879, -0.0023558, -0.0446524, 0.0752772)
+hand_pose = SubResource("Resource_fvqlp")
+
+[node name="HandleOrigin" type="Node3D" parent="SideStickOrigin/XRToolsInteractableJoystick"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.16)
+
+[node name="XRToolsInteractableHandle" type="RigidBody3D" parent="SideStickOrigin/XRToolsInteractableJoystick/HandleOrigin"]
+collision_layer = 262144
+collision_mask = 0
+freeze = true
+script = ExtResource("5_reqxm")
+picked_up_layer = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SideStickOrigin/XRToolsInteractableJoystick/HandleOrigin/XRToolsInteractableHandle"]
+transform = Transform3D(0.999999, 0.00115921, -0.00122099, -0.00121966, -0.00113471, -0.999999, -0.00116061, 0.999999, -0.00113328, 0, 0, 0)
+shape = SubResource("CapsuleShape3D_dovx5")
+
+[node name="GrabPointRedirect" parent="SideStickOrigin/XRToolsInteractableJoystick/HandleOrigin/XRToolsInteractableHandle" node_paths=PackedStringArray("target") instance=ExtResource("6_pmdlv")]
+target = NodePath("../../../SideStickBody/HandleMesh/GrabPointHandRight")

@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://c08vubwsc2swp"]
+[gd_scene load_steps=12 format=3 uid="uid://c08vubwsc2swp"]
 
 [ext_resource type="Script" path="res://spacecraft/spacecraft.gd" id="1_b8yyq"]
 [ext_resource type="ArrayMesh" uid="uid://1woisy38wlky" path="res://spacecraft/RocketModel.obj" id="2_o0qaw"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://btf05hjpw6k05" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_physics_hand_low.tscn" id="5_16q6j"]
 [ext_resource type="PackedScene" uid="uid://cn7xh5rtkwr8q" path="res://spacecraft/controls/throttle/throttle.tscn" id="6_7of32"]
 [ext_resource type="PackedScene" uid="uid://bft3xyxs31ci3" path="res://addons/godot-xr-tools/functions/function_pose_detector.tscn" id="6_bteek"]
+[ext_resource type="PackedScene" uid="uid://neklbt0jds8q" path="res://spacecraft/controls/sidestick/sidestick.tscn" id="10_e5xbv"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_63e0r"]
 size = Vector3(7.7, 7.7, 7.7)
@@ -84,5 +85,8 @@ target_position = Vector3(0, -1000, 0)
 
 [node name="Throttle" parent="." instance=ExtResource("6_7of32")]
 transform = Transform3D(-0.268748, -0.191108, -0.944062, 0.963162, -0.043508, -0.265378, 0.00964142, -0.980604, 0.19576, 1.1871, 5.52689, -0.769352)
+
+[node name="SideStick" parent="." instance=ExtResource("10_e5xbv")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.18881, 5.21135, -0.322783)
 
 [connection signal="throttle_output_changed" from="Throttle" to="." method="_on_throttle_output_changed"]
