@@ -15,7 +15,6 @@ normal_texture = ExtResource("4_4w4eg")
 uv1_scale = Vector3(100, 100, 100)
 
 [node name="SmartMoon" type="Node3D"]
-transform = Transform3D(1000, 0, 0, 0, 1000, 0, 0, 0, 1000, 0, 0, 0)
 script = ExtResource("1_xw7yp")
 moon_data = ExtResource("2_mwm2u")
 chunk_resolution_power = 7

@@ -18,7 +18,8 @@ var cubic_position : Vector3 = Vector3.ZERO
 
 func _ready():
 	reset_high_precision()
-	start_timer()
+	if not Engine.is_editor_hint():
+		start_timer()
 
 func reset_high_precision():
 	#print("chunk: reset_high_precision")
@@ -27,7 +28,7 @@ func reset_high_precision():
 	evaluate_precision()
 
 func evaluate_precision():
-	var high_precision = global_position.length() < size*moon.scale.x
+	var high_precision = not Engine.is_editor_hint() and global_position.length() < size*moon.scale.x
 	#print(global_position, " ", size, " ", moon.scale.x)
 	if high_precision:
 		#print("is high precision")
