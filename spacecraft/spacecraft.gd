@@ -60,6 +60,8 @@ var thrust : float = 0.0
 var dv_last_position : DVector3
 var last_xz_radius : float
 var altitude_agl : float = NAN
+var altitude_radar : float = NAN
+var terrain_altitude : float = NAN
 #var v_altitude_agl : Vector3 = Vector3.INF
 
 # UI State 
@@ -110,6 +112,7 @@ func reset_spacecraft():
 	ui_rotation = true
 	ui_thrust_lock = true
 	ui_alternate_control = false
+	reset_viewpoint()
 
 # reset the pilot viewpoint
 func reset_viewpoint():
@@ -120,6 +123,7 @@ func reset_viewpoint():
 	else:
 		YAWPIVOT.transform = reset_view_yaw
 		PITCHPIVOT.transform = reset_view_pitch
+		XRORIGIN.visible = false
 
 # Set spacecraft logical position to lat/long and heading (cw from N) (all in degrees)
 # Also sets rotation to be level with local ground, pointing at heading
@@ -140,7 +144,9 @@ func set_logical_position(lat: float, lon: float, radius: float, altitude: float
 	reset_spacecraft()
 	MOON.set_from_logical_position(self)
 
-
+# get the current computed height above "msl"
+func get_altitude_msl() -> float:
+	return dv_logical_position.length()-MOON.physical_radius
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -179,14 +185,19 @@ func _process(delta):
 		XRCAMERA.far = view_distance
 		
 	
+	var altitude_msl = get_altitude_msl()
 	GROUNDRADAR.target_position = to_local(MOON.position).normalized()*1000/MOON.scale_factor
 	if GROUNDRADAR.is_colliding():
 		v_impact_point = GROUNDRADAR.get_collision_point()
 		v_impact_normal = GROUNDRADAR.get_collision_normal()
-		altitude_agl = GROUNDRADAR.to_local(v_impact_point).length()-GROUNDRADAR.position.y
+		altitude_radar = GROUNDRADAR.to_local(v_impact_point).length()-GROUNDRADAR.position.y
+		terrain_altitude = get_altitude_msl() - altitude_radar
 	else:
-		altitude_agl = NAN
+		altitude_radar = NAN
 
+	if not is_nan(altitude_radar):
+		altitude_agl = altitude_msl - terrain_altitude
+	
 	# compute an impact restoring force
 	if altitude_agl < -2.0:
 		# too much. reload the scenario!
@@ -279,7 +290,7 @@ func _process(delta):
 	var hvel = dv_logical_position.vector3().normalized().cross(dv_logical_velocity.vector3()).length()
 	HUDVEL.text = str(hvel).pad_decimals(1) + " m/s"
 	if is_nan(altitude_agl):
-		HUDALT.text = str((dv_logical_position.length()-MOON.physical_radius)/1000.0).pad_decimals(2) + " km"
+		HUDALT.text = str(altitude_msl/1000.0).pad_decimals(2) + " km"
 	else:
 		HUDALT.text = str(altitude_agl).pad_decimals(1) + " m"
 	HUDTHRUST.text = str(v_thrust.y).pad_decimals(0) + " N"
