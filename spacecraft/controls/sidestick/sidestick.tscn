@@ -1,5 +1,6 @@
-[gd_scene load_steps=18 format=3 uid="uid://neklbt0jds8q"]
+[gd_scene load_steps=19 format=3 uid="uid://neklbt0jds8q"]
 
+[ext_resource type="Script" path="res://spacecraft/controls/sidestick/sidestick.gd" id="1_iv445"]
 [ext_resource type="Script" path="res://addons/godot-xr-tools/interactables/interactable_joystick.gd" id="1_qwgnm"]
 [ext_resource type="PackedScene" uid="uid://ctw7nbntd5pcj" path="res://addons/godot-xr-tools/objects/grab_points/grab_point_hand_right.tscn" id="2_lc13g"]
 [ext_resource type="Animation" uid="uid://daqddcrbpam0c" path="res://addons/godot-xr-tools/hands/animations/right/Grip 1.res" id="3_es5y4"]
@@ -11,7 +12,7 @@
 size = Vector3(0.15, 0.05, 0.15)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vc1ik"]
-albedo_color = Color(0.0352941, 0.0352941, 0.0352941, 1)
+albedo_color = Color(0.145098, 0.145098, 0.145098, 1)
 metallic = 0.8
 roughness = 0.74
 
@@ -59,6 +60,7 @@ radius = 0.02
 height = 0.1
 
 [node name="SideStick" type="Node3D"]
+script = ExtResource("1_iv445")
 
 [node name="Frame" type="StaticBody3D" parent="."]
 
@@ -66,6 +68,7 @@ height = 0.1
 shape = SubResource("BoxShape3D_lbxbi")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Frame"]
+layers = 4
 mesh = SubResource("BoxMesh_7xuyl")
 
 [node name="SideStickOrigin" type="Node3D" parent="."]
@@ -87,10 +90,12 @@ shape = SubResource("CapsuleShape3D_0mcja")
 
 [node name="BarMesh" type="MeshInstance3D" parent="SideStickOrigin/XRToolsInteractableJoystick/SideStickBody"]
 transform = Transform3D(1, 0, 0, 0, 0.0239486, 0.999713, 0, -0.999713, 0.0239486, 0, 0, 0.07)
+layers = 4
 mesh = SubResource("CylinderMesh_tpodn")
 
 [node name="HandleMesh" type="MeshInstance3D" parent="SideStickOrigin/XRToolsInteractableJoystick/SideStickBody"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0.16)
+layers = 4
 mesh = SubResource("CapsuleMesh_vde5a")
 
 [node name="GrabPointHandRight" parent="SideStickOrigin/XRToolsInteractableJoystick/SideStickBody/HandleMesh" instance=ExtResource("2_lc13g")]
@@ -106,6 +111,7 @@ collision_mask = 0
 freeze = true
 script = ExtResource("5_reqxm")
 picked_up_layer = 0
+release_mode = 1
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="SideStickOrigin/XRToolsInteractableJoystick/HandleOrigin/XRToolsInteractableHandle"]
 transform = Transform3D(0.999999, 0.00115921, -0.00122099, -0.00121966, -0.00113471, -0.999999, -0.00116061, 0.999999, -0.00113328, 0, 0, 0)
@@ -113,3 +119,7 @@ shape = SubResource("CapsuleShape3D_dovx5")
 
 [node name="GrabPointRedirect" parent="SideStickOrigin/XRToolsInteractableJoystick/HandleOrigin/XRToolsInteractableHandle" node_paths=PackedStringArray("target") instance=ExtResource("6_pmdlv")]
 target = NodePath("../../../SideStickBody/HandleMesh/GrabPointHandRight")
+
+[connection signal="grabbed" from="SideStickOrigin/XRToolsInteractableJoystick" to="." method="_on_sidestick_grabbed"]
+[connection signal="joystick_moved" from="SideStickOrigin/XRToolsInteractableJoystick" to="." method="_on_sidestick_moved"]
+[connection signal="released" from="SideStickOrigin/XRToolsInteractableJoystick" to="." method="_on_sidestick_released"]
