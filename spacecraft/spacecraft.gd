@@ -32,6 +32,9 @@ const SPRING_DAMP : Vector3 = Vector3(10000, 10000, 10000)
 @onready var YAWPIVOT : Node3D = $YawPivot
 @onready var PITCHPIVOT : Node3D = $YawPivot/PitchPivot
 @onready var THROTTLE : Node3D = $Throttle
+@onready var SIDESTICK : Node3D = $SideStick
+@onready var ALTCTRLBUTTON : Node3D = $AltCtrlButton
+@onready var STABILIZERBUTTON : Node3D = $StabilizerButton
 @onready var dv_logical_position := DVector3.new()
 @onready var dv_logical_velocity := DVector3.new(0,0,0)
 @onready var dv_gravity_force := DVector3.new()
@@ -41,14 +44,6 @@ const SPRING_DAMP : Vector3 = Vector3(10000, 10000, 10000)
 @onready var reset_view_yaw : Transform3D = YAWPIVOT.transform
 @onready var reset_view_pitch : Transform3D = PITCHPIVOT.transform
 
-@onready var damp_mode = false:
-	set(val):
-		damp_mode = val
-		if damp_mode:
-			angular_damp = 1
-		else:
-			angular_damp = 0
-		
 
 # projected impact point in global coordinates
 var v_impact_point := Vector3.INF
@@ -64,11 +59,14 @@ var altitude_radar : float = NAN
 var terrain_altitude : float = NAN
 #var v_altitude_agl : Vector3 = Vector3.INF
 
+# Sidestick State
+var sidestick_x : float = 0.0
+var sidestick_y : float = 0.0
+
 # UI State 
 var ui_in : bool
 var ui_rotation : bool
 var ui_thrust_lock : bool
-var ui_alternate_control : bool
 	
 # Calculate new position and velocity for each step
 # 4th order runge kutte integration
@@ -106,12 +104,12 @@ func reset_spacecraft():
 	thrust = 0.0
 	v_thrust = Vector3.ZERO
 	v_torque = Vector3.ZERO
-	damp_mode = true
 	angular_velocity = Vector3.ZERO
 	ui_in = false
 	ui_rotation = true
 	ui_thrust_lock = true
-	ui_alternate_control = false
+	STABILIZERBUTTON.set_button(false)	# turn light off
+	STABILIZERBUTTON.press_button()	# now toggle it on and handle event
 	reset_viewpoint()
 
 # reset the pilot viewpoint
@@ -197,13 +195,15 @@ func _process(delta):
 
 	if not is_nan(altitude_radar):
 		altitude_agl = altitude_msl - terrain_altitude
+	else:
+		altitude_agl = NAN
 	
 	# compute an impact restoring force
 	if altitude_agl < -2.0:
 		# too much. reload the scenario!
 		LEVEL.scenario_input(false, false, true)
 	if altitude_agl <= 0.0:
-		damp_mode = true
+		STABILIZERBUTTON.set_button(true)
 		if dv_captured_logical_position == null:
 			dv_captured_logical_position = dv_logical_position.copy()
 			dv_captured_logical_position.rotate_y(-LEVEL.current_moon_rotation) # UNrotate
@@ -258,7 +258,7 @@ func _process(delta):
 			var horiz_vel = JOY_SENS * Input.get_axis("Viewpoint Left", "Viewpoint Right")
 			var forward_vel : float = 0.0
 			var upward_vel : float = 0.0
-			if ui_alternate_control:
+			if ALTCTRLBUTTON.get_button():
 				upward_vel = JOY_SENS * Input.get_axis("Viewpoint Down", "Viewpoint Up")
 			else:
 				forward_vel = JOY_SENS * Input.get_axis("Viewpoint Backward", "Viewpoint Forward")
@@ -276,13 +276,17 @@ func _process(delta):
 				new_eye.y < (-5.0/6.0)*new_eye.x + 6.675):
 				$YawPivot.position = new_eye
 		else:
-			v_torque.z += Input.get_axis("Pitch Forward", "Pitch Backward")
-			v_torque.y += Input.get_axis("Yaw Right Always", "Yaw Left Always")
-			if ui_alternate_control:
-				v_torque.y += Input.get_axis("Yaw Right", "Yaw Left")
+			if ALTCTRLBUTTON.get_button():
+				SIDESTICK.set_sidestick(-Input.get_axis("Yaw Right", "Yaw Left"), Input.get_axis("Pitch Forward", "Pitch Backward"))
 			else:
-				v_torque.x += -Input.get_axis("Roll Right", "Roll Left")
+				SIDESTICK.set_sidestick(-Input.get_axis("Roll Right", "Roll Left"), Input.get_axis("Pitch Forward", "Pitch Backward"))
 			# oddly, this has to be here to keep the ship rotating		
+		v_torque.y += Input.get_axis("Yaw Right Always", "Yaw Left Always")
+		v_torque.z += sidestick_y
+		if ALTCTRLBUTTON.get_button():
+			v_torque.y -= sidestick_x
+		else:
+			v_torque.x += sidestick_x
 		apply_torque(basis * v_torque * delta * 10000)
 	
 				
@@ -295,23 +299,21 @@ func _process(delta):
 		HUDALT.text = str(altitude_agl).pad_decimals(1) + " m"
 	HUDTHRUST.text = str(v_thrust.y).pad_decimals(0) + " N"
 	HUDFUEL.value = 100.0*fuel/FULL_FUEL
-	HUDSTAB.visible = damp_mode
 	
 func increase_thrust(step : float):
 	ui_thrust_lock = true
 	thrust = clamp(thrust+step*THRUST_STEP_MULTIPLIER, 0.0, 1.0)
-	THROTTLE._set_throttle_slider(thrust)
+	THROTTLE.set_throttle_slider(thrust)
  
 func decrease_thrust(step : float):
 	ui_thrust_lock = true
 	thrust = clamp(thrust-step*THRUST_STEP_MULTIPLIER, 0.0, 1.0)
-	THROTTLE._set_throttle_slider(thrust)
+	THROTTLE.set_throttle_slider(thrust)
 
 func set_thrust(value : float, lock : bool = true):
 	ui_thrust_lock = lock
 	thrust = value
-	THROTTLE._set_throttle_slider(thrust)
-	
+	THROTTLE.set_throttle_slider(thrust)
 
 func _on_throttle_output_changed(value):
 	if value == 0.0:
@@ -319,6 +321,16 @@ func _on_throttle_output_changed(value):
 	else:
 		v_thrust.y = THRUST_MIN + (THRUST_MAX - THRUST_MIN)*value
 
+func _on_sidestick_output_changed(x, y):
+	sidestick_x = x
+	sidestick_y = y
+
+## Manage the "Stabilizer" button state
+func _on_stabilizer_pressed():
+	if STABILIZERBUTTON.get_button():
+		angular_damp = 1
+	else:
+		angular_damp = 0
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("Toggle In Out"):
@@ -327,12 +339,10 @@ func _input(event: InputEvent) -> void:
 		ui_rotation = not ui_rotation
 	elif event.is_action_pressed("Toggle Thrust Lock"):
 		ui_thrust_lock = not ui_thrust_lock
-	elif event.is_action_pressed("Alternate Control"):
-		ui_alternate_control = true
-	elif event.is_action_released("Alternate Control"):
-		ui_alternate_control = false
+	elif Input.is_action_just_pressed("Alternate Control"):
+		ALTCTRLBUTTON.press_button()
 	elif event.is_action_pressed("Rotation Damp Toggle"):
-		damp_mode = not damp_mode
+		STABILIZERBUTTON.press_button()
 			
 	elif event is InputEventMouseMotion:
 		$YawPivot.rotation.y -= MOUSE_SENS * event.relative.x
@@ -342,6 +352,3 @@ func _input(event: InputEvent) -> void:
 		get_tree().quit()
 	elif Input.is_action_just_pressed("ui_cancel"):
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)	
-
-		
-

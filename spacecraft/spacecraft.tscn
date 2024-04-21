@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://c08vubwsc2swp"]
+[gd_scene load_steps=13 format=3 uid="uid://c08vubwsc2swp"]
 
 [ext_resource type="Script" path="res://spacecraft/spacecraft.gd" id="1_b8yyq"]
 [ext_resource type="ArrayMesh" uid="uid://1woisy38wlky" path="res://spacecraft/RocketModel.obj" id="2_o0qaw"]
@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://cn7xh5rtkwr8q" path="res://spacecraft/controls/throttle/throttle.tscn" id="6_7of32"]
 [ext_resource type="PackedScene" uid="uid://bft3xyxs31ci3" path="res://addons/godot-xr-tools/functions/function_pose_detector.tscn" id="6_bteek"]
 [ext_resource type="PackedScene" uid="uid://neklbt0jds8q" path="res://spacecraft/controls/sidestick/sidestick.tscn" id="10_e5xbv"]
+[ext_resource type="PackedScene" uid="uid://bhsiske1duhng" path="res://spacecraft/controls/PanelButton/panel_button.tscn" id="11_jspjg"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_63e0r"]
 size = Vector3(7.7, 7.7, 7.7)
@@ -58,11 +59,18 @@ tracker = &"right_hand"
 
 [node name="RightPhysicsHand" parent="XROrigin3D/XRRight" instance=ExtResource("5_16q6j")]
 
+[node name="XRToolsFunctionPickup" type="Node3D" parent="XROrigin3D/XRRight"]
+script = ExtResource("4_ltj2u")
+grab_collision_mask = 327684
+ranged_enable = false
+
+[node name="FunctionPoseDetector" parent="XROrigin3D/XRRight" instance=ExtResource("6_bteek")]
+
 [node name="YawPivot" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.03445, 5.706, -0.574646)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.83635, 5.62812, -0.574646)
 
 [node name="PitchPivot" type="Node3D" parent="YawPivot"]
-transform = Transform3D(0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0, 0, 1, -0.130496, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="YawPivot/PitchPivot"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
@@ -73,11 +81,11 @@ far = 300000.0
 transform = Transform3D(-0.310347, 0.154323, -0.048673, 0.151618, 0.314105, 0.0291598, 0.0565385, 0.00477134, -0.34537, 1.28147, 5.31345, -0.562522)
 
 [node name="SpotLight3D" type="SpotLight3D" parent="."]
-transform = Transform3D(0.0833087, 0.352459, -0.932112, -0.064964, 0.935295, 0.347856, 0.994404, 0.0315743, 0.100815, 0.574802, 5.54278, -0.456192)
+transform = Transform3D(0.167574, 0.353867, -0.920161, -0.064964, 0.935295, 0.347856, 0.983717, 0.00148564, 0.17972, 0.574802, 5.54278, -0.456192)
 layers = 4
 light_cull_mask = 4293918724
-spot_range = 1.05963
-spot_angle = 10.4289
+spot_range = 1.038
+spot_angle = 45.06
 
 [node name="GroundRadar" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 5, 0)
@@ -89,4 +97,16 @@ transform = Transform3D(-0.268748, -0.191108, -0.944062, 0.963162, -0.043508, -0
 [node name="SideStick" parent="." instance=ExtResource("10_e5xbv")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.18881, 5.21135, -0.322783)
 
+[node name="AltCtrlButton" parent="." instance=ExtResource("11_jspjg")]
+transform = Transform3D(0.186862, -0.264385, -0.946141, 0.0512264, 0.964417, -0.259375, 0.98105, 0, 0.193757, 1.24134, 5.68063, -0.368222)
+label_text = "Alternate Ctrl"
+layers = 4
+
+[node name="StabilizerButton" parent="." instance=ExtResource("11_jspjg")]
+transform = Transform3D(0.187533, -0.263709, -0.946197, 0.0505527, 0.964602, -0.258819, 0.980956, 0.000704471, 0.194226, 1.24905, 5.64931, -0.368)
+label_text = "Stabilizer"
+layers = 4
+
 [connection signal="throttle_output_changed" from="Throttle" to="." method="_on_throttle_output_changed"]
+[connection signal="sidestick_output_changed" from="SideStick" to="." method="_on_sidestick_output_changed"]
+[connection signal="button_pressed" from="StabilizerButton" to="." method="_on_stabilizer_pressed"]
