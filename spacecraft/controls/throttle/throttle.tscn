@@ -70,15 +70,24 @@ shape = SubResource("CylinderShape3D_ak1nc")
 
 [node name="BarMesh" type="MeshInstance3D" parent="SliderOrigin/XRToolsInteractableSlider/SliderBody"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 0.25, 0, -1, -1.09278e-08, 0, 8.86265e-10, 0.000275385)
+layers = 4
 mesh = SubResource("CylinderMesh_h522r")
 
 [node name="HandleMesh" type="MeshInstance3D" parent="SliderOrigin/XRToolsInteractableSlider/SliderBody"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.000525229, 0.0295031)
+layers = 4
 mesh = SubResource("CylinderMesh_fe1uw")
 
 [node name="GrabPointHandLeft" parent="SliderOrigin/XRToolsInteractableSlider/SliderBody/HandleMesh" instance=ExtResource("2_qsbaf")]
 transform = Transform3D(-0.753526, -0.262894, -0.602566, 0.20532, -0.964824, 0.164186, -0.624534, -6.28988e-08, 0.780998, 0.0364589, -0.0666344, -0.065562)
 hand_pose = SubResource("Resource_pt8a0")
+
+[node name="Label3D" type="Label3D" parent="SliderOrigin/XRToolsInteractableSlider/SliderBody/HandleMesh"]
+transform = Transform3D(-3.09086e-08, 0.707107, 0.707107, -1, -4.37114e-08, 0, 3.09086e-08, -0.707107, 0.707107, 0.0152917, -6.40284e-10, 0.014627)
+pixel_size = 0.0005
+modulate = Color(0.615686, 0.615686, 0.615686, 1)
+text = "THROTTLE"
+outline_size = 2
 
 [node name="HandleOrigin" type="Node3D" parent="SliderOrigin/XRToolsInteractableSlider"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.0650348)

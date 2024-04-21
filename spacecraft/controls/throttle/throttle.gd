@@ -14,7 +14,7 @@ func _on_throttle_slider_moved(position):
 	throttle_output_changed.emit(value)
 
 # Set the throttle lever to position corresponding to thrust 0.0 --> 1.0
-func _set_throttle_slider(value):
+func set_throttle_slider(value):
 	var set_value := 0.0
 	if value > 0.0:
 		set_value = value*(max_position-dead_band) + dead_band
