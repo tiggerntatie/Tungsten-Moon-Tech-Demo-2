@@ -67,6 +67,7 @@ var sidestick_y : float = 0.0
 var ui_in : bool
 var ui_rotation : bool
 var ui_thrust_lock : bool
+var mouse_button_2 : bool
 	
 # Calculate new position and velocity for each step
 # 4th order runge kutte integration
@@ -148,7 +149,7 @@ func get_altitude_msl() -> float:
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	#Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	dv_logical_position =  MOON.get_logical_position(self)
 	dv_gravity_force = DVector3.Mul(mass, MOON.get_acceleration(dv_logical_position))
 	dv_last_position = dv_logical_position.copy()
@@ -339,16 +340,16 @@ func _input(event: InputEvent) -> void:
 		ui_rotation = not ui_rotation
 	elif event.is_action_pressed("Toggle Thrust Lock"):
 		ui_thrust_lock = not ui_thrust_lock
-	elif Input.is_action_just_pressed("Alternate Control"):
+	elif event.is_action_pressed("Alternate Control"):
 		ALTCTRLBUTTON.press_button()
 	elif event.is_action_pressed("Rotation Damp Toggle"):
 		STABILIZERBUTTON.press_button()
-			
-	elif event is InputEventMouseMotion:
+	elif (event is InputEventMouseButton and event.get_button_index() == MOUSE_BUTTON_RIGHT):
+		mouse_button_2 = event.is_pressed()
+	elif event is InputEventMouseMotion and mouse_button_2:
 		$YawPivot.rotation.y -= MOUSE_SENS * event.relative.x
 		$YawPivot/PitchPivot.rotation.z -= MOUSE_SENS * event.relative.y
 		$YawPivot/PitchPivot.rotation.z = clamp($YawPivot/PitchPivot.rotation.z, -PI/2, PI/2)
 	elif event.is_action_pressed("Quit"):
 		get_tree().quit()
-	elif Input.is_action_just_pressed("ui_cancel"):
-		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)	
+
