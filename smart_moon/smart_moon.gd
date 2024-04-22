@@ -25,6 +25,8 @@ extends Node3D
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	if not Engine.is_editor_hint():
+		LEVEL =  get_node("/root/Level")
 	on_data_changed()
 			
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -44,7 +46,7 @@ const rhoW = 19250.0 # kg/m^3
 const SHRINK_ALTITUDE = 10000 # meters above ground
 const SHRINK_FACTOR = 4
 const MOON_SCALE = 1000	
-@onready var LEVEL : Node3D = get_node("/root/Level")
+var LEVEL : Node3D
 @onready var physical_radius = $".".moon_data.radius*1000
 @onready var LogicalM =  rhoW*(PI*4/3)*pow(physical_radius,3)
 var scale_factor : float = 1.0
