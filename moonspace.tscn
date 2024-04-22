@@ -93,7 +93,6 @@ directional_shadow_mode = 0
 directional_shadow_max_distance = 1000.0
 
 [node name="SmartMoon" parent="." instance=ExtResource("6_co76x")]
-transform = Transform3D(1000, 0, 0, 0, 1000, 0, 0, 0, 1000, 0, 0, 0)
 
 [node name="Spacecraft" parent="." instance=ExtResource("5_4lifu")]
 collision_layer = 0
