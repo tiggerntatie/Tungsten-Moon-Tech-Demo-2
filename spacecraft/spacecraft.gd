@@ -109,6 +109,7 @@ func reset_spacecraft():
 	ui_in = false
 	ui_rotation = true
 	ui_thrust_lock = true
+	altitude_agl = NAN
 	STABILIZERBUTTON.set_button(false)	# turn light off
 	STABILIZERBUTTON.press_button()	# now toggle it on and handle event
 	reset_viewpoint()
@@ -203,30 +204,34 @@ func _process(delta):
 	if altitude_agl < -2.0:
 		# too much. reload the scenario!
 		LEVEL.scenario_input(false, false, true)
-	if altitude_agl <= 0.0:
+	elif altitude_agl <= 0.0:
 		STABILIZERBUTTON.set_button(true)
 		if dv_captured_logical_position == null:
 			dv_captured_logical_position = dv_logical_position.copy()
 			dv_captured_logical_position.rotate_y(-LEVEL.current_moon_rotation) # UNrotate
 		var dv_captured = dv_captured_logical_position.copy()
 		dv_captured.rotate_y(LEVEL.current_moon_rotation)
-		var dv_position_delta = DVector3.Sub(dv_logical_position, dv_captured)
+		# we haven't done a physics cycle yet, but we need to estimate a restoring force based on 
+		# the current velocity to get a projected current position. This doesn't matter if the delta
+		# is small, but when it glitches and becomes large, it is essential!
+		var dv_estimated_logical_position : DVector3 = DVector3.Add(dv_logical_position, DVector3.Mul(delta, dv_logical_velocity))
+		var dv_position_delta = DVector3.Sub(dv_estimated_logical_position, dv_captured)
 		# too much spring deflection.. reload scenario
 		if dv_position_delta.length() > 1.0:
 			LEVEL.scenario_input(false, false, true)
-		
-		var dv_restoring_force = DVector3.Mul(-SPRING_K.y, dv_position_delta)
-		var dv_local_velocity = DVector3.Sub(dv_logical_velocity, get_landed_velocity(dv_logical_position, dv_logical_position.xz_length(), LEVEL.moon_axis_rate))
-		# damping force (kills oscillations)
-		dv_restoring_force.add(DVector3.Mul(-SPRING_DAMP.y, dv_local_velocity))
-		# rotate to match surface 
-		var v_crossed = (basis*Vector3.UP).cross(v_impact_normal)
-		# this torque is computed in global space:
-		apply_torque(v_crossed * delta * 100000)
+		else:
+			var dv_restoring_force = DVector3.Mul(-SPRING_K.y, dv_position_delta)
+			var dv_local_velocity = DVector3.Sub(dv_logical_velocity, get_landed_velocity(dv_logical_position, dv_logical_position.xz_length(), LEVEL.moon_axis_rate))
+			# damping force (kills oscillations)
+			dv_restoring_force.add(DVector3.Mul(-SPRING_DAMP.y, dv_local_velocity))
+			# rotate to match surface 
+			var v_crossed = (basis*Vector3.UP).cross(v_impact_normal)
+			# this torque is computed in global space:
+			apply_torque(v_crossed * delta * 100000)
 
-		#print("restoring force: ", v_restoring_force)
-		v_thrust_global += dv_restoring_force.vector3()
-	elif altitude_agl > 0.0:
+			#print("restoring force: ", v_restoring_force)
+			v_thrust_global += dv_restoring_force.vector3()
+	else: # agl is undefined or above zero
 		dv_captured_logical_position = null
 
 
