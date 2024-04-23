@@ -3,40 +3,79 @@
 [sub_resource type="SystemFont" id="SystemFont_3k1r4"]
 
 [node name="InstrumentCanvas" type="CanvasLayer"]
+metadata/_edit_vertical_guides_ = [795.0]
 
 [node name="L_Altitude" type="Label" parent="."]
 offset_left = 50.0
 offset_top = 34.0
-offset_right = 385.0
+offset_right = 186.0
 offset_bottom = 122.0
 theme_override_fonts/font = SubResource("SystemFont_3k1r4")
 theme_override_font_sizes/font_size = 64
-text = "altitude: "
+text = "alt"
 uppercase = true
 
 [node name="ALT" type="Label" parent="L_Altitude"]
 layout_mode = 1
-offset_left = 369.0
-offset_right = 483.0
+offset_left = 299.0
+offset_right = 413.0
 offset_bottom = 88.0
 theme_override_fonts/font = SubResource("SystemFont_3k1r4")
 theme_override_font_sizes/font_size = 64
 uppercase = true
 
-[node name="L_Velocity" type="Label" parent="."]
+[node name="L_RAltitude" type="Label" parent="."]
 offset_left = 50.0
 offset_top = 122.0
-offset_right = 364.0
+offset_right = 239.0
 offset_bottom = 210.0
 theme_override_fonts/font = SubResource("SystemFont_3k1r4")
 theme_override_font_sizes/font_size = 64
-text = "hor. vel:"
+text = "r. alt"
 uppercase = true
 
-[node name="VEL" type="Label" parent="L_Velocity"]
+[node name="RALT" type="Label" parent="L_RAltitude"]
+layout_mode = 1
+offset_left = 299.0
+offset_right = 413.0
+offset_bottom = 88.0
+theme_override_fonts/font = SubResource("SystemFont_3k1r4")
+theme_override_font_sizes/font_size = 64
+uppercase = true
+
+[node name="L_VSpeed" type="Label" parent="."]
+offset_left = 50.0
+offset_top = 210.0
+offset_right = 239.0
+offset_bottom = 298.0
+theme_override_fonts/font = SubResource("SystemFont_3k1r4")
+theme_override_font_sizes/font_size = 64
+text = "v speed"
+uppercase = true
+
+[node name="VVEL" type="Label" parent="L_VSpeed"]
+layout_mode = 1
+offset_left = 299.0
+offset_right = 413.0
+offset_bottom = 88.0
+theme_override_fonts/font = SubResource("SystemFont_3k1r4")
+theme_override_font_sizes/font_size = 64
+uppercase = true
+
+[node name="L_HSpeed" type="Label" parent="."]
+offset_left = 50.0
+offset_top = 298.0
+offset_right = 330.0
+offset_bottom = 386.0
+theme_override_fonts/font = SubResource("SystemFont_3k1r4")
+theme_override_font_sizes/font_size = 64
+text = "h speed"
+uppercase = true
+
+[node name="HVEL" type="Label" parent="L_HSpeed"]
 layout_mode = 0
-offset_left = 362.0
-offset_right = 476.0
+offset_left = 299.0
+offset_right = 413.0
 offset_bottom = 88.0
 theme_override_fonts/font = SubResource("SystemFont_3k1r4")
 theme_override_font_sizes/font_size = 64
@@ -44,9 +83,9 @@ uppercase = true
 
 [node name="L_Thrust" type="Label" parent="."]
 offset_left = 50.0
-offset_top = 210.0
+offset_top = 386.0
 offset_right = 329.0
-offset_bottom = 298.0
+offset_bottom = 474.0
 size_flags_horizontal = 0
 size_flags_vertical = 8
 theme_override_fonts/font = SubResource("SystemFont_3k1r4")
@@ -57,8 +96,8 @@ uppercase = true
 
 [node name="THRUST" type="Label" parent="L_Thrust"]
 layout_mode = 1
-offset_left = 369.0
-offset_right = 483.0
+offset_left = 299.0
+offset_right = 413.0
 offset_bottom = 88.0
 theme_override_fonts/font = SubResource("SystemFont_3k1r4")
 theme_override_font_sizes/font_size = 64
@@ -66,9 +105,9 @@ uppercase = true
 
 [node name="L_Fuel" type="Label" parent="."]
 offset_left = 50.0
-offset_top = 298.0
+offset_top = 474.0
 offset_right = 221.0
-offset_bottom = 386.0
+offset_bottom = 562.0
 size_flags_horizontal = 0
 size_flags_vertical = 8
 theme_override_fonts/font = SubResource("SystemFont_3k1r4")
@@ -79,9 +118,47 @@ uppercase = true
 
 [node name="FUEL" type="ProgressBar" parent="L_Fuel"]
 layout_mode = 1
-offset_left = 369.0
-offset_right = 626.0
+offset_left = 299.0
+offset_right = 556.0
 offset_bottom = 92.0
 theme_override_fonts/font = SubResource("SystemFont_3k1r4")
 theme_override_font_sizes/font_size = 64
 value = 50.0
+
+[node name="L_OrbitApoapsis" type="Label" parent="."]
+offset_left = 50.0
+offset_top = 562.0
+offset_right = 300.0
+offset_bottom = 650.0
+theme_override_fonts/font = SubResource("SystemFont_3k1r4")
+theme_override_font_sizes/font_size = 64
+text = "a. alt"
+uppercase = true
+
+[node name="AALT" type="Label" parent="L_OrbitApoapsis"]
+layout_mode = 1
+offset_left = 299.0
+offset_right = 413.0
+offset_bottom = 88.0
+theme_override_fonts/font = SubResource("SystemFont_3k1r4")
+theme_override_font_sizes/font_size = 64
+uppercase = true
+
+[node name="L_OrbitPeriapsis" type="Label" parent="."]
+offset_left = 50.0
+offset_top = 650.0
+offset_right = 330.0
+offset_bottom = 738.0
+theme_override_fonts/font = SubResource("SystemFont_3k1r4")
+theme_override_font_sizes/font_size = 64
+text = "p. alt"
+uppercase = true
+
+[node name="PALT" type="Label" parent="L_OrbitPeriapsis"]
+layout_mode = 0
+offset_left = 299.0
+offset_right = 413.0
+offset_bottom = 88.0
+theme_override_fonts/font = SubResource("SystemFont_3k1r4")
+theme_override_font_sizes/font_size = 64
+uppercase = true

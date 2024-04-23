@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://c08vubwsc2swp"]
+[gd_scene load_steps=14 format=3 uid="uid://c08vubwsc2swp"]
 
 [ext_resource type="Script" path="res://spacecraft/spacecraft.gd" id="1_b8yyq"]
 [ext_resource type="ArrayMesh" uid="uid://1woisy38wlky" path="res://spacecraft/RocketModel.obj" id="2_o0qaw"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://btf05hjpw6k05" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_physics_hand_low.tscn" id="5_16q6j"]
 [ext_resource type="PackedScene" uid="uid://cn7xh5rtkwr8q" path="res://spacecraft/controls/throttle/throttle.tscn" id="6_7of32"]
 [ext_resource type="PackedScene" uid="uid://bft3xyxs31ci3" path="res://addons/godot-xr-tools/functions/function_pose_detector.tscn" id="6_bteek"]
+[ext_resource type="Script" path="res://spacecraft/landing_light.gd" id="9_u56vm"]
 [ext_resource type="PackedScene" uid="uid://neklbt0jds8q" path="res://spacecraft/controls/sidestick/sidestick.tscn" id="10_e5xbv"]
 [ext_resource type="PackedScene" uid="uid://bhsiske1duhng" path="res://spacecraft/controls/PanelButton/panel_button.tscn" id="11_jspjg"]
 
@@ -87,6 +88,15 @@ light_cull_mask = 4293918724
 spot_range = 1.038
 spot_angle = 45.06
 
+[node name="LandingLight" type="SpotLight3D" parent="."]
+transform = Transform3D(-4.25809e-08, 0.730648, -0.682755, -9.87698e-09, 0.682755, 0.730648, 1, 3.78552e-08, -2.18557e-08, 1.61995, 3.48719, 0)
+light_energy = 16.0
+light_indirect_energy = 0.0
+light_volumetric_fog_energy = 0.0
+spot_range = 100.0
+spot_angle = 40.99
+script = ExtResource("9_u56vm")
+
 [node name="GroundRadar" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.7, 5, 0)
 target_position = Vector3(0, -1000, 0)
@@ -107,6 +117,11 @@ transform = Transform3D(0.187533, -0.263709, -0.946197, 0.0505527, 0.964602, -0.
 label_text = "Stabilizer"
 layers = 4
 
+[node name="LandingLightButton" parent="." instance=ExtResource("11_jspjg")]
+transform = Transform3D(0.187533, -0.263709, -0.946197, 0.0505527, 0.964602, -0.258819, 0.980956, 0.000704471, 0.194226, 1.27814, 5.567, -0.368)
+label_text = "Landing Light"
+
 [connection signal="throttle_output_changed" from="Throttle" to="." method="_on_throttle_output_changed"]
 [connection signal="sidestick_output_changed" from="SideStick" to="." method="_on_sidestick_output_changed"]
 [connection signal="button_pressed" from="StabilizerButton" to="." method="_on_stabilizer_pressed"]
+[connection signal="button_pressed" from="LandingLightButton" to="LandingLight" method="_on_landing_light_pressed"]

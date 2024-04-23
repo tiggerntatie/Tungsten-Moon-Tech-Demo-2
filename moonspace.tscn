@@ -56,10 +56,10 @@ scenario_list = [{
 "lat": 31.0,
 "long": 225.0
 }, {
-"altitude": 3.0,
+"altitude": 2.0,
 "heading": 0.0,
 "lat": -10.0,
-"long": 45.0
+"long": 46.0
 }, {
 "altitude": 294.0,
 "heading": 180.0,

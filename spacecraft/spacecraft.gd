@@ -21,10 +21,14 @@ const SPRING_DAMP : Vector3 = Vector3(10000, 10000, 10000)
 @onready var MOON : Node3D = $"../SmartMoon"
 @onready var GROUNDRADAR : RayCast3D = $GroundRadar
 @onready var COLLISIONSHAPE : CollisionShape3D = $CollisionShape3D
-@onready var HUDVEL : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Velocity/VEL
+@onready var HUDHVEL : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_HSpeed/HVEL
+@onready var HUDVVEL : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_VSpeed/VVEL
 @onready var HUDALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Altitude/ALT
+@onready var HUDRALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_RAltitude/RALT
 @onready var HUDTHRUST : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Thrust/THRUST
 @onready var HUDFUEL : ProgressBar = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Fuel/FUEL
+@onready var HUDAALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_OrbitApoapsis/AALT
+@onready var HUDPALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_OrbitPeriapsis/PALT
 @onready var HUDSTAB : ColorRect = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Stabilizer/STAB
 @onready var CAMERA : Camera3D = $YawPivot/PitchPivot/Camera3D
 @onready var XRCAMERA : XRCamera3D = $"XROrigin3D/XRCamera3D"
@@ -35,6 +39,7 @@ const SPRING_DAMP : Vector3 = Vector3(10000, 10000, 10000)
 @onready var SIDESTICK : Node3D = $SideStick
 @onready var ALTCTRLBUTTON : Node3D = $AltCtrlButton
 @onready var STABILIZERBUTTON : Node3D = $StabilizerButton
+@onready var LANDINGLIGHT : SpotLight3D = $LandingLight
 @onready var dv_logical_position := DVector3.new()
 @onready var dv_logical_velocity := DVector3.new(0,0,0)
 @onready var dv_gravity_force := DVector3.new()
@@ -295,16 +300,40 @@ func _process(delta):
 			v_torque.x += sidestick_x
 		apply_torque(basis * v_torque * delta * 10000)
 	
+	# Orbit State Calculation
+	var GM = MOON.LogicalM*MOON.G
+	var P0 = dv_logical_position.vector3().cross(dv_logical_velocity.vector3()).length()
+	var r0 = dv_logical_position.vector3().length()
+	var v0 = dv_logical_velocity.vector3().length()
+	var discriminant = GM*GM/P0/P0 - 2.0*GM/r0 + v0*v0
+	var AA = 0.0
+	var PA = 0.0
+	if discriminant >= 0.0:
+		AA = P0/(GM/P0 + sqrt(discriminant)) - MOON.physical_radius
+		PA = P0/(GM/P0 - sqrt(discriminant)) - MOON.physical_radius
 				
 	# HUD Updates
-	var hvel = dv_logical_position.vector3().normalized().cross(dv_logical_velocity.vector3()).length()
-	HUDVEL.text = str(hvel).pad_decimals(1) + " m/s"
+	var v_ground_logical_velocity = get_landed_velocity(dv_logical_position, dv_logical_position.xz_length(), LEVEL.moon_axis_rate).vector3()
+	var hvel = dv_logical_position.vector3().normalized().cross(dv_logical_velocity.vector3()-v_ground_logical_velocity).length()
+	var vvel = dv_logical_position.vector3().normalized().dot(dv_logical_velocity.vector3())
+	HUDHVEL.text = str(hvel).pad_decimals(1) + " m/s"
+	HUDVVEL.text = str(vvel).pad_decimals(1) + " m/s"
+	HUDALT.text = str(altitude_msl/1000.0).pad_decimals(2) + " km"
 	if is_nan(altitude_agl):
-		HUDALT.text = str(altitude_msl/1000.0).pad_decimals(2) + " km"
+		HUDRALT.text = "no signal"
 	else:
-		HUDALT.text = str(altitude_agl).pad_decimals(1) + " m"
+		HUDRALT.text = str(altitude_agl).pad_decimals(1) + " m"
 	HUDTHRUST.text = str(v_thrust.y).pad_decimals(0) + " N"
 	HUDFUEL.value = 100.0*fuel/FULL_FUEL
+	if AA > 0.0:
+		HUDAALT.text = str(AA/1000.0).pad_decimals(2) + " km"
+	else:
+		HUDAALT.text = "---"
+	if PA > 0.0:
+		HUDPALT.text = str(PA/1000.0).pad_decimals(2) + " km"
+	else:
+		HUDPALT.text = "---"
+		
 	
 func increase_thrust(step : float):
 	ui_thrust_lock = true
@@ -332,8 +361,8 @@ func _on_sidestick_output_changed(x, y):
 	sidestick_y = y
 
 ## Manage the "Stabilizer" button state
-func _on_stabilizer_pressed():
-	if STABILIZERBUTTON.get_button():
+func _on_stabilizer_pressed(state):
+	if state:
 		angular_damp = 1
 	else:
 		angular_damp = 0
@@ -357,4 +386,5 @@ func _input(event: InputEvent) -> void:
 		$YawPivot/PitchPivot.rotation.z = clamp($YawPivot/PitchPivot.rotation.z, -PI/2, PI/2)
 	elif event.is_action_pressed("Quit"):
 		get_tree().quit()
+
 
