@@ -47,3 +47,6 @@ func press_button() -> void:
 		set_button(not state)
 	button_pressed.emit()
 
+func _on_button_input_event(camera, event, position, normal, shape_idx):
+	if event.is_pressed() and event.get_button_index() == MOUSE_BUTTON_LEFT:
+		press_button()

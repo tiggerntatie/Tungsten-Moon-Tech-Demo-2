@@ -9,7 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://ca3daqmpo0tua" path="res://addons/godot-xr-tools/objects/grab_points/grab_point_redirect.tscn" id="6_bnox4"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_0ijdc"]
-size = Vector3(0.1, 0.3, 0.02)
+size = Vector3(0.1, 0.3, 0.1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ui2y2"]
 
@@ -45,9 +45,10 @@ transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 
 script = ExtResource("1_ggwtq")
 
 [node name="Frame" type="StaticBody3D" parent="."]
+collision_layer = 4194304
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Frame"]
-transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0.059157)
 shape = SubResource("BoxShape3D_0ijdc")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Frame"]
@@ -107,4 +108,7 @@ shape = SubResource("SphereShape3D_e6iek")
 [node name="GrabPointRedirectLeft" parent="SliderOrigin/XRToolsInteractableSlider/HandleOrigin/XRToolsInteractableHandle" node_paths=PackedStringArray("target") instance=ExtResource("6_bnox4")]
 target = NodePath("../../../SliderBody/HandleMesh/GrabPointHandLeft")
 
+[connection signal="input_event" from="Frame" to="." method="_on_handle_input_event"]
+[connection signal="mouse_entered" from="Frame" to="." method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Frame" to="." method="_on_mouse_exited"]
 [connection signal="slider_moved" from="SliderOrigin/XRToolsInteractableSlider" to="." method="_on_throttle_slider_moved"]

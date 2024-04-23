@@ -38,7 +38,7 @@ open_pose = ExtResource("6_mhedx")
 closed_pose = ExtResource("6_mhedx")
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_7grw1"]
-size = Vector3(0.025, 0.025, 0.02)
+size = Vector3(0.025, 0.025, 0.008)
 
 [node name="PanelButton" type="Node3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.12746e-05, -0.000195928, 0.000140071)
@@ -72,7 +72,8 @@ mesh = SubResource("BoxMesh_lmgeq")
 surface_material_override/0 = SubResource("StandardMaterial3D_nl7w2")
 
 [node name="XRToolsInteractableAreaButton" type="Area3D" parent="."]
-collision_layer = 0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.002)
+collision_layer = 4194304
 collision_mask = 131072
 script = ExtResource("2_u2ppo")
 button = NodePath("../Button")
@@ -87,8 +88,9 @@ left_pose = SubResource("Resource_hb5u4")
 right_pose = SubResource("Resource_8sfpx")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="HandPoseArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0486142, 0, 0.0188927)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0486142, 0, 0.0170794)
 shape = SubResource("BoxShape3D_7grw1")
 
 [connection signal="button_pressed" from="XRToolsInteractableAreaButton" to="." method="_on_button_pressed"]
 [connection signal="button_released" from="XRToolsInteractableAreaButton" to="." method="_on_button_released"]
+[connection signal="input_event" from="HandPoseArea" to="." method="_on_button_input_event"]
