@@ -1,7 +1,7 @@
 @tool
 extends Node3D
 
-signal button_pressed
+signal button_pressed(state: bool)
 signal button_released
 
 @onready var LABEL : Label3D = $ButtonBase/Label3D
@@ -45,7 +45,7 @@ func get_button() -> bool:
 func press_button() -> void:
 	if is_toggle:
 		set_button(not state)
-	button_pressed.emit()
+	button_pressed.emit(state)
 
 func _on_button_input_event(camera, event, position, normal, shape_idx):
 	if event.is_pressed() and event.get_button_index() == MOUSE_BUTTON_LEFT:
