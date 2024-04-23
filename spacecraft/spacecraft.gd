@@ -306,11 +306,11 @@ func _process(delta):
 	var r0 = dv_logical_position.vector3().length()
 	var v0 = dv_logical_velocity.vector3().length()
 	var discriminant = GM*GM/P0/P0 - 2.0*GM/r0 + v0*v0
-	var AA = 0.0
 	var PA = 0.0
+	var AA = 0.0
 	if discriminant >= 0.0:
-		AA = P0/(GM/P0 + sqrt(discriminant)) - MOON.physical_radius
-		PA = P0/(GM/P0 - sqrt(discriminant)) - MOON.physical_radius
+		PA = P0/(GM/P0 + sqrt(discriminant)) - MOON.physical_radius
+		AA = P0/(GM/P0 - sqrt(discriminant)) - MOON.physical_radius
 				
 	# HUD Updates
 	var v_ground_logical_velocity = get_landed_velocity(dv_logical_position, dv_logical_position.xz_length(), LEVEL.moon_axis_rate).vector3()
