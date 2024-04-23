@@ -351,6 +351,7 @@ func set_thrust(value : float, lock : bool = true):
 	THROTTLE.set_throttle_slider(thrust)
 
 func _on_throttle_output_changed(value):
+	thrust = value
 	if value == 0.0:
 		v_thrust.y = 0.0
 	else:
