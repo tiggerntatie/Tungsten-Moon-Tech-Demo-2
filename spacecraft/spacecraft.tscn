@@ -50,6 +50,7 @@ tracker = &"left_hand"
 
 [node name="XRToolsFunctionPickup" type="Node3D" parent="XROrigin3D/XRLeft"]
 script = ExtResource("4_ltj2u")
+grab_distance = 0.1
 grab_collision_mask = 327684
 ranged_enable = false
 
@@ -62,6 +63,7 @@ tracker = &"right_hand"
 
 [node name="XRToolsFunctionPickup" type="Node3D" parent="XROrigin3D/XRRight"]
 script = ExtResource("4_ltj2u")
+grab_distance = 0.1
 grab_collision_mask = 327684
 ranged_enable = false
 
@@ -128,8 +130,16 @@ transform = Transform3D(0.187533, -0.263709, -0.946197, 0.0505527, 0.964602, -0.
 label_text = "Fill Prop. Tank"
 is_toggle = false
 
+[connection signal="button_pressed" from="XROrigin3D/XRLeft" to="." method="_on_xr_left_button_pressed"]
+[connection signal="button_released" from="XROrigin3D/XRLeft" to="." method="_on_xr_left_button_released"]
+[connection signal="input_vector2_changed" from="XROrigin3D/XRLeft" to="." method="_on_xr_left_input_vector_2_changed"]
+[connection signal="button_pressed" from="XROrigin3D/XRRight" to="." method="_on_xr_right_button_pressed"]
+[connection signal="button_released" from="XROrigin3D/XRRight" to="." method="_on_xr_right_button_released"]
+[connection signal="input_vector2_changed" from="XROrigin3D/XRRight" to="." method="_on_xr_right_input_vector_2_changed"]
 [connection signal="throttle_output_changed" from="Throttle" to="." method="_on_throttle_output_changed"]
 [connection signal="sidestick_output_changed" from="SideStick" to="." method="_on_sidestick_output_changed"]
 [connection signal="button_pressed" from="StabilizerButton" to="." method="_on_stabilizer_pressed"]
+[connection signal="button_set" from="StabilizerButton" to="." method="_on_stabilizer_button_set"]
 [connection signal="button_pressed" from="LandingLightButton" to="LandingLight" method="_on_landing_light_pressed"]
+[connection signal="button_set" from="LandingLightButton" to="LandingLight" method="_on_landing_light_button_set"]
 [connection signal="button_pressed" from="RefuelButton" to="." method="_on_refuel_button_pressed"]

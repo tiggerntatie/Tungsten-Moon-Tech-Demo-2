@@ -73,6 +73,14 @@ var ui_in : bool
 var ui_rotation : bool
 var ui_thrust_lock : bool
 var mouse_button_2 : bool
+
+# Asynchronous XR inputs
+var left_ax := false
+var left_by := false
+var right_ax := false
+var right_by := false
+var left_primary := Vector2.ZERO
+var right_primary := Vector2.ZERO
 	
 # Calculate new position and velocity for each step
 # 4th order runge kutte integration
@@ -113,9 +121,8 @@ func reset_spacecraft():
 	ui_in = false
 	ui_rotation = true
 	altitude_agl = NAN
-	STABILIZERBUTTON.set_button(false)	# turn stabilizer off
-	STABILIZERBUTTON.press_button()	# now toggle it on and handle event
-	LANDINGLIGHTBUTTON.set_button(false)	# lights off
+	STABILIZERBUTTON.set_button(true)	# turn stabilizer on
+	LANDINGLIGHTBUTTON.set_button(false)	# lights on
 	set_thrust(0.0)
 	reset_viewpoint()
 
@@ -246,14 +253,20 @@ func _process(delta):
 		
 	# Input Polling
 	# view reset
-	if Input.is_action_just_pressed("Reset Viewpoint"):
+	if Input.is_action_just_pressed("Reset Viewpoint") or left_ax:
+		left_ax = false
 		reset_viewpoint()
 	# scenario selection and/or restart
-	var p = Input.is_action_just_pressed("Load Prev Scenario")
-	var n = Input.is_action_just_pressed("Load Next Scenario")
-	var r = Input.is_action_just_pressed("Restart")
+	var p = Input.is_action_just_pressed("Load Prev Scenario") or right_ax
+	var n = Input.is_action_just_pressed("Load Next Scenario") or right_by
+	var r = Input.is_action_just_pressed("Restart") or left_by
+	right_ax = false
+	right_by = false
+	left_by = false
 	# ignore other inputs if we are chhanging scenarios
 	if not LEVEL.scenario_input(p, n, r):
+		if left_primary.y != 0.0:
+			increase_thrust(left_primary.y * delta)	# will move throttle if manipulated (up or down)
 		if Input.is_action_pressed("Thrust Increase"):
 			increase_thrust(delta)
 		elif Input.is_action_pressed("Thrust Decrease"):
@@ -288,9 +301,9 @@ func _process(delta):
 				$YawPivot.position = new_eye
 		else:
 			if ALTCTRLBUTTON.get_button():
-				SIDESTICK.set_sidestick(-Input.get_axis("Yaw Right", "Yaw Left"), Input.get_axis("Pitch Forward", "Pitch Backward"))
+				SIDESTICK.set_sidestick(-(Input.get_axis("Yaw Right", "Yaw Left") - right_primary.x), Input.get_axis("Pitch Forward", "Pitch Backward") - right_primary.y)
 			else:
-				SIDESTICK.set_sidestick(-Input.get_axis("Roll Right", "Roll Left"), Input.get_axis("Pitch Forward", "Pitch Backward"))
+				SIDESTICK.set_sidestick(-(Input.get_axis("Roll Right", "Roll Left") - right_primary.x), Input.get_axis("Pitch Forward", "Pitch Backward") - right_primary.y)
 			# oddly, this has to be here to keep the ship rotating		
 		v_torque.y += Input.get_axis("Yaw Right Always", "Yaw Left Always")
 		v_torque.z += sidestick_y
@@ -368,6 +381,12 @@ func _on_stabilizer_pressed(state):
 	else:
 		angular_damp = 0
 
+func _on_stabilizer_button_set(state):
+	if state:
+		angular_damp = 1
+	else:
+		angular_damp = 0
+
 func _on_refuel_button_pressed(state):
 	fuel = FULL_FUEL	# FIXME this should be refilled some other way
 
@@ -391,6 +410,36 @@ func _input(event: InputEvent) -> void:
 	elif event.is_action_pressed("Quit"):
 		get_tree().quit()
 
+func _on_xr_left_button_pressed(name):
+	if name == "ax_button":
+		left_ax = true
+	elif name == "by_button":
+		left_by = true
 
+func _on_xr_left_button_released(name):
+	if name == "ax_button":
+		left_ax = false
+	elif name == "by_button":
+		left_by = false
+
+func _on_xr_right_button_pressed(name):
+	if name == "ax_button":
+		right_ax = true
+	elif name == "by_button":
+		right_by = true
+		
+func _on_xr_right_button_released(name):
+	if name == "ax_button":
+		right_ax = false
+	elif name == "by_button":
+		right_by = false
+		
+func _on_xr_left_input_vector_2_changed(name, value):
+	if name == "primary":
+		left_primary = value
+
+func _on_xr_right_input_vector_2_changed(name, value):
+	if name == "primary":
+		right_primary = value
 
 
