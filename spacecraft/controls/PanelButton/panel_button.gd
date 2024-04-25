@@ -3,6 +3,7 @@ extends Node3D
 
 signal button_pressed(state: bool)
 signal button_released
+signal button_set(state: bool)
 
 @onready var LABEL : Label3D = $ButtonBase/Label3D
 @onready var BASE : MeshInstance3D = $ButtonBase/MeshInstance3D
@@ -40,6 +41,7 @@ func _on_button_released(button):
 func set_button(value: bool) -> void:
 	state = value
 	BUTTON.get_surface_override_material(0).emission_enabled = state
+	button_set.emit(state)
 
 func get_button() -> bool:
 	return state

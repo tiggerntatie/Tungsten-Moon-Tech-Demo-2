@@ -13,3 +13,7 @@ func _process(delta):
 
 func _on_landing_light_pressed(state):
 	visible = state
+
+
+func _on_landing_light_button_set(state):
+	visible = state
