@@ -4,9 +4,9 @@ extends RigidBody3D
 
 const THRUST_INC = 10.0 	# Newtons
 const THRUST_MAX = 20000 	# Newtons
-const THRUST_MIN = 5000 	# Newtons
+const THRUST_MIN = THRUST_MAX*0.1 	# Newtons
 const THRUST_STEP_MULTIPLIER = 0.2 # 
-const FULL_FUEL = 2000 		# kg
+const FULL_FUEL = 2500 		# kg
 const ISP = 300 			# s
 const GEARTH = 9.80665 		# m/s^2
 const MOUSE_SENS = 0.002	# m/unit and deg/unit
@@ -39,7 +39,7 @@ const SPRING_DAMP : Vector3 = Vector3(10000, 10000, 10000)
 @onready var SIDESTICK : Node3D = $SideStick
 @onready var ALTCTRLBUTTON : Node3D = $AltCtrlButton
 @onready var STABILIZERBUTTON : Node3D = $StabilizerButton
-@onready var LANDINGLIGHT : SpotLight3D = $LandingLight
+@onready var LANDINGLIGHTBUTTON : Node3D = $LandingLightButton
 @onready var dv_logical_position := DVector3.new()
 @onready var dv_logical_velocity := DVector3.new(0,0,0)
 @onready var dv_gravity_force := DVector3.new()
@@ -107,16 +107,16 @@ func get_landed_velocity(dv_pos: DVector3, hradius: float, rate: float):
 func reset_spacecraft():
 	dv_captured_logical_position = null
 	fuel = FULL_FUEL	# FIXME this should be refilled some other way!
-	thrust = 0.0
 	v_thrust = Vector3.ZERO
 	v_torque = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
 	ui_in = false
 	ui_rotation = true
-	ui_thrust_lock = true
 	altitude_agl = NAN
-	STABILIZERBUTTON.set_button(false)	# turn light off
+	STABILIZERBUTTON.set_button(false)	# turn stabilizer off
 	STABILIZERBUTTON.press_button()	# now toggle it on and handle event
+	LANDINGLIGHTBUTTON.set_button(false)	# lights off
+	set_thrust(0.0)
 	reset_viewpoint()
 
 # reset the pilot viewpoint
@@ -368,6 +368,9 @@ func _on_stabilizer_pressed(state):
 	else:
 		angular_damp = 0
 
+func _on_refuel_button_pressed(state):
+	fuel = FULL_FUEL	# FIXME this should be refilled some other way
+
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("Toggle In Out"):
 		ui_in = not ui_in
@@ -387,5 +390,7 @@ func _input(event: InputEvent) -> void:
 		$YawPivot/PitchPivot.rotation.z = clamp($YawPivot/PitchPivot.rotation.z, -PI/2, PI/2)
 	elif event.is_action_pressed("Quit"):
 		get_tree().quit()
+
+
 
 
