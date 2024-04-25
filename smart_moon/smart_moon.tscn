@@ -1,25 +1,144 @@
-[gd_scene load_steps=8 format=3 uid="uid://l3t54y8k7j41"]
+[gd_scene load_steps=21 format=3 uid="uid://l3t54y8k7j41"]
 
 [ext_resource type="Script" path="res://smart_moon/smart_moon.gd" id="1_xw7yp"]
 [ext_resource type="Resource" uid="uid://cpyimrebtcomr" path="res://smart_moon/moon_data.tres" id="2_mwm2u"]
-[ext_resource type="Texture2D" uid="uid://bes4acdkv68y3" path="res://smart_moon/rocky_trail_02_diff_4k.png" id="3_r84ol"]
-[ext_resource type="Texture2D" uid="uid://deues776ra4xu" path="res://smart_moon/rocky_trail_02_nor_gl_4k.png" id="4_4w4eg"]
-[ext_resource type="Texture2D" uid="uid://c4cov3rqjqb10" path="res://smart_moon/rocky_trail_02_rough_4k.png" id="5_ak41s"]
+[ext_resource type="Texture2D" uid="uid://d3v8uh2j44ify" path="res://smart_moon/Ground051_4K-PNG_Color.png" id="3_82agc"]
+[ext_resource type="Texture2D" uid="uid://chfjm2eogg4id" path="res://smart_moon/Ground058_4K-PNG_Color.png" id="4_4nt8j"]
+[ext_resource type="Texture2D" uid="uid://bioujwx5bnrif" path="res://smart_moon/Ground051_4K-PNG_NormalGL.png" id="5_8j1am"]
+[ext_resource type="Texture2D" uid="uid://dho80d02klv3s" path="res://smart_moon/Ground058_4K-PNG_NormalGL.png" id="6_2tdsx"]
 [ext_resource type="Script" path="res://smart_moon/face.gd" id="6_appy7"]
+[ext_resource type="Texture2D" uid="uid://duwmml08hpcu8" path="res://smart_moon/Ground051_4K-PNG_Roughness.png" id="7_3nh05"]
+[ext_resource type="Texture2D" uid="uid://c1uhkv2g10cmu" path="res://smart_moon/Ground058_4K-PNG_Roughness.png" id="8_2eaki"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_omoeu"]
-albedo_texture = ExtResource("3_r84ol")
-roughness_texture = ExtResource("5_ak41s")
-normal_enabled = true
-normal_texture = ExtResource("4_4w4eg")
-uv1_scale = Vector3(100, 100, 100)
+[sub_resource type="Shader" id="Shader_omomy"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.2.1.stable's StandardMaterial3D.
+
+shader_type spatial;
+render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
+uniform vec4 albedo1 : source_color;
+uniform vec4 albedo2 : source_color;
+uniform sampler2D blend_map : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D albedo_map1 : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D albedo_map2 : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D texture_albedo1 : source_color,filter_linear_mipmap,repeat_enable;
+uniform sampler2D texture_albedo2 : source_color,filter_linear_mipmap,repeat_enable;
+uniform float point_size : hint_range(0,128);
+uniform float roughness : hint_range(0,1);
+uniform sampler2D texture_roughness1 : hint_roughness_r,filter_linear_mipmap,repeat_enable;
+uniform sampler2D texture_roughness2 : hint_roughness_r,filter_linear_mipmap,repeat_enable;
+uniform float specular;
+uniform float metallic;
+uniform sampler2D texture_normal1 : hint_roughness_normal,filter_linear_mipmap,repeat_enable;
+uniform sampler2D texture_normal2 : hint_roughness_normal,filter_linear_mipmap,repeat_enable;
+uniform float normal_scale : hint_range(-16,16);
+uniform float uv_scale1 : hint_range(0.01, 4000.0);
+uniform float uv_scale2 : hint_range(0.01, 4000.0);
+uniform float uv_blend_scale : hint_range(0.01, 100);
+uniform float uv_albedo_scale1 : hint_range(0.001, 10);
+uniform float uv_albedo_scale2 : hint_range(0.01, 100);
+
+void fragment() {
+	vec2 base_uv = UV*uv_scale1;
+	vec2 base_uv2 = UV*uv_scale2;
+	vec2 blend_uv = UV*uv_blend_scale;
+	vec2 albedo_uv1 = UV*uv_albedo_scale1;
+	vec2 albedo_uv2 = UV*uv_albedo_scale2;
+	vec4 blend_map_tex = texture(blend_map, blend_uv);
+	vec4 albedo_map_tex1 = texture(albedo_map1, albedo_uv1);
+	vec4 albedo_map_tex2 = texture(albedo_map2, albedo_uv2);
+	vec4 albedo_tex1 = texture(texture_albedo1,base_uv);
+	vec4 albedo_tex2 = texture(texture_albedo2, base_uv2);
+	float blend = blend_map_tex.r;
+	//if (blend > 0.5)
+	//ALBEDO = albedo_map_tex1.rgb*albedo_map_tex2.rgb*(albedo1.rgb*albedo_tex1.rgb*blend + albedo2.rgb*albedo_tex2.rgb*(1.0-blend));
+	ALBEDO = albedo_map_tex1.rgb*albedo_map_tex2.rgb*mix(albedo1.rgb*albedo_tex1.rgb, albedo2.rgb*albedo_tex2.rgb, blend);
+	vec4 roughness_texture_channel = vec4(1.0,0.0,0.0,0.0);
+	float roughness_tex1 = dot(texture(texture_roughness1,base_uv),roughness_texture_channel);
+	float roughness_tex2 = dot(texture(texture_roughness2,base_uv2),roughness_texture_channel);
+	ROUGHNESS = mix(roughness_tex1, roughness_tex2, blend) * roughness;
+	SPECULAR = specular;
+	vec3 normal_tex1 = texture(texture_normal1,base_uv).rgb;
+	vec3 normal_tex2 = texture(texture_normal2,base_uv2).rgb;
+	NORMAL_MAP = mix(normal_tex1, normal_tex2, blend);
+	NORMAL_MAP_DEPTH = normal_scale;
+}
+"
+
+[sub_resource type="Gradient" id="Gradient_tt6q3"]
+colors = PackedColorArray(0.572988, 0.572988, 0.572988, 1, 1, 1, 1, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_41wn8"]
+noise_type = 3
+frequency = 0.0625
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_uywm1"]
+width = 4096
+height = 4096
+seamless = true
+color_ramp = SubResource("Gradient_tt6q3")
+noise = SubResource("FastNoiseLite_41wn8")
+
+[sub_resource type="Gradient" id="Gradient_ure4c"]
+colors = PackedColorArray(0.674815, 0.674815, 0.674815, 1, 1, 1, 1, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_5hgw0"]
+noise_type = 4
+frequency = 0.05
+fractal_type = 2
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_lav23"]
+width = 2048
+height = 2048
+seamless = true
+color_ramp = SubResource("Gradient_ure4c")
+noise = SubResource("FastNoiseLite_5hgw0")
+
+[sub_resource type="Gradient" id="Gradient_j6t3h"]
+offsets = PackedFloat32Array(0.376344, 0.607527)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_n237v"]
+noise_type = 2
+frequency = 0.0444
+fractal_type = 2
+fractal_octaves = 6
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_6qley"]
+width = 4096
+height = 4096
+seamless = true
+color_ramp = SubResource("Gradient_j6t3h")
+noise = SubResource("FastNoiseLite_n237v")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gg88o"]
+render_priority = 0
+shader = SubResource("Shader_omomy")
+shader_parameter/albedo1 = Color(0.937255, 0.929412, 0.898039, 1)
+shader_parameter/albedo2 = Color(0.678431, 0.615686, 0.341176, 1)
+shader_parameter/point_size = 1.0
+shader_parameter/roughness = 1.0
+shader_parameter/specular = 0.1
+shader_parameter/metallic = 0.0
+shader_parameter/normal_scale = 1.0
+shader_parameter/uv_scale1 = 168.229
+shader_parameter/uv_scale2 = 299.075
+shader_parameter/uv_blend_scale = 1.034
+shader_parameter/uv_albedo_scale1 = 1.661
+shader_parameter/uv_albedo_scale2 = 0.477
+shader_parameter/blend_map = SubResource("NoiseTexture2D_6qley")
+shader_parameter/albedo_map1 = SubResource("NoiseTexture2D_uywm1")
+shader_parameter/albedo_map2 = SubResource("NoiseTexture2D_lav23")
+shader_parameter/texture_albedo1 = ExtResource("3_82agc")
+shader_parameter/texture_albedo2 = ExtResource("4_4nt8j")
+shader_parameter/texture_roughness1 = ExtResource("7_3nh05")
+shader_parameter/texture_roughness2 = ExtResource("8_2eaki")
+shader_parameter/texture_normal1 = ExtResource("5_8j1am")
+shader_parameter/texture_normal2 = ExtResource("6_2tdsx")
 
 [node name="SmartMoon" type="Node3D"]
-transform = Transform3D(1000, 0, 0, 0, 1000, 0, 0, 0, 1000, 0, 0, 0)
 script = ExtResource("1_xw7yp")
 moon_data = ExtResource("2_mwm2u")
 chunk_resolution_power = 7
-material_override = SubResource("StandardMaterial3D_omoeu")
+material_override = SubResource("ShaderMaterial_gg88o")
 
 [node name="FaceX+" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 300, 0, 0)
