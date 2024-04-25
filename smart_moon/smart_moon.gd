@@ -35,7 +35,8 @@ func _process(delta):
 
 
 func on_data_changed():
-	scale = Vector3.ONE*MOON_SCALE
+	if not Engine.is_editor_hint():
+		scale = Vector3.ONE*MOON_SCALE
 	for face in get_children():
 		face.generate_meshes(moon_data, resolution_power, chunk_resolution_power)
 	reset_high_precision_chunks()
