@@ -33,6 +33,8 @@ func _on_button_pressed(button):
 	press_button()
 	
 func _on_button_released(button):
+	if not is_toggle:
+		BUTTON.get_surface_override_material(0).emission_enabled = false
 	button_released.emit()
 
 func set_button(value: bool) -> void:
@@ -45,8 +47,19 @@ func get_button() -> bool:
 func press_button() -> void:
 	if is_toggle:
 		set_button(not state)
+	else:
+		BUTTON.get_surface_override_material(0).emission_enabled = true	
 	button_pressed.emit(state)
 
+func release_button() -> void:
+	if not is_toggle:
+		BUTTON.get_surface_override_material(0).emission_enabled = false
+	button_released.emit()
+
 func _on_button_input_event(camera, event, position, normal, shape_idx):
-	if event.is_pressed() and event.get_button_index() == MOUSE_BUTTON_LEFT:
-		press_button()
+	if event is InputEventMouseButton and event.get_button_index() == MOUSE_BUTTON_LEFT:
+		if event.is_pressed():
+			press_button()
+		elif event.is_released():
+			release_button()
+	
