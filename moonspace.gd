@@ -121,11 +121,19 @@ func _ready():
 			CAMERA.current = false
 			XRCAMERA.current = true
 			XRCAMERA.position = XRCAMERA.position   # reset head position
+			# Disable fancy AA
+			var rid : RID = get_viewport().get_viewport_rid()
+			RenderingServer.viewport_set_msaa_3d(rid, RenderingServer.VIEWPORT_MSAA_2X)
+			RenderingServer.viewport_set_screen_space_aa(rid, RenderingServer.VIEWPORT_SCREEN_SPACE_AA_DISABLED )
 	if not XRisup:
 		print("OpenXR not found or initialized; running in non-VR mode")
 		get_viewport().use_xr = false
 		CAMERA.current = true
 		XRCAMERA.current = false
+		var display : Vector2i = DisplayServer.screen_get_size()
+		var window_size : Vector2i = DisplayServer.window_get_size()
+		if display.x < window_size.x or display.y < window_size.y:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	# END VR Setup	
 	# Shader setup
 	ENVIRONMENT.environment.sky.sky_material.set_shader_parameter("planet_default_light_energy", planet_default_light_energy)
@@ -192,6 +200,7 @@ func body_is_visible(dv_log_pos : DVector3, moon_phys_pos : Vector3, moon_radius
 func _process(delta):
 	# update shader parameters 
 	# Rotate starfield to account for Tungsten Moon rotation
+	
 	var step: float = delta * astronomy_speed_factor
 	current_moon_rotation += moon_axis_rate * step
 	if current_moon_rotation > TAU:

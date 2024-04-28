@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Tungsten Moon Tech Demo 2"
-config/version="0.0.7"
+config/version="0.0.8"
 run/main_scene="res://moonspace.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
 run/max_fps=90
@@ -24,8 +24,8 @@ XRToolsUserSettings="*res://addons/godot-xr-tools/user_settings/user_settings.gd
 
 [display]
 
-window/size/viewport_width=1280
-window/size/viewport_height=800
+window/size/viewport_width=1920
+window/size/viewport_height=1080
 
 [dotnet]
 
@@ -267,7 +267,8 @@ Quit={
 [rendering]
 
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
-anti_aliasing/quality/msaa_3d=1
+anti_aliasing/quality/msaa_3d=3
+anti_aliasing/quality/screen_space_aa=1
 
 [xr]
 
