@@ -35,7 +35,6 @@ const STABILITY_MINIMUM_RATE := 0.001
 @onready var HUDFUEL : ProgressBar = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Fuel/FUEL
 @onready var HUDAALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_OrbitApoapsis/AALT
 @onready var HUDPALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_OrbitPeriapsis/PALT
-@onready var HUDSTAB : ColorRect = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Stabilizer/STAB
 @onready var CAMERA : Camera3D = $YawPivot/PitchPivot/Camera3D
 @onready var XRREFERENCE : Marker3D = $XRReferencePosition
 @onready var XRCAMERA : XRCamera3D = $"XROrigin3D/XRCamera3D"
