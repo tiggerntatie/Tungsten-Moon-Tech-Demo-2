@@ -20,6 +20,8 @@ const VERT_SPRING_K = 50000 # N/m
 const HORIZ_SPRING_K = 10000 # N/m
 const SPRING_K : Vector3 = Vector3(50000, 50000, 50000)
 const SPRING_DAMP : Vector3 = Vector3(10000, 10000, 10000)
+const STABILITY_COEFFICIENT := 10.0	# for stability feedback loop
+const STABILITY_MINIMUM_RATE := 0.001
 
 @onready var LEVEL : Node3D = $".."
 @onready var MOON : Node3D = $"../SmartMoon"
@@ -76,7 +78,7 @@ var v_last_torque := Vector3.ZERO
 
 # UI State 
 var ui_in : bool
-var ui_rotation : bool
+var rotation_rate_mode : bool
 var ui_thrust_lock : bool
 var mouse_button_2 : bool
 
@@ -125,7 +127,6 @@ func reset_spacecraft():
 	v_torque = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
 	ui_in = false
-	ui_rotation = true
 	altitude_agl = NAN
 	STABILIZERBUTTON.set_button(true)	# turn stabilizer on
 	LANDINGLIGHTBUTTON.set_button(false)	# lights on
@@ -223,7 +224,7 @@ func _process(delta):
 		# too much. reload the scenario!
 		LEVEL.scenario_input(false, false, true)
 	elif altitude_agl <= 0.0:
-		STABILIZERBUTTON.set_button(true)
+		angular_damp = 1	# use Godot to damp out the jiggles
 		if dv_captured_logical_position == null:
 			has_landed.emit()
 			dv_captured_logical_position = dv_logical_position.copy()
@@ -250,6 +251,7 @@ func _process(delta):
 
 			v_thrust_global += dv_restoring_force.vector3()
 	else: # agl is undefined or above zero
+		angular_damp = 0
 		dv_captured_logical_position = null
 
 
@@ -317,9 +319,18 @@ func _process(delta):
 			v_torque.y -= sidestick_x
 		else:
 			v_torque.x += sidestick_x
+		# rotational stabilization, but only if we're not damping oscillations using angular_damp
+		var angular_rate := angular_velocity.length()
+		if rotation_rate_mode and angular_rate > STABILITY_MINIMUM_RATE and (angular_damp == 0.0):
+			# convert torque to local space, adjust for ship moment of inertia
+			var v_correction_torque = basis.inverse() * (-angular_velocity * STABILITY_COEFFICIENT)
+			#if v_correction_torque.length() < STABILITY_MINIMUM_TORQUE:
+			#	v_correction_torque = Vector3.ZERO
+			v_torque += v_correction_torque.limit_length()
 		if (v_last_torque == Vector3.ZERO and v_torque != Vector3.ZERO) or (v_last_torque != Vector3.ZERO and v_torque == Vector3.ZERO) :
 			torque_changed.emit(v_torque)
 		v_last_torque = v_torque
+		# convert back to global spacce and apply
 		apply_torque(basis * v_torque * delta * 10000)
 	
 	# Orbit State Calculation
@@ -386,16 +397,10 @@ func _on_sidestick_output_changed(x, y):
 
 ## Manage the "Stabilizer" button state
 func _on_stabilizer_pressed(state):
-	if state:
-		angular_damp = 1
-	else:
-		angular_damp = 0
+	rotation_rate_mode = state
 
 func _on_stabilizer_button_set(state):
-	if state:
-		angular_damp = 1
-	else:
-		angular_damp = 0
+	rotation_rate_mode = state
 
 func _on_refuel_button_pressed(state):
 	fuel = FULL_FUEL	# FIXME this should be refilled some other way
@@ -403,8 +408,6 @@ func _on_refuel_button_pressed(state):
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("Toggle In Out"):
 		ui_in = not ui_in
-	elif event.is_action_pressed("Toggle Rotation"):
-		ui_rotation = not ui_rotation
 	elif event.is_action_pressed("Toggle Thrust Lock"):
 		ui_thrust_lock = not ui_thrust_lock
 	elif event.is_action_pressed("Alternate Control"):
