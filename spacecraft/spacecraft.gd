@@ -2,6 +2,10 @@ class_name Spacecraft
 
 extends RigidBody3D
 
+signal has_landed
+signal thrust_changed(float)
+signal torque_changed(Vector3)
+
 const THRUST_INC = 10.0 	# Newtons
 const THRUST_MAX = 20000 	# Newtons
 const THRUST_MIN = THRUST_MAX*0.1 	# Newtons
@@ -67,6 +71,7 @@ var terrain_altitude : float = NAN
 # Sidestick State
 var sidestick_x : float = 0.0
 var sidestick_y : float = 0.0
+var v_last_torque := Vector3.ZERO
 
 # UI State 
 var ui_in : bool
@@ -219,6 +224,7 @@ func _process(delta):
 	elif altitude_agl <= 0.0:
 		STABILIZERBUTTON.set_button(true)
 		if dv_captured_logical_position == null:
+			has_landed.emit()
 			dv_captured_logical_position = dv_logical_position.copy()
 			dv_captured_logical_position.rotate_y(-LEVEL.current_moon_rotation) # UNrotate
 		var dv_captured = dv_captured_logical_position.copy()
@@ -241,7 +247,6 @@ func _process(delta):
 			# this torque is computed in global space:
 			apply_torque(v_crossed * delta * 100000)
 
-			#print("restoring force: ", v_restoring_force)
 			v_thrust_global += dv_restoring_force.vector3()
 	else: # agl is undefined or above zero
 		dv_captured_logical_position = null
@@ -311,6 +316,9 @@ func _process(delta):
 			v_torque.y -= sidestick_x
 		else:
 			v_torque.x += sidestick_x
+		if (v_last_torque == Vector3.ZERO and v_torque != Vector3.ZERO) or (v_last_torque != Vector3.ZERO and v_torque == Vector3.ZERO) :
+			torque_changed.emit(v_torque)
+		v_last_torque = v_torque
 		apply_torque(basis * v_torque * delta * 10000)
 	
 	# Orbit State Calculation
@@ -364,6 +372,7 @@ func set_thrust(value : float, lock : bool = true):
 	THROTTLE.set_throttle_slider(thrust)
 
 func _on_throttle_output_changed(value):
+	thrust_changed.emit(value)
 	thrust = value
 	if value == 0.0:
 		v_thrust.y = 0.0
