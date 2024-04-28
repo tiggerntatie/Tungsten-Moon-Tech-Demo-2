@@ -17,6 +17,7 @@ shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
 uniform vec4 albedo1 : source_color;
 uniform vec4 albedo2 : source_color;
+uniform sampler2D albedo : source_color;
 uniform sampler2D blend_map : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D albedo_map1 : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D albedo_map2 : source_color, filter_linear_mipmap, repeat_enable;
@@ -37,6 +38,51 @@ uniform float uv_blend_scale : hint_range(0.01, 100);
 uniform float uv_albedo_scale1 : hint_range(0.001, 10);
 uniform float uv_albedo_scale2 : hint_range(0.01, 100);
 
+/*
+float sum( vec3 v ) { return v.x+v.y+v.z; }
+
+vec3 textureNoTile( in vec2 x, float v )
+{
+    float k = texture( albedo_map1, 0.005*x ).x; // cheap (cache friendly) lookup
+    
+    vec2 duvdx = dFdx( x );
+    vec2 duvdy = dFdy( x );
+    
+    float l = k*8.0;
+    float f = fract(l);
+    
+#if 1
+    float ia = floor(l); // my method
+    float ib = ia + 1.0;
+#else
+    float ia = floor(l+0.5); // suslik's method (see comments)
+    float ib = floor(l);
+    f = min(f, 1.0-f)*2.0;
+#endif    
+    
+    vec2 offa = sin(vec2(3.0,7.0)*ia); // can replace with any other hash
+    vec2 offb = sin(vec2(3.0,7.0)*ib); // can replace with any other hash
+
+    vec3 cola = textureGrad( albedo, x + v*offa, duvdx, duvdy ).xyz;
+    vec3 colb = textureGrad( albedo, x + v*offb, duvdx, duvdy ).xyz;
+    
+    return mix( cola, colb, smoothstep(0.2,0.8,f-0.1*sum(cola-colb)) );
+}
+
+
+void fragment() {
+	
+	vec2 uv = (UV*uv_scale1).xy;
+	float t = 12688.0;
+	float f = smoothstep( 0.4, 0.6, sin(t    ) );
+    float s = smoothstep( 0.4, 0.6, sin(t*0.5) );
+        
+	vec3 col = textureNoTile( (4.0 + 6.0*s)*uv, f );
+	
+	ALBEDO = vec4( col, 1.0 ).rgb;
+}
+*/
+/**/
 void fragment() {
 	vec2 base_uv = UV*uv_scale1;
 	vec2 base_uv2 = UV*uv_scale2;
@@ -62,7 +108,7 @@ void fragment() {
 	NORMAL_MAP = mix(normal_tex1, normal_tex2, blend);
 	NORMAL_MAP_DEPTH = normal_scale;
 }
-"
+/**/"
 
 [sub_resource type="Gradient" id="Gradient_tt6q3"]
 colors = PackedColorArray(0.572988, 0.572988, 0.572988, 1, 1, 1, 1, 1)
@@ -124,6 +170,7 @@ shader_parameter/uv_scale2 = 299.075
 shader_parameter/uv_blend_scale = 1.034
 shader_parameter/uv_albedo_scale1 = 1.661
 shader_parameter/uv_albedo_scale2 = 0.477
+shader_parameter/albedo = ExtResource("3_82agc")
 shader_parameter/blend_map = SubResource("NoiseTexture2D_6qley")
 shader_parameter/albedo_map1 = SubResource("NoiseTexture2D_uywm1")
 shader_parameter/albedo_map2 = SubResource("NoiseTexture2D_lav23")
