@@ -47,8 +47,12 @@ mesh = ExtResource("2_o0qaw")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.612574, 3.92809, -0.0324347)
 shape = SubResource("BoxShape3D_63e0r")
 
+[node name="XRReferencePosition" type="Marker3D" parent="."]
+editor_description = "A fixed location serving as the default XR Origin when resetting the XR Origin point"
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0.926, 5.6, -0.545)
+
 [node name="XROrigin3D" type="XROrigin3D" parent="."]
-transform = Transform3D(-4.37114e-08, 0, -1, -2.30926e-14, 1, 0, 1, 0, -4.37114e-08, 1.08654, 5.54487, -0.566513)
+transform = Transform3D(-4.37114e-08, 0, -1, -2.30926e-14, 1, 0, 1, 0, -4.37114e-08, 0.926205, 5.54487, -0.545199)
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
 far = 600000.0

@@ -35,6 +35,7 @@ const SPRING_DAMP : Vector3 = Vector3(10000, 10000, 10000)
 @onready var HUDPALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_OrbitPeriapsis/PALT
 @onready var HUDSTAB : ColorRect = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Stabilizer/STAB
 @onready var CAMERA : Camera3D = $YawPivot/PitchPivot/Camera3D
+@onready var XRREFERENCE : Marker3D = $XRReferencePosition
 @onready var XRCAMERA : XRCamera3D = $"XROrigin3D/XRCamera3D"
 @onready var XRORIGIN : XROrigin3D = $XROrigin3D
 @onready var YAWPIVOT : Node3D = $YawPivot
@@ -135,8 +136,8 @@ func reset_spacecraft():
 func reset_viewpoint():
 	if XRCAMERA.current:
 		# this is a little bit of VR magic .. the spacecraft alignment is not the default for Godot!
-		XRORIGIN.position = Vector3(1.0, 5.7, -0.53) - Vector3(-XRCAMERA.position.z, XRCAMERA.position.y, XRCAMERA.position.x)
-		XRORIGIN.rotation = Vector3(0.0, -PI/2.0, 0.0) - Vector3(0.0, XRCAMERA.rotation.y, 0.0)
+		XRORIGIN.rotation = XRREFERENCE.rotation - Vector3(0.0, XRCAMERA.rotation.y, 0.0)
+		XRORIGIN.position = XRREFERENCE.position - Vector3(-XRCAMERA.position.z, XRCAMERA.position.y, XRCAMERA.position.x)
 	else:
 		YAWPIVOT.transform = reset_view_yaw
 		PITCHPIVOT.transform = reset_view_pitch
