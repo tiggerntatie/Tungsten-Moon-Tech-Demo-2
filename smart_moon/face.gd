@@ -2,6 +2,9 @@
 extends Node3D
 class_name MoonSmartFace
 
+signal mesh_loaded
+signal face_loaded(normal: Vector3, total_meshes: int)
+
 @export var face_normal : Vector3 = Vector3.ZERO
 @onready var SMOON = "$.."
 const MESH_PATH := "res://smart_moon/mesh_resources/"
@@ -53,7 +56,7 @@ func generate_meshes(moon_data : MoonData, resolution_power : int, chunk_resolut
 			else:
 				# local, face-relative osition of each chunk
 				generate_chunk_mesh(chunk, moon_data, 2*va/resolution, 2*vb/resolution, chunk_resolution, resource_path, collision_res_path)
-	
+	face_loaded.emit(face_normal, resolution*resolution)
 # Note: we will actually build a mesh that is larger than requested, but only generate triangles in the desired mesh
 # This function is much more complicated than typical examples because it is one mesh that will fit with its neighbors. The problem is 
 # ensuring that edge vertex normals match where two meshes come together. If they don't match, the seams between meshes become quite 
@@ -166,4 +169,9 @@ func _load_mesh(chunk : MeshInstance3D, path : String, collpath : String):
 	var shape : Shape3D = ResourceLoader.load(collpath)
 	collshape.set_shape(shape)
 	chunk.add_child(staticbody)
+	mesh_loaded.emit()
 
+
+
+func _on_face_loaded(normal, total_meshes):
+	pass # Replace with function body.

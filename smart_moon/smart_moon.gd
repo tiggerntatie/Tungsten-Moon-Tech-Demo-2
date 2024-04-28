@@ -1,6 +1,8 @@
 @tool
 extends Node3D
 
+signal meshes_loaded(value: float)
+
 @export var moon_data : MoonData:
 	set(val):
 		moon_data = val
@@ -37,6 +39,8 @@ func _process(delta):
 func on_data_changed():
 	if not Engine.is_editor_hint():
 		scale = Vector3.ONE*MOON_SCALE
+	mesh_max_count = 0
+	mesh_count = 0
 	for face in get_children():
 		face.generate_meshes(moon_data, resolution_power, chunk_resolution_power)
 	reset_high_precision_chunks()
@@ -52,6 +56,8 @@ var LEVEL : Node3D
 @onready var LogicalM =  rhoW*(PI*4/3)*pow(physical_radius,3)
 var scale_factor : float = 1.0
 var high_precision_chunks: Dictionary = {}
+var mesh_max_count : int
+var mesh_count : int
 
 # maintain a high fidelity version of moon position
 @onready var dv_position : DVector3 = DVector3.FromVector3(position):
@@ -139,3 +145,13 @@ func get_logical_from_physical(pos : Vector3) -> DVector3:
 	dv_temp_logical_position.sub(moon_position)
 	dv_temp_logical_position.rotate_y(LEVEL.current_moon_rotation)
 	return dv_temp_logical_position
+
+
+func _on_face_loaded(normal, total_meshes):
+	mesh_max_count = total_meshes
+
+
+func _on_mesh_loaded():
+	mesh_count += 1
+	if not Engine.is_editor_hint():
+		meshes_loaded.emit(mesh_count/(6*mesh_max_count))

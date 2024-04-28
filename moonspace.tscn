@@ -103,3 +103,5 @@ physics_material_override = SubResource("PhysicsMaterial_rxq0f")
 inertia = Vector3(1000, 1000, 1000)
 continuous_cd = false
 metadata/_edit_group_ = true
+
+[connection signal="meshes_loaded" from="SmartMoon" to="." method="_on_smart_moon_meshes_loaded"]

@@ -1,5 +1,7 @@
 extends Node3D
 
+signal meshes_loaded(value : float)
+
 @onready var SPACECRAFT : RigidBody3D = $Spacecraft
 @onready var CAMERA : Camera3D = $Spacecraft/YawPivot/PitchPivot/Camera3D
 @onready var XRCAMERA : XRCamera3D = $Spacecraft/XROrigin3D/XRCamera3D
@@ -257,3 +259,7 @@ func scenario_input(prev : bool, next : bool, restart : bool) -> bool:
 		load_scenario(scenario_index)
 		return true
 	return false
+
+# find a way to bring this to the loading screen!
+func _on_smart_moon_meshes_loaded(value):
+	meshes_loaded.emit(value)

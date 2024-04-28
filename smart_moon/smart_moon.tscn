@@ -169,3 +169,16 @@ face_normal = Vector3(0, 0, 1)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -300)
 script = ExtResource("6_appy7")
 face_normal = Vector3(0, 0, -1)
+
+[connection signal="face_loaded" from="FaceX+" to="." method="_on_face_loaded"]
+[connection signal="mesh_loaded" from="FaceX+" to="." method="_on_mesh_loaded"]
+[connection signal="face_loaded" from="FaceX-" to="FaceX-" method="_on_face_loaded"]
+[connection signal="mesh_loaded" from="FaceX-" to="." method="_on_mesh_loaded"]
+[connection signal="face_loaded" from="FaceY+" to="." method="_on_face_loaded"]
+[connection signal="mesh_loaded" from="FaceY+" to="." method="_on_mesh_loaded"]
+[connection signal="face_loaded" from="FaceY-" to="." method="_on_face_loaded"]
+[connection signal="mesh_loaded" from="FaceY-" to="." method="_on_mesh_loaded"]
+[connection signal="face_loaded" from="FaceZ+" to="." method="_on_face_loaded"]
+[connection signal="mesh_loaded" from="FaceZ+" to="." method="_on_mesh_loaded"]
+[connection signal="face_loaded" from="FaceZ-" to="." method="_on_face_loaded"]
+[connection signal="mesh_loaded" from="FaceZ-" to="." method="_on_mesh_loaded"]
