@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://bhsiske1duhng"]
+[gd_scene load_steps=20 format=3 uid="uid://bhsiske1duhng"]
 
 [ext_resource type="Script" path="res://spacecraft/controls/PanelButton/panel_button.gd" id="1_vc5ga"]
 [ext_resource type="Script" path="res://addons/godot-xr-tools/interactables/interactable_area_button.gd" id="2_u2ppo"]
@@ -6,6 +6,10 @@
 [ext_resource type="Animation" uid="uid://cevirj0eagdrq" path="res://addons/godot-xr-tools/hands/animations/left/Sign 1.res" id="4_by2ri"]
 [ext_resource type="Script" path="res://addons/godot-xr-tools/hands/poses/hand_pose_settings.gd" id="5_pcypn"]
 [ext_resource type="Animation" uid="uid://bcwx6a6mhsoj2" path="res://addons/godot-xr-tools/hands/animations/right/Sign 1.res" id="6_mhedx"]
+[ext_resource type="AudioStream" uid="uid://d05c1n871jqtr" path="res://spacecraft/audio/button_click_in.wav" id="7_enp8s"]
+[ext_resource type="Script" path="res://spacecraft/controls/PanelButton/click_in.gd" id="8_lw5d1"]
+[ext_resource type="AudioStream" uid="uid://c8agvv4yq23pd" path="res://spacecraft/audio/button_click_out.wav" id="9_p0jsx"]
+[ext_resource type="Script" path="res://spacecraft/controls/PanelButton/click_out.gd" id="10_y0fn7"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_glrdq"]
 size = Vector3(0.12, 0.024, 0.015)
@@ -91,6 +95,19 @@ right_pose = SubResource("Resource_8sfpx")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0486142, 0, 0.0170794)
 shape = SubResource("BoxShape3D_7grw1")
 
+[node name="ClickIn" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 0, 0)
+stream = ExtResource("7_enp8s")
+volume_db = 1.42858
+script = ExtResource("8_lw5d1")
+
+[node name="ClickOut" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 0, 0)
+stream = ExtResource("9_p0jsx")
+script = ExtResource("10_y0fn7")
+
+[connection signal="button_pressed" from="." to="ClickIn" method="_on_panel_button_pressed"]
+[connection signal="button_released" from="." to="ClickOut" method="_on_panel_button_released"]
 [connection signal="button_pressed" from="XRToolsInteractableAreaButton" to="." method="_on_button_pressed"]
 [connection signal="button_released" from="XRToolsInteractableAreaButton" to="." method="_on_button_released"]
 [connection signal="input_event" from="HandPoseArea" to="." method="_on_button_input_event"]

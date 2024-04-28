@@ -1,0 +1,5 @@
+[gd_resource type="AudioBusLayout" format=3 uid="uid://cdrsxdn2d4yfv"]
+
+[resource]
+bus/0/volume_db = 0.0694828
+bus/0/send = &"Engine Click"

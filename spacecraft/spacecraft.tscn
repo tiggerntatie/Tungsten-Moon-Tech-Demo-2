@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://c08vubwsc2swp"]
+[gd_scene load_steps=26 format=3 uid="uid://c08vubwsc2swp"]
 
 [ext_resource type="Script" path="res://spacecraft/spacecraft.gd" id="1_b8yyq"]
 [ext_resource type="ArrayMesh" uid="uid://1woisy38wlky" path="res://spacecraft/RocketModel.obj" id="2_o0qaw"]
@@ -12,6 +12,18 @@
 [ext_resource type="Script" path="res://spacecraft/landing_light.gd" id="9_u56vm"]
 [ext_resource type="PackedScene" uid="uid://neklbt0jds8q" path="res://spacecraft/controls/sidestick/sidestick.tscn" id="10_e5xbv"]
 [ext_resource type="PackedScene" uid="uid://bhsiske1duhng" path="res://spacecraft/controls/PanelButton/panel_button.tscn" id="11_jspjg"]
+[ext_resource type="AudioStream" uid="uid://boes466x3k2lw" path="res://spacecraft/audio/fan_hum.wav" id="13_huula"]
+[ext_resource type="Script" path="res://spacecraft/audio/fan_hum.gd" id="14_4f2dy"]
+[ext_resource type="AudioStream" uid="uid://cj57k6u8yyp4q" path="res://spacecraft/audio/landing_rattle.wav" id="15_4rpjs"]
+[ext_resource type="Script" path="res://spacecraft/audio/landing_rattle.gd" id="16_7xops"]
+[ext_resource type="AudioStream" uid="uid://crgrl1aopfbp" path="res://spacecraft/audio/flow_click.wav" id="17_4p3gk"]
+[ext_resource type="Script" path="res://spacecraft/audio/flow_click.gd" id="18_eedt2"]
+[ext_resource type="AudioStream" uid="uid://egrvyw8vsr5q" path="res://spacecraft/audio/thruster_burst.wav" id="19_5elai"]
+[ext_resource type="Script" path="res://spacecraft/audio/start_rotation.gd" id="20_0u0mn"]
+[ext_resource type="AudioStream" uid="uid://c5fv7cv40hgeq" path="res://spacecraft/audio/fluid_flow.wav" id="21_2fodt"]
+[ext_resource type="Script" path="res://spacecraft/audio/flow_sound.gd" id="22_g3a7g"]
+[ext_resource type="AudioStream" uid="uid://gy817b38k5sc" path="res://spacecraft/audio/thruster_hiss.wav" id="23_bstsh"]
+[ext_resource type="Script" path="res://spacecraft/audio/hold_rotation.gd" id="24_4g0p2"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_63e0r"]
 size = Vector3(7.7, 7.7, 7.7)
@@ -70,10 +82,10 @@ ranged_enable = false
 [node name="FunctionPoseDetector" parent="XROrigin3D/XRRight" instance=ExtResource("6_bteek")]
 
 [node name="YawPivot" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.83635, 5.62812, -0.574646)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 5.628, -0.575)
 
 [node name="PitchPivot" type="Node3D" parent="YawPivot"]
-transform = Transform3D(0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0, 0, 1, -0.130496, 0, 0)
+transform = Transform3D(0.974229, 0.225564, 0, -0.225564, 0.974229, 0, 0, 0, 1, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="YawPivot/PitchPivot"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
@@ -130,6 +142,46 @@ transform = Transform3D(0.187533, -0.263709, -0.946197, 0.0505527, 0.964602, -0.
 label_text = "Fill Prop. Tank"
 is_toggle = false
 
+[node name="FanHum" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.836668, 5.90087, -0.64503)
+stream = ExtResource("13_huula")
+script = ExtResource("14_4f2dy")
+
+[node name="LandingRattle" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.27699, 0)
+stream = ExtResource("15_4rpjs")
+script = ExtResource("16_7xops")
+
+[node name="FlowClick" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.37665, 0)
+stream = ExtResource("17_4p3gk")
+volume_db = -19.0
+pitch_scale = 1.38
+attenuation_filter_cutoff_hz = 500.0
+attenuation_filter_db = -49.3
+script = ExtResource("18_eedt2")
+
+[node name="StartRotation" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("19_5elai")
+volume_db = -1.39131
+script = ExtResource("20_0u0mn")
+
+[node name="FlowSound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("21_2fodt")
+volume_db = 0.714283
+script = ExtResource("22_g3a7g")
+
+[node name="HoldRotation" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("23_bstsh")
+volume_db = -31.3913
+attenuation_filter_db = -11.7
+script = ExtResource("24_4g0p2")
+
+[connection signal="has_landed" from="." to="LandingRattle" method="_on_spacecraft_has_landed"]
+[connection signal="thrust_changed" from="." to="FlowClick" method="_on_spacecraft_thrust_changed"]
+[connection signal="thrust_changed" from="." to="FlowSound" method="_on_spacecraft_thrust_changed"]
+[connection signal="torque_changed" from="." to="StartRotation" method="_on_spacecraft_torque_changed"]
+[connection signal="torque_changed" from="." to="HoldRotation" method="_on_spacecraft_torque_changed"]
 [connection signal="button_pressed" from="XROrigin3D/XRLeft" to="." method="_on_xr_left_button_pressed"]
 [connection signal="button_released" from="XROrigin3D/XRLeft" to="." method="_on_xr_left_button_released"]
 [connection signal="input_vector2_changed" from="XROrigin3D/XRLeft" to="." method="_on_xr_left_input_vector_2_changed"]
