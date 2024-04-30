@@ -136,6 +136,7 @@ func _ready():
 		if OS.has_feature("editor"):
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 			DisplayServer.window_set_size(Vector2i(1920, 1080))
+			
 	# END VR Setup	
 	# Shader setup
 	ENVIRONMENT.environment.sky.sky_material.set_shader_parameter("planet_default_light_energy", planet_default_light_energy)
