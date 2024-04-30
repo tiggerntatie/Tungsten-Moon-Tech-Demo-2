@@ -18,38 +18,34 @@ Tungsten Moon will run in VR mode if a VR headset is detected. You can use full 
 * Velocity is reported as ground-relative horizontal and vertical components.
 * To help with achieving orbit, apoapsis and periapsis altitudes are reported (A. ALT and P.ALT) for the current spacecraft altitude and velocity vector.
 
-## Controls
-The controller sticks are used to adjust your interior view, or activate exterior thrusters depending on a toggling UI mode. Toggle the mode using the Y  key/button. There is currently no visual indication of which mode you are in.
 ## Alternate Control Mode
-Pressing the right shoulder button on the controller or the SHIFT key on the keyboard toggles the ALTERNATE control mode. There is also an in-cockpit UI button that you can activate with a mouse or VR controller.
-### Interior Control Mode
-* Left stick (controller) or WASD (keyboard) control forward/backward, left/right motion inside the cockpit. Toggling the ALTERNATE control switches the X-axis stick motion or WS keys to control vertical position in the cockpit.
-* Right stick (controller) or mouse control the view direction inside the cockpit.
-### Exterior Control Mode
-* Left stick (controller) and WASD (keyboard) are currently INOPERATIVE in this mode.
-* Right stick (controller) or direction keys (keyboard) control pitch and roll thrusters. Toggling the ALTERNATE control switches between the X-axis control yaw 
-and roll thrusters. 
+Some inputs perform an alternate function. Pressing the right shoulder button on the controller or the SHIFT key on the keyboard toggles the ALTERNATE control mode. There is also an in-cockpit UI button that you can activate with a mouse or VR controller.
+### Interior View
+* D-Pad (controller) or WASD (keyboard) control forward/backward, left/right viewpoint inside the cockpit. Toggling the ALTERNATE control lets D-Pad up/down or WS keys to control vertical position in the cockpit.
+* PUSH and hold the right stick (controller) or hold the right mouse button to control the view direction inside the cockpit with the right stick or mouse.
+### Flight Controls
+* The left stick left/right (controller) or left/right keys (keyboard in ALTERNATE mode) activate the yaw (rotate left/right) thrusters.
+* The right stick (controller) or direction keys (keyboard) control pitch and roll thrusters. 
 * Keyboards that have a numeric keypad also work in the Orbiter style: pitch control with 8/2, roll with 4/6, and yaw with 1/3.
 ### Main Thrust Control
-* The thrust control starts in "locked" mode. While locked, thrust can be increased or decreased by holding the D-Pad UP or DOWN buttons (controller) or the Ctrl + PG-UP or Ctrl + PG-DN keys on a keyboard (or Ctrl + + or Ctrl + - on keypad )
+* The thrust control starts in "soft lock" mode. While locked, thrust can be increased or decreased with the left stick up/down (controller) or the Ctrl + PG-UP or Ctrl + PG-DN keys on a keyboard (or Ctrl + + or Ctrl + - on keypad)
 * The in-cockpit THROTTLE handle also works with a mouse or VR hand controller.
-* On a game controller, thrust lock is toggled using the left shoulder button. The left trigger is used to manually control the thrust from zero to maximum. Once you have a thrust level you like, press the lock button again to hold that thrust.  
-* On a keyboard, PG-UP and PG-DN (keypad + or -) immediately set and hold full or zero thrust, respectively. You can then tweak the levels using the Ctrl+ keys as desired.
+* On a game controller, thrust soft lock is toggled using the left shoulder button. The left trigger is used to manually control the thrust from zero to maximum. Once you have a thrust level you like, press the lock button again to hold that thrust.  
+* On a keyboard, PG-UP and PG-DN (keypad + or -) immediately set and hold full or zero thrust, respectively. You can then tweak the levels using the Ctrl + PG-UP and PG-DN keys.
 ### Other Controls
 * Menu button or Q key will quit the program.
-* X button or X key will toggle rotation stabilization mode (ON by default). The stabilization automatically engages when the spaceship is on the ground. You 
-have to take off before turning stabilization off.
+* X button or X key will toggle rotation stabilization mode (ON by default). 
 * There is an in-cockpit landing light toggle switch. There is no controller button or keyboard key mapped to this switch.
 * There is an in-cockpit button for refilling the propellant tank. There is no controller button or key for this.
 * B controller button or R key or LEFT VR controller B/Y button will restart at your current scenario location.
 * Left stick PUSH (controller) or V key or LEFT VR controller A/X button will reset your view position.
-* D-Pad LEFT or RIGHT, or keyboard [ or ] keys or RIGHT VR controller B/Y button will select one of five different starting locations above the surface of the moon. Your selected location will be saved and will also become the startup location the next time you run the program. The locations are:
+* Keyboard [ or ] keys or RIGHT VR controller B/Y button will select one of five different starting locations above the surface of the moon. Your selected location will be saved and will also become the startup location the next time you run the program. The locations are:
 +161 degrees longitude, 89.9 degrees latitude, 0 degrees heading
 -134 degrees longitude, +31 degrees latitude, 90 degrees heading
 +46 degrees longitude, -10 degrees latitude, 0 degrees heading
 1 degrees longitude, +85 degrees latitude, 180 degrees heading
 -80 degrees longitude, -85 degrees latitude, 0 degrees heading
-These starting positions provide various combinations of sun and/or planet shine, or complete darkness.
+These starting positions provide various combinations of sun and/or planet shine, or complete darkness. 
 
 ## How to Get Started
 * Run the program.

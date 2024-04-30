@@ -9,7 +9,7 @@ signal torque_changed(Vector3)
 const THRUST_INC = 10.0 	# Newtons
 const THRUST_MAX = 20000 	# Newtons
 const THRUST_MIN = THRUST_MAX*0.1 	# Newtons
-const THRUST_STEP_MULTIPLIER = 0.2 # 
+const THRUST_STEP_MULTIPLIER = 0.4 # 
 const FULL_FUEL = 2500 		# kg
 const ISP = 300 			# s
 const GEARTH = 9.80665 		# m/s^2
@@ -76,7 +76,6 @@ var sidestick_y : float = 0.0
 var v_last_torque := Vector3.ZERO
 
 # UI State 
-var ui_in : bool
 var rotation_rate_mode : bool
 var ui_thrust_lock : bool
 var mouse_button_2 : bool
@@ -125,7 +124,6 @@ func reset_spacecraft():
 	v_thrust = Vector3.ZERO
 	v_torque = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
-	ui_in = false
 	altitude_agl = NAN
 	STABILIZERBUTTON.set_button(true)	# turn stabilizer on
 	LANDINGLIGHTBUTTON.set_button(false)	# lights on
@@ -273,45 +271,44 @@ func _process(delta):
 	# ignore other inputs if we are chhanging scenarios
 	if not LEVEL.scenario_input(p, n, r):
 		if left_primary.y != 0.0:
-			increase_thrust(left_primary.y * delta)	# will move throttle if manipulated (up or down)
-		if Input.is_action_pressed("Thrust Increase"):
-			increase_thrust(delta)
-		elif Input.is_action_pressed("Thrust Decrease"):
-			decrease_thrust(delta)
-		elif Input.is_action_pressed("Thrust Max"):
+			change_thrust(delta, left_primary.y)	# will move throttle if manipulated (up or down)
+		change_thrust(delta, Input.get_axis("Thrust Decrease","Thrust Increase"))
+		if Input.is_action_pressed("Thrust Max", true):
 			set_thrust(1.0)
-		elif Input.is_action_pressed("Thrust Cut"):
+		elif Input.is_action_pressed("Thrust Cut", true):
 			set_thrust(0.0)
 		if not ui_thrust_lock:
 			set_thrust(Input.get_action_strength("Thrust Analog"), false)
-		if ui_in:
-			v_torque = Vector3.ZERO
-			var horiz_vel = JOY_SENS * Input.get_axis("Viewpoint Left", "Viewpoint Right")
-			var forward_vel : float = 0.0
-			var upward_vel : float = 0.0
-			if ALTCTRLBUTTON.get_button():
-				upward_vel = JOY_SENS * Input.get_axis("Viewpoint Down", "Viewpoint Up")
-			else:
-				forward_vel = JOY_SENS * Input.get_axis("Viewpoint Backward", "Viewpoint Forward")
+
+		v_torque = Vector3.ZERO
+		var horiz_vel = JOY_SENS * Input.get_axis("Viewpoint Left", "Viewpoint Right")
+		var forward_vel : float = 0.0
+		var upward_vel : float = 0.0
+		if ALTCTRLBUTTON.get_button():
+			upward_vel = JOY_SENS * Input.get_axis("Viewpoint Down", "Viewpoint Up")
+		else:
+			forward_vel = JOY_SENS * Input.get_axis("Viewpoint Backward", "Viewpoint Forward")
+		if Input.is_action_pressed("Viewpoint Pan Mode"):
 			$YawPivot.rotation.y -= JOY_SENS * Input.get_axis("Viewpoint Pan Left", "Viewpoint Pan Right")
 			$YawPivot/PitchPivot.rotation.z += JOY_SENS * Input.get_axis("Viewpoint Pan Down", "Viewpoint Pan Up")
 			$YawPivot/PitchPivot.rotation.z = clamp($YawPivot/PitchPivot.rotation.z, -PI/2, PI/2)
-			var v_move = Quaternion.from_euler(
-				Vector3(0.0, $YawPivot.rotation.y, $YawPivot/PitchPivot.rotation.z))*Vector3(forward_vel, upward_vel, horiz_vel)
-			var new_eye = $YawPivot.position + v_move
-			if (new_eye.x < 1.05 and 
-				new_eye.x > 0.0 and
-				new_eye.y > 4.5 and
-				new_eye.y < 6.05 and 
-				new_eye.z > -0.75 and new_eye.z < 0.75 and 
-				new_eye.y < (-5.0/6.0)*new_eye.x + 6.675):
-				$YawPivot.position = new_eye
 		else:
 			if ALTCTRLBUTTON.get_button():
 				SIDESTICK.set_sidestick(-(Input.get_axis("Yaw Right", "Yaw Left") - right_primary.x), Input.get_axis("Pitch Forward", "Pitch Backward") - right_primary.y)
 			else:
 				SIDESTICK.set_sidestick(-(Input.get_axis("Roll Right", "Roll Left") - right_primary.x), Input.get_axis("Pitch Forward", "Pitch Backward") - right_primary.y)
-			# oddly, this has to be here to keep the ship rotating		
+		var v_move = Quaternion.from_euler(
+			Vector3(0.0, $YawPivot.rotation.y, $YawPivot/PitchPivot.rotation.z))*Vector3(forward_vel, upward_vel, horiz_vel)
+		var new_eye = $YawPivot.position + v_move
+		if (new_eye.x < 1.05 and 
+			new_eye.x > 0.0 and
+			new_eye.y > 4.5 and
+			new_eye.y < 6.05 and 
+			new_eye.z > -0.75 and new_eye.z < 0.75 and 
+			new_eye.y < (-5.0/6.0)*new_eye.x + 6.675):
+			$YawPivot.position = new_eye
+		
+		# oddly, this has to be here to keep the ship rotating		
 		v_torque.y += Input.get_axis("Yaw Right Always", "Yaw Left Always")
 		v_torque.z += sidestick_y
 		if ALTCTRLBUTTON.get_button():
@@ -367,16 +364,12 @@ func _process(delta):
 		HUDPALT.text = "---"
 		
 	
-func increase_thrust(step : float):
-	ui_thrust_lock = true
-	thrust = clamp(thrust+step*THRUST_STEP_MULTIPLIER, 0.0, 1.0)
-	THROTTLE.set_throttle_slider(thrust)
+func change_thrust(step : float, value : float):
+	if value != 0.0:
+		ui_thrust_lock = true
+		thrust = clamp(thrust+value*step*THRUST_STEP_MULTIPLIER, 0.0, 1.0)
+		THROTTLE.set_throttle_slider(thrust)
  
-func decrease_thrust(step : float):
-	ui_thrust_lock = true
-	thrust = clamp(thrust-step*THRUST_STEP_MULTIPLIER, 0.0, 1.0)
-	THROTTLE.set_throttle_slider(thrust)
-
 func set_thrust(value : float, lock : bool = true):
 	ui_thrust_lock = lock
 	thrust = value
@@ -405,9 +398,7 @@ func _on_refuel_button_pressed(state):
 	fuel = FULL_FUEL	# FIXME this should be refilled some other way
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("Toggle In Out"):
-		ui_in = not ui_in
-	elif event.is_action_pressed("Toggle Thrust Lock"):
+	if event.is_action_pressed("Toggle Thrust Lock"):
 		ui_thrust_lock = not ui_thrust_lock
 	elif event.is_action_pressed("Alternate Control"):
 		ALTCTRLBUTTON.press_button()
