@@ -39,6 +39,7 @@ uniform float uv_albedo_scale1 : hint_range(0.001, 10);
 uniform float uv_albedo_scale2 : hint_range(0.01, 100);
 
 /*
+// see also: https://iquilezles.org/articles/texturerepetition/
 float sum( vec3 v ) { return v.x+v.y+v.z; }
 
 vec3 textureNoTile( in vec2 x, float v )
