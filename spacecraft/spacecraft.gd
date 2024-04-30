@@ -28,9 +28,9 @@ const STABILITY_MINIMUM_RATE := 0.001
 @onready var GROUNDRADAR : RayCast3D = $GroundRadar
 @onready var COLLISIONSHAPE : CollisionShape3D = $CollisionShape3D
 @onready var HUDHVEL : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_HSpeed/HVEL
-@onready var HUDHDRIFT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_HSpeed/DRIFT
+@onready var HUDHDRIFT : Control = $InstrumentPanel/SubViewport/InstrumentCanvas/L_HSpeed/DRIFT
 @onready var HUDVVEL : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_VSpeed/VVEL
-@onready var HUDVDIR : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_VSpeed/DIR
+@onready var HUDVDIR : Control = $InstrumentPanel/SubViewport/InstrumentCanvas/L_VSpeed/DIR
 @onready var HUDALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Altitude/ALT
 @onready var HUDRALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_RAltitude/RALT
 @onready var HUDTHRUST : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Thrust/THRUST
@@ -367,11 +367,11 @@ func _process(delta):
 	# altitude change direction
 	var vvel = dv_logical_position.vector3().normalized().dot(dv_logical_velocity.vector3())
 	if vvel > 0.1:
-		HUDVDIR.label_settings.font_color = Color.WHITE
+		HUDVDIR.modulate = Color.WHITE
 		HUDVDIR.visible = true
 		HUDVDIR.rotation = -PI/2.0
 	elif vvel < -0.1:
-		HUDVDIR.label_settings.font_color = Color.RED
+		HUDVDIR.modulate = Color.RED
 		HUDVDIR.visible = true
 		HUDVDIR.rotation = PI/2.0
 	else:

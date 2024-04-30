@@ -132,9 +132,10 @@ func _ready():
 		get_viewport().use_xr = false
 		CAMERA.current = true
 		XRCAMERA.current = false
-		# Use the resolution configured in the project settings when running in dev mode, otherwise:
-		if not OS.has_feature("editor"):
-			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+		# Use fullscreen set in the project settings, but when running in dev mode:
+		if OS.has_feature("editor"):
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+			DisplayServer.window_set_size(Vector2i(1920, 1080))
 	# END VR Setup	
 	# Shader setup
 	ENVIRONMENT.environment.sky.sky_material.set_shader_parameter("planet_default_light_energy", planet_default_light_energy)
