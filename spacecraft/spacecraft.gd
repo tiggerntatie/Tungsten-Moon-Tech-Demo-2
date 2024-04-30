@@ -28,7 +28,9 @@ const STABILITY_MINIMUM_RATE := 0.001
 @onready var GROUNDRADAR : RayCast3D = $GroundRadar
 @onready var COLLISIONSHAPE : CollisionShape3D = $CollisionShape3D
 @onready var HUDHVEL : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_HSpeed/HVEL
+@onready var HUDHDRIFT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_HSpeed/DRIFT
 @onready var HUDVVEL : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_VSpeed/VVEL
+@onready var HUDVDIR : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_VSpeed/DIR
 @onready var HUDALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Altitude/ALT
 @onready var HUDRALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_RAltitude/RALT
 @onready var HUDTHRUST : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Thrust/THRUST
@@ -343,10 +345,39 @@ func _process(delta):
 				
 	# HUD Updates
 	var v_ground_logical_velocity = get_landed_velocity(dv_logical_position, dv_logical_position.xz_length(), LEVEL.moon_axis_rate).vector3()
-	var hvel = dv_logical_position.vector3().normalized().cross(dv_logical_velocity.vector3()-v_ground_logical_velocity).length()
+	var v_logical_velocity = dv_logical_velocity.vector3()
+	# logical ground normal
+	var v_normal = dv_logical_position.vector3().normalized()
+	# logical velocity, relative to ground
+	var v_logical_ground_rel_velocity = v_logical_velocity-v_ground_logical_velocity
+	var v_logical_hvel = v_logical_ground_rel_velocity - v_logical_ground_rel_velocity.dot(v_normal) * v_normal
+	# scalar horizontal velocity
+	var hvel = v_logical_hvel.length()
+	# unrotated logical ground relative horizontal.. 
+	var v_global_unrot_hvel = v_logical_hvel.rotated(Vector3.UP, -LEVEL.current_moon_rotation)
+	# transformed to ship-local coordinates
+	var v_local_hvel = basis.inverse()*v_global_unrot_hvel
+	# obtain an angle in the local horizontal plane and DISPLAY it!
+	if v_local_hvel.length() < 0.1:
+		# don't display confusing information!
+		HUDHDRIFT.visible = false
+	else:
+		HUDHDRIFT.visible = true
+		HUDHDRIFT.rotation = atan2(v_local_hvel.z, v_local_hvel.x) - PI/2.0
+	# altitude change direction
 	var vvel = dv_logical_position.vector3().normalized().dot(dv_logical_velocity.vector3())
+	if vvel > 0.1:
+		HUDVDIR.label_settings.font_color = Color.WHITE
+		HUDVDIR.visible = true
+		HUDVDIR.rotation = -PI/2.0
+	elif vvel < -0.1:
+		HUDVDIR.label_settings.font_color = Color.RED
+		HUDVDIR.visible = true
+		HUDVDIR.rotation = PI/2.0
+	else:
+		HUDVDIR.visible = false
 	HUDHVEL.text = str(hvel).pad_decimals(1) + " m/s"
-	HUDVVEL.text = str(vvel).pad_decimals(1) + " m/s"
+	HUDVVEL.text = str(abs(vvel)).pad_decimals(1) + " m/s"
 	HUDALT.text = str(altitude_msl/1000.0).pad_decimals(2) + " km"
 	if is_nan(altitude_agl):
 		HUDRALT.text = "no signal"
@@ -362,6 +393,12 @@ func _process(delta):
 		HUDPALT.text = str(PA/1000.0).pad_decimals(2) + " km"
 	else:
 		HUDPALT.text = "---"
+	
+	# Calculate a horizontal drift direction
+	# get unrotated velocity
+	var v_global_velocity : Vector3 = dv_logical_velocity.vector3().rotated(Vector3.UP, -LEVEL.current_moon_rotation)
+	#print(rad_to_deg(atan2(v_global_velocity.y, v_global_velocity.x)), " ", rad_to_deg(atan2(rotation.y, rotation.x)))
+	
 		
 	
 func change_thrust(step : float, value : float):

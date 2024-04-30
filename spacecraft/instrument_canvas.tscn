@@ -1,9 +1,16 @@
-[gd_scene load_steps=2 format=3 uid="uid://cma70xnsskq6a"]
+[gd_scene load_steps=4 format=3 uid="uid://cma70xnsskq6a"]
 
 [sub_resource type="SystemFont" id="SystemFont_3k1r4"]
 
+[sub_resource type="SystemFont" id="SystemFont_eyjk2"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_p1gf0"]
+font = SubResource("SystemFont_eyjk2")
+font_size = 60
+
 [node name="InstrumentCanvas" type="CanvasLayer"]
 metadata/_edit_vertical_guides_ = [795.0]
+metadata/_edit_horizontal_guides_ = [218.0]
 
 [node name="L_Altitude" type="Label" parent="."]
 offset_left = 50.0
@@ -50,7 +57,7 @@ offset_right = 239.0
 offset_bottom = 298.0
 theme_override_fonts/font = SubResource("SystemFont_3k1r4")
 theme_override_font_sizes/font_size = 64
-text = "v speed"
+text = "v spd. "
 uppercase = true
 
 [node name="VVEL" type="Label" parent="L_VSpeed"]
@@ -62,14 +69,37 @@ theme_override_fonts/font = SubResource("SystemFont_3k1r4")
 theme_override_font_sizes/font_size = 64
 uppercase = true
 
+[node name="DIR" type="Label" parent="L_VSpeed"]
+offset_left = 220.0
+offset_right = 290.0
+offset_bottom = 88.0
+rotation = -1.5708
+pivot_offset = Vector2(35, 44)
+theme_override_fonts/font = SubResource("SystemFont_3k1r4")
+theme_override_font_sizes/font_size = 64
+text = "🠊"
+label_settings = SubResource("LabelSettings_p1gf0")
+uppercase = true
+
 [node name="L_HSpeed" type="Label" parent="."]
 offset_left = 50.0
 offset_top = 298.0
-offset_right = 330.0
+offset_right = 266.0
 offset_bottom = 386.0
 theme_override_fonts/font = SubResource("SystemFont_3k1r4")
 theme_override_font_sizes/font_size = 64
-text = "h speed"
+text = "h spd."
+uppercase = true
+
+[node name="DRIFT" type="Label" parent="L_HSpeed"]
+layout_mode = 1
+offset_left = 220.0
+offset_right = 290.0
+offset_bottom = 88.0
+pivot_offset = Vector2(35, 44)
+theme_override_fonts/font = SubResource("SystemFont_3k1r4")
+theme_override_font_sizes/font_size = 64
+text = "🠊"
 uppercase = true
 
 [node name="HVEL" type="Label" parent="L_HSpeed"]
