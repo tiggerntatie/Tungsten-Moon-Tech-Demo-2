@@ -132,9 +132,8 @@ func _ready():
 		get_viewport().use_xr = false
 		CAMERA.current = true
 		XRCAMERA.current = false
-		var display : Vector2i = DisplayServer.screen_get_size()
-		var window_size : Vector2i = DisplayServer.window_get_size()
-		if display.x < window_size.x or display.y < window_size.y:
+		# Use the resolution configured in the project settings when running in dev mode, otherwise:
+		if not OS.has_feature("editor"):
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	# END VR Setup	
 	# Shader setup
