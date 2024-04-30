@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.2", "Forward Plus")
 run/max_fps=90
 run/low_processor_mode=true
 config/icon="res://icon.svg"
+boot_splash/minimum_display_time=1000
 
 [autoload]
 
