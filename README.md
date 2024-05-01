@@ -18,7 +18,7 @@ Tungsten Moon will run in VR mode if a VR headset is detected. You can use full 
 * Velocity is reported as ground-relative horizontal and vertical components.
 * To help with achieving orbit, apoapsis and periapsis altitudes are reported (A. ALT and P.ALT) for the current spacecraft altitude and velocity vector.
 
-## Alternate Control Mode
+## Controls
 Some inputs perform an alternate function. Pressing the right shoulder button on the controller or the SHIFT key on the keyboard toggles the ALTERNATE control mode. There is also an in-cockpit UI button that you can activate with a mouse or VR controller.
 ### Interior View
 * D-Pad (controller) or WASD (keyboard) control forward/backward, left/right viewpoint inside the cockpit. Toggling the ALTERNATE control lets D-Pad up/down or WS keys to control vertical position in the cockpit.
