@@ -33,7 +33,7 @@ Some inputs perform an alternate function. Pressing the right shoulder button on
 * On a game controller, thrust soft lock is toggled using the left shoulder button. The left trigger is used to manually control the thrust from zero to maximum. Once you have a thrust level you like, press the lock button again to hold that thrust.  
 * On a keyboard, PG-UP and PG-DN (keypad + or -) immediately set and hold full or zero thrust, respectively. You can then tweak the levels using the Ctrl + PG-UP and PG-DN keys.
 ### Other Controls
-* Menu button or Q key will quit the program.
+* Menu button or Q or ESC key will quit the program.
 * X button or X key will toggle rotation stabilization mode (ON by default). 
 * There is an in-cockpit landing light toggle switch. There is no controller button or keyboard key mapped to this switch.
 * There is an in-cockpit button for refilling the propellant tank. There is no controller button or key for this.
