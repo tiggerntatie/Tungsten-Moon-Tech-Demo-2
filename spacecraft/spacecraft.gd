@@ -48,6 +48,7 @@ const STABILITY_MINIMUM_RATE := 0.001
 @onready var ALTCTRLBUTTON : Node3D = $AltCtrlButton
 @onready var STABILIZERBUTTON : Node3D = $StabilizerButton
 @onready var LANDINGLIGHTBUTTON : Node3D = $LandingLightButton
+@onready var ATTITUDEBALL : Node3D = $AttitudeBall
 @onready var dv_logical_position := DVector3.new()
 @onready var dv_logical_velocity := DVector3.new(0,0,0)
 @onready var dv_gravity_force := DVector3.new()
@@ -89,6 +90,10 @@ var right_ax := false
 var right_by := false
 var left_primary := Vector2.ZERO
 var right_primary := Vector2.ZERO
+
+# Tracking rotation
+var initial_rotation : Vector3
+
 	
 # Calculate new position and velocity for each step
 # 4th order runge kutte integration
@@ -131,6 +136,10 @@ func reset_spacecraft():
 	LANDINGLIGHTBUTTON.set_button(false)	# lights on
 	set_thrust(0.0)
 	reset_viewpoint()
+	# initial orientation experiments
+	var angles = basis.get_euler()
+	print(rad_to_deg(angles.x), " ", rad_to_deg(angles.y), " ", rad_to_deg(angles.z),)
+	initial_rotation = rotation
 
 # reset the pilot viewpoint
 func reset_viewpoint():
@@ -392,14 +401,10 @@ func _process(delta):
 	if PA > 0.0:
 		HUDPALT.text = str(PA/1000.0).pad_decimals(2) + " km"
 	else:
-		HUDPALT.text = "---"
+		HUDPALT.text = "---"		
 	
-	# Calculate a horizontal drift direction
-	# get unrotated velocity
-	var v_global_velocity : Vector3 = dv_logical_velocity.vector3().rotated(Vector3.UP, -LEVEL.current_moon_rotation)
-	#print(rad_to_deg(atan2(v_global_velocity.y, v_global_velocity.x)), " ", rad_to_deg(atan2(rotation.y, rotation.x)))
-	
-		
+	# Experiment with the ball
+	ATTITUDEBALL.orientation = (rotation-initial_rotation).rotated(Vector3.UP, -PI/2.0)
 	
 func change_thrust(step : float, value : float):
 	if value != 0.0:

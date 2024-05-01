@@ -1,0 +1,61 @@
+[gd_scene load_steps=9 format=3 uid="uid://c1dlge57vtwna"]
+
+[ext_resource type="Texture2D" uid="uid://bqf7wjkm1sdvo" path="res://spacecraft/instruments/attitude_ball/AIBall.png" id="1_a12wi"]
+[ext_resource type="Script" path="res://spacecraft/instruments/attitude_ball/attitude_ball.gd" id="1_q07ae"]
+[ext_resource type="PackedScene" uid="uid://bhsiske1duhng" path="res://spacecraft/controls/PanelButton/panel_button.tscn" id="2_raoxe"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_56w3p"]
+albedo_texture = ExtResource("1_a12wi")
+
+[sub_resource type="SphereMesh" id="SphereMesh_75qd4"]
+material = SubResource("StandardMaterial3D_56w3p")
+radius = 0.04
+height = 0.08
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_funjo"]
+radius = 0.04
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5vml6"]
+albedo_color = Color(0.223529, 0.223529, 0.223529, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_2rpu3"]
+size = Vector2(0.085, 0.085)
+
+[node name="AttitudeBall" type="Node3D"]
+script = ExtResource("1_q07ae")
+
+[node name="Ball" type="StaticBody3D" parent="."]
+transform = Transform3D(0.999903, 0.000194943, 0.0139608, 0, 0.999903, -0.0139622, -0.0139622, 0.0139608, 0.999805, 0, 0, 0)
+
+[node name="Ball" type="MeshInstance3D" parent="Ball"]
+transform = Transform3D(-0.996171, 0, 0.0871532, 0, 0.99998, 0, -0.0871538, 0, -0.996164, 0, 0, 0)
+layers = 4
+mesh = SubResource("SphereMesh_75qd4")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ball"]
+shape = SubResource("SphereShape3D_funjo")
+
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+layers = 4
+material_override = SubResource("StandardMaterial3D_5vml6")
+
+[node name="CSGMesh3D" type="CSGMesh3D" parent="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.022, 0)
+mesh = SubResource("PlaneMesh_2rpu3")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0050833, 0.013)
+size = Vector3(0.09, 0.09, 0.115)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="CSGCombiner3D/CSGBox3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, -0.012)
+operation = 2
+size = Vector3(0.085, 0.085, 0.085)
+
+[node name="ResetButton" parent="." instance=ExtResource("2_raoxe")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.058, 0.033)
+label_text = "RESET"
+base_width = 0.089
+state = true
+layers = 4

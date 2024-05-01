@@ -12,18 +12,23 @@
 [ext_resource type="Script" path="res://spacecraft/controls/PanelButton/click_out.gd" id="10_y0fn7"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_glrdq"]
+resource_local_to_scene = true
 size = Vector3(0.12, 0.024, 0.015)
 
 [sub_resource type="BoxMesh" id="BoxMesh_g8lmw"]
+resource_local_to_scene = true
 size = Vector3(0.12, 0.024, 0.015)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_acs1d"]
+resource_local_to_scene = true
 albedo_color = Color(0.223529, 0.223529, 0.223529, 1)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_o3a7i"]
+resource_local_to_scene = true
 size = Vector3(0.02, 0.02, 0.01)
 
 [sub_resource type="BoxMesh" id="BoxMesh_lmgeq"]
+resource_local_to_scene = true
 size = Vector3(0.02, 0.02, 0.01)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nl7w2"]
@@ -42,6 +47,7 @@ open_pose = ExtResource("6_mhedx")
 closed_pose = ExtResource("6_mhedx")
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_7grw1"]
+resource_local_to_scene = true
 size = Vector3(0.025, 0.025, 0.008)
 
 [node name="PanelButton" type="Node3D"]
@@ -59,7 +65,7 @@ mesh = SubResource("BoxMesh_g8lmw")
 surface_material_override/0 = SubResource("StandardMaterial3D_acs1d")
 
 [node name="Label3D" type="Label3D" parent="ButtonBase"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0323527, 0.000149272, 0.00868278)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.032, 0.000149272, 0.00868278)
 pixel_size = 0.0004
 horizontal_alignment = 0
 
@@ -92,7 +98,7 @@ left_pose = SubResource("Resource_hb5u4")
 right_pose = SubResource("Resource_8sfpx")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="HandPoseArea"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0486142, 0, 0.0170794)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.048, 0, 0.0170794)
 shape = SubResource("BoxShape3D_7grw1")
 
 [node name="ClickIn" type="AudioStreamPlayer3D" parent="."]

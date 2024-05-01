@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://c08vubwsc2swp"]
+[gd_scene load_steps=27 format=3 uid="uid://c08vubwsc2swp"]
 
 [ext_resource type="Script" path="res://spacecraft/spacecraft.gd" id="1_b8yyq"]
 [ext_resource type="ArrayMesh" uid="uid://1woisy38wlky" path="res://spacecraft/RocketModel.obj" id="2_o0qaw"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://neklbt0jds8q" path="res://spacecraft/controls/sidestick/sidestick.tscn" id="10_e5xbv"]
 [ext_resource type="PackedScene" uid="uid://bhsiske1duhng" path="res://spacecraft/controls/PanelButton/panel_button.tscn" id="11_jspjg"]
 [ext_resource type="AudioStream" uid="uid://boes466x3k2lw" path="res://spacecraft/audio/fan_hum.wav" id="13_huula"]
+[ext_resource type="PackedScene" uid="uid://c1dlge57vtwna" path="res://spacecraft/instruments/attitude_ball/attitude_ball.tscn" id="13_ufkbg"]
 [ext_resource type="Script" path="res://spacecraft/audio/fan_hum.gd" id="14_4f2dy"]
 [ext_resource type="AudioStream" uid="uid://cj57k6u8yyp4q" path="res://spacecraft/audio/landing_rattle.wav" id="15_4rpjs"]
 [ext_resource type="Script" path="res://spacecraft/audio/landing_rattle.gd" id="16_7xops"]
@@ -145,6 +146,9 @@ label_text = "Landing Light"
 transform = Transform3D(0.187533, -0.263709, -0.946197, 0.0505527, 0.964602, -0.258819, 0.980956, 0.000704471, 0.194226, 1.28674, 5.53516, -0.368)
 label_text = "Fill Prop. Tank"
 is_toggle = false
+
+[node name="AttitudeBall" parent="." instance=ExtResource("13_ufkbg")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.31126, 5.4708, -0.365528)
 
 [node name="FanHum" type="AudioStreamPlayer3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.836668, 5.90087, -0.64503)

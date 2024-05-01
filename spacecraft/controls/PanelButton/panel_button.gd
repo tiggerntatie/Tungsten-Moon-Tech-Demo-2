@@ -14,11 +14,27 @@ signal button_set(state: bool)
 		label_text = value
 		$ButtonBase/Label3D.text = value
 
+const default_base_width : float = 0.12
+@export var base_width : float =  default_base_width:
+	set(value):
+		base_width = value
+		var shift_x =  (default_base_width - value)/2
+		$ButtonBase/MeshInstance3D.mesh.size.x = value
+		$ButtonBase/CollisionShape3D.shape.size.x = value
+		$ButtonBase/Label3D.position.x = -0.032 + shift_x
+		$Button/CollisionShape3D.position.x = -0.048 + shift_x
+		$Button/MeshInstance3D.position.x = -0.048 + shift_x
+		$XRToolsInteractableAreaButton/CollisionShape3D.position.x = -0.048 + shift_x
+		$HandPoseArea/CollisionShape3D.position.x = -0.048 + shift_x
+		
 ## Toggle Button
 @export var is_toggle : bool = true
 
 ## Initial button state
-@export var state : bool = false
+@export var state : bool = false:
+	set(value):
+		state = value
+		_set_state()
 
 ## Render Layer
 @export_flags_2d_render var layers:
@@ -27,8 +43,11 @@ signal button_set(state: bool)
 		$ButtonBase/MeshInstance3D.layers = value
 		$Button/MeshInstance3D.layers = value
 
+func _set_state() -> void:
+	$Button/MeshInstance3D.get_surface_override_material(0).emission_enabled = state
+
 func _ready():
-	BUTTON.get_surface_override_material(0).emission_enabled = state
+	_set_state()
 
 func _on_button_pressed(button):
 	press_button()
