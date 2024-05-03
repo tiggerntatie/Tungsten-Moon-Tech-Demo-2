@@ -3,6 +3,8 @@ class_name Spacecraft
 extends RigidBody3D
 
 signal has_landed
+signal has_lifted_off
+signal state_updated(Spacecraft)	# pass spacecraft
 signal thrust_changed(float)
 signal torque_changed(Vector3)
 
@@ -91,9 +93,6 @@ var right_by := false
 var left_primary := Vector2.ZERO
 var right_primary := Vector2.ZERO
 
-# Tracking rotation
-var initial_rotation : Vector3
-
 	
 # Calculate new position and velocity for each step
 # 4th order runge kutte integration
@@ -136,10 +135,6 @@ func reset_spacecraft():
 	LANDINGLIGHTBUTTON.set_button(false)	# lights on
 	set_thrust(0.0)
 	reset_viewpoint()
-	# initial orientation experiments
-	var angles = basis.get_euler()
-	print(rad_to_deg(angles.x), " ", rad_to_deg(angles.y), " ", rad_to_deg(angles.z),)
-	initial_rotation = rotation
 
 # reset the pilot viewpoint
 func reset_viewpoint():
@@ -259,6 +254,7 @@ func _process(delta):
 
 			v_thrust_global += dv_restoring_force.vector3()
 	else: # agl is undefined or above zero
+		has_lifted_off.emit()
 		angular_damp = 0
 		dv_captured_logical_position = null
 
@@ -403,8 +399,8 @@ func _process(delta):
 	else:
 		HUDPALT.text = "---"		
 	
-	# Experiment with the ball
-	ATTITUDEBALL.orientation = (rotation-initial_rotation).rotated(Vector3.UP, -PI/2.0)
+	# Inform interested parties!
+	state_updated.emit(self)
 	
 func change_thrust(step : float, value : float):
 	if value != 0.0:
