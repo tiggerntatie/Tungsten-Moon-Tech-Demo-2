@@ -6,7 +6,7 @@ signal has_landed
 signal has_lifted_off
 signal state_updated(Spacecraft)	# pass spacecraft
 signal thrust_changed(float)
-signal torque_changed(Vector3)
+signal torque_changed(Vector3, float) # new torque, threshold value
 
 const THRUST_INC = 10.0 	# Newtons
 const THRUST_MAX = 20000 	# Newtons
@@ -22,8 +22,10 @@ const VERT_SPRING_K = 50000 # N/m
 const HORIZ_SPRING_K = 10000 # N/m
 const SPRING_K : Vector3 = Vector3(50000, 50000, 50000)
 const SPRING_DAMP : Vector3 = Vector3(10000, 10000, 10000)
-const STABILITY_COEFFICIENT := 10.0	# for stability feedback loop
-const STABILITY_MINIMUM_RATE := 0.001
+const STABILITY_COEFFICIENT := 20.0	# for stability feedback loop
+const STABILITY_MINIMUM_RATE := 0.0001
+const RATE_FROM_TORQUE := 0.1	# how a torque command translates to rad/sec in rate mode
+const TORQUE_THRESHOLD := 0.01	# torque below which we can turn off the sound
 
 @onready var LEVEL : Node3D = $".."
 @onready var MOON : Node3D = $"../SmartMoon"
@@ -287,7 +289,6 @@ func _process(delta):
 		if not ui_thrust_lock:
 			set_thrust(Input.get_action_strength("Thrust Analog"), false)
 
-		v_torque = Vector3.ZERO
 		var horiz_vel = JOY_SENS * Input.get_axis("Viewpoint Left", "Viewpoint Right")
 		var forward_vel : float = 0.0
 		var upward_vel : float = 0.0
@@ -316,6 +317,7 @@ func _process(delta):
 			$YawPivot.position = new_eye
 		
 		# oddly, this has to be here to keep the ship rotating		
+		v_torque = Vector3.ZERO
 		v_torque.y += Input.get_axis("Yaw Right Always", "Yaw Left Always")
 		v_torque.z += sidestick_y
 		if ALTCTRLBUTTON.get_button():
@@ -323,15 +325,21 @@ func _process(delta):
 		else:
 			v_torque.x += sidestick_x
 		# rotational stabilization, but only if we're not damping oscillations using angular_damp
-		var angular_rate := angular_velocity.length()
-		if rotation_rate_mode and angular_rate > STABILITY_MINIMUM_RATE and (angular_damp == 0.0):
-			# convert torque to local space, adjust for ship moment of inertia
-			var v_correction_torque = basis.inverse() * (-angular_velocity * STABILITY_COEFFICIENT)
-			#if v_correction_torque.length() < STABILITY_MINIMUM_TORQUE:
-			#	v_correction_torque = Vector3.ZERO
-			v_torque += v_correction_torque.limit_length()
-		if (v_last_torque == Vector3.ZERO and v_torque != Vector3.ZERO) or (v_last_torque != Vector3.ZERO and v_torque == Vector3.ZERO) :
-			torque_changed.emit(v_torque)
+		# a body that is not rotating in global game space is actually spinning with the moon rate
+		if rotation_rate_mode:
+			# rate mode. Convert commanded torque (body coords) to a rotational rate in global space
+			var v_commanded_rate = basis * v_torque * RATE_FROM_TORQUE
+			var corrected_angular_velocity : Vector3 = angular_velocity + Vector3.UP*LEVEL.moon_axis_rate - v_commanded_rate
+			var corrected_angular_rate := corrected_angular_velocity.length()
+			if  corrected_angular_rate > STABILITY_MINIMUM_RATE and (angular_damp == 0.0):
+				# convert torque to local space, adjust for ship moment of inertia
+				var v_correction_torque = basis.inverse() * (-corrected_angular_velocity * STABILITY_COEFFICIENT)
+				#if v_correction_torque.length() < STABILITY_MINIMUM_TORQUE:
+				#	v_correction_torque = Vector3.ZERO
+				v_torque += v_correction_torque.limit_length()
+		if ((v_last_torque.length() < TORQUE_THRESHOLD and v_torque.length() >= TORQUE_THRESHOLD) or 
+			(v_last_torque.length() >= TORQUE_THRESHOLD and v_torque.length() < TORQUE_THRESHOLD)) :
+			torque_changed.emit(v_torque, TORQUE_THRESHOLD)
 		v_last_torque = v_torque
 		# convert back to global spacce and apply
 		apply_torque(basis * v_torque * delta * 10000)

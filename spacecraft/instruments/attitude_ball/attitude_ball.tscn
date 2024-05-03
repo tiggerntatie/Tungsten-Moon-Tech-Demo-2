@@ -29,7 +29,7 @@ script = ExtResource("1_q07ae")
 transform = Transform3D(0.999903, 0.000194943, 0.0139608, 0, 0.999903, -0.0139622, -0.0139622, 0.0139608, 0.999805, 0, 0, 0)
 
 [node name="Ball" type="MeshInstance3D" parent="Ball"]
-transform = Transform3D(0.999936, 0, 0, 0, 0.999915, 0, 0, 0, 0.999895, 0, 0, 0)
+transform = Transform3D(0.999931, 0, 0, 0, 0.999905, 0, 0, 0, 0.999891, 0, 0, 0)
 layers = 4
 mesh = SubResource("SphereMesh_75qd4")
 

@@ -37,6 +37,8 @@ var saved_ship : Spacecraft
 var suspend_orientation : bool = false
 var reset_in_progress : bool = false
 var reset_weight : float
+var time_since_reset : float = 0.0
+var moon_rotation : float = 0.0
 
 func _orient_ball_from_angles()->void:
 	$Ball/Ball.rotation_degrees = Vector3(0.0, 0.0, 0.0)
@@ -46,10 +48,12 @@ func _orient_ball_from_angles()->void:
 	
 func _on_spacecraft_state_update(ship : Spacecraft):
 	saved_ship = ship
-	current_orientation = ship.basis.get_rotation_quaternion()
+	current_orientation = ship.basis.rotated(Vector3.UP, moon_rotation).get_rotation_quaternion()
 
+	
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	time_since_reset = 0.0
 	reset_in_progress = false
 	_orient_ball_from_angles()
 
@@ -58,6 +62,9 @@ func _process(delta):
 	if Engine.is_editor_hint():
 		return
 	var reference : Quaternion = reference_orientation
+	time_since_reset += delta
+	#moon_rotation = Quaternion(Vector3.UP, saved_ship.LEVEL.moon_axis_rate*time_since_reset*500.0)
+	moon_rotation = saved_ship.LEVEL.moon_axis_rate*time_since_reset
 	if reset_in_progress:
 		reset_weight = clamp(reset_weight + delta, 0.0, TIME_TO_FAST_RESET)
 		reference = reference_orientation.slerp(target_orientation, pow(reset_weight/TIME_TO_FAST_RESET, 0.2))
@@ -71,8 +78,10 @@ func _process(delta):
 	#$Ball/Ball.
 
 func _on_reset_button_pressed(state):
-	if saved_ship.angular_velocity.length() < saved_ship.STABILITY_MINIMUM_RATE:
+	# ship must be close to not rotating
+	if saved_ship.angular_damp or abs(saved_ship.angular_velocity.length() - saved_ship.LEVEL.moon_axis_rate) < saved_ship.STABILITY_MINIMUM_RATE:
 		reset_in_progress = true
+		time_since_reset = 0.0
 		reset_weight = 0.0
 		target_orientation = saved_ship.quaternion
 

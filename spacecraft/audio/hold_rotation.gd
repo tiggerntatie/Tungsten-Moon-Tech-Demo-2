@@ -2,8 +2,8 @@ extends AudioStreamPlayer3D
 
 var timer : SceneTreeTimer = null
 
-func _on_spacecraft_torque_changed(value : Vector3):
-	if value == Vector3.ZERO:
+func _on_spacecraft_torque_changed(value : Vector3, threshold: float):
+	if value.length() < threshold:
 		stop()
 	else:
 		start_timer()

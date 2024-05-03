@@ -67,9 +67,9 @@ scenario_list = [{
 "long": 1.0
 }, {
 "altitude": 3.0,
-"heading": 0.0,
-"lat": -85.0,
-"long": 280.0
+"heading": 90.0,
+"lat": 45.0,
+"long": 120.0
 }]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
