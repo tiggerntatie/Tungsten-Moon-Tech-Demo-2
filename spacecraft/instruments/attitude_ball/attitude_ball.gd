@@ -81,7 +81,7 @@ func _process(delta):
 		return
 	var reference : Quaternion = reference_orientation
 	time_since_reset += delta
-	moon_rotation = saved_ship.LEVEL.moon_axis_rate*time_since_reset*500.0
+	moon_rotation = saved_ship.LEVEL.moon_axis_rate*time_since_reset
 	if reset_in_progress:
 		reset_weight = clamp(reset_weight + delta, 0.0, TIME_TO_FAST_RESET)
 		reference = reference_orientation.slerp(target_orientation, pow(reset_weight/TIME_TO_FAST_RESET, 0.2))
@@ -110,3 +110,11 @@ func _on_reset_button_released():
 	if not reset_in_progress:
 		# do not signify that reset is underway
 		$ResetButton.state = true
+
+
+func _on_spacecraft_has_landed():
+	pass # Replace with function body.
+
+
+func _on_spacecraft_has_lifted_off():
+	pass # Replace with function body.

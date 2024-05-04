@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://c1dlge57vtwna"]
+[gd_scene load_steps=13 format=3 uid="uid://c1dlge57vtwna"]
 
 [ext_resource type="Texture2D" uid="uid://bqf7wjkm1sdvo" path="res://spacecraft/instruments/attitude_ball/AIBall.png" id="1_a12wi"]
 [ext_resource type="Script" path="res://spacecraft/instruments/attitude_ball/attitude_ball.gd" id="1_q07ae"]
@@ -21,6 +21,28 @@ albedo_color = Color(0.223529, 0.223529, 0.223529, 1)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_2rpu3"]
 size = Vector2(0.085, 0.085)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_fg5ff"]
+resource_local_to_scene = true
+radius = 1.0
+height = 7.0
+radial_segments = 4
+rings = 2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_011fy"]
+albedo_color = Color(0.941176, 0.564706, 0, 1)
+emission_enabled = true
+emission = Color(0.941176, 0.564706, 0, 1)
+emission_energy_multiplier = 0.5
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_yqded"]
+radius = 1.0
+height = 10.0
+radial_segments = 4
+rings = 2
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ikvax"]
+size = Vector3(0.025, 0.003, 0.002)
 
 [node name="AttitudeBall" type="Node3D"]
 script = ExtResource("1_q07ae")
@@ -61,6 +83,35 @@ base_width = 0.089
 is_toggle = false
 state = true
 layers = 4
+
+[node name="VirtualWings" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.04)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="VirtualWings"]
+transform = Transform3D(0.000642788, 0.000766044, 0, -0.000766044, 0.000642788, 0, 0, 0, 0.001, 0.002, -0.003, 0)
+mesh = SubResource("CapsuleMesh_fg5ff")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_011fy")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="VirtualWings"]
+transform = Transform3D(0.000642788, -0.000766044, 0, 0.000766044, 0.000642788, 0, 0, 0, 0.001, -0.002, -0.003, 0)
+mesh = SubResource("CapsuleMesh_fg5ff")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_011fy")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="VirtualWings"]
+transform = Transform3D(-4.37114e-11, -0.001, 0, 0.001, -4.37114e-11, 0, 0, 0, 0.001, 0.008, -0.001, 0)
+mesh = SubResource("CapsuleMesh_yqded")
+surface_material_override/0 = SubResource("StandardMaterial3D_011fy")
+
+[node name="MeshInstance3D4" type="MeshInstance3D" parent="VirtualWings"]
+transform = Transform3D(-4.37114e-11, -0.001, 0, 0.001, -4.37114e-11, 0, 0, 0, 0.001, -0.008, -0.001, 0)
+mesh = SubResource("CapsuleMesh_yqded")
+surface_material_override/0 = SubResource("StandardMaterial3D_011fy")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="VirtualWings"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.002, 0)
+shape = SubResource("BoxShape3D_ikvax")
 
 [connection signal="button_pressed" from="ResetButton" to="." method="_on_reset_button_pressed"]
 [connection signal="button_released" from="ResetButton" to="." method="_on_reset_button_released"]
