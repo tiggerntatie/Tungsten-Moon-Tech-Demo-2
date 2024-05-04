@@ -18,14 +18,30 @@ extends Node3D
 		roll_degrees = value
 		if not suspend_orientation:
 			_orient_ball_from_angles()
+
+var heading : float = deg_to_rad(heading_degrees):
+	set(value):
+		heading = value
+		heading_degrees = rad_to_deg(value)
 		
+var pitch : float = deg_to_rad(pitch_degrees):
+	set(value):
+		pitch = value
+		pitch_degrees = rad_to_deg(value)
+		
+var roll : float = deg_to_rad(roll_degrees):
+	set(value):
+		roll = value
+		roll_degrees = rad_to_deg(value)
+		
+
 var orientation : Vector3 = Vector3(0.0, 0.0, 0.0):
 	set(value):
 		orientation = value
 		suspend_orientation = true
-		heading_degrees = rad_to_deg(value.y)
-		pitch_degrees = rad_to_deg(value.x)
-		roll_degrees = rad_to_deg(value.z)
+		heading = value.y
+		pitch = value.x
+		roll = value.z
 		suspend_orientation = false
 		_orient_ball_from_angles()
 
@@ -48,6 +64,8 @@ func _orient_ball_from_angles()->void:
 	
 func _on_spacecraft_state_update(ship : Spacecraft):
 	saved_ship = ship
+	# the game global frame is stationary (the moon), but it is really rotating, so 
+	# we need to add the rotation in for display purposese
 	current_orientation = ship.basis.rotated(Vector3.UP, moon_rotation).get_rotation_quaternion()
 
 	
@@ -63,8 +81,7 @@ func _process(delta):
 		return
 	var reference : Quaternion = reference_orientation
 	time_since_reset += delta
-	#moon_rotation = Quaternion(Vector3.UP, saved_ship.LEVEL.moon_axis_rate*time_since_reset*500.0)
-	moon_rotation = saved_ship.LEVEL.moon_axis_rate*time_since_reset
+	moon_rotation = saved_ship.LEVEL.moon_axis_rate*time_since_reset*500.0
 	if reset_in_progress:
 		reset_weight = clamp(reset_weight + delta, 0.0, TIME_TO_FAST_RESET)
 		reference = reference_orientation.slerp(target_orientation, pow(reset_weight/TIME_TO_FAST_RESET, 0.2))
@@ -73,10 +90,13 @@ func _process(delta):
 			$ResetButton.state = true
 			reference_orientation = target_orientation
 			reference = target_orientation
-	var angles : Vector3 = (reference.inverse()*current_orientation).get_euler()  
-	orientation = Vector3(angles.z, -angles.y, -angles.x)
-	#$Ball/Ball.
-
+	# This gives us the net rotation of the ship since the ball was reset
+	var deltaq := reference.inverse()*current_orientation
+	# This transforms the delta quaternion of the ship to the ball, taking into account 
+	# the differnt "forward" axis of the ship and the ball, and
+	# the fact that roll rotation is reversed in a nav ball.
+	$Ball/Ball.quaternion = Quaternion(deltaq.z, deltaq.y, deltaq.x, deltaq.w)
+	
 func _on_reset_button_pressed(state):
 	# ship must be close to not rotating
 	if saved_ship.angular_damp or abs(saved_ship.angular_velocity.length() - saved_ship.LEVEL.moon_axis_rate) < saved_ship.STABILITY_MINIMUM_RATE:
