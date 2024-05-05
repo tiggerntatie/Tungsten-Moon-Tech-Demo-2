@@ -1,12 +1,14 @@
-[gd_scene load_steps=13 format=3 uid="uid://c1dlge57vtwna"]
+[gd_scene load_steps=15 format=3 uid="uid://c1dlge57vtwna"]
 
 [ext_resource type="Texture2D" uid="uid://bqf7wjkm1sdvo" path="res://spacecraft/instruments/attitude_ball/AIBall.png" id="1_a12wi"]
 [ext_resource type="Script" path="res://spacecraft/instruments/attitude_ball/attitude_ball.gd" id="1_q07ae"]
 [ext_resource type="PackedScene" uid="uid://bhsiske1duhng" path="res://spacecraft/controls/PanelButton/panel_button.tscn" id="2_raoxe"]
+[ext_resource type="AudioStream" uid="uid://q30hpi85cirn" path="res://spacecraft/instruments/attitude_ball/nav_ball.wav" id="4_dbkhy"]
+[ext_resource type="Script" path="res://spacecraft/instruments/attitude_ball/nav_ball_sound.gd" id="5_7ovt0"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_56w3p"]
 albedo_texture = ExtResource("1_a12wi")
-uv1_offset = Vector3(0.5139, 0, 0)
+uv1_offset = Vector3(0.513, 0.004, 0)
 
 [sub_resource type="SphereMesh" id="SphereMesh_75qd4"]
 material = SubResource("StandardMaterial3D_56w3p")
@@ -51,7 +53,7 @@ script = ExtResource("1_q07ae")
 transform = Transform3D(0.999903, 0.000194943, 0.0139608, 0, 0.999903, -0.0139622, -0.0139622, 0.0139608, 0.999805, 0, 0, 0)
 
 [node name="Ball" type="MeshInstance3D" parent="Ball"]
-transform = Transform3D(0.999931, 0, 0, 0, 0.999904, 0, 0, 0, 0.99989, 0, 0, 0)
+transform = Transform3D(0.540265, 0, 0.841378, 0, 0.999904, 0, -0.841413, 0, 0.540243, 0, 0, 0)
 layers = 4
 mesh = SubResource("SphereMesh_75qd4")
 
@@ -88,24 +90,24 @@ layers = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.04)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="VirtualWings"]
-transform = Transform3D(0.000642788, 0.000766044, 0, -0.000766044, 0.000642788, 0, 0, 0, 0.001, 0.002, -0.003, 0)
+transform = Transform3D(0.000642788, 0.000766044, 0, -0.000766044, 0.000642788, 0, 0, 0, 0.001, 0.003, -0.003, 0)
 mesh = SubResource("CapsuleMesh_fg5ff")
 skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("StandardMaterial3D_011fy")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="VirtualWings"]
-transform = Transform3D(0.000642788, -0.000766044, 0, 0.000766044, 0.000642788, 0, 0, 0, 0.001, -0.002, -0.003, 0)
+transform = Transform3D(0.000642788, -0.000766044, 0, 0.000766044, 0.000642788, 0, 0, 0, 0.001, -0.001, -0.003, 0)
 mesh = SubResource("CapsuleMesh_fg5ff")
 skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("StandardMaterial3D_011fy")
 
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="VirtualWings"]
-transform = Transform3D(-4.37114e-11, -0.001, 0, 0.001, -4.37114e-11, 0, 0, 0, 0.001, 0.008, -0.001, 0)
+transform = Transform3D(-4.37114e-11, -0.001, 0, 0.001, -4.37114e-11, 0, 0, 0, 0.001, 0.009, -0.001, 0)
 mesh = SubResource("CapsuleMesh_yqded")
 surface_material_override/0 = SubResource("StandardMaterial3D_011fy")
 
 [node name="MeshInstance3D4" type="MeshInstance3D" parent="VirtualWings"]
-transform = Transform3D(-4.37114e-11, -0.001, 0, 0.001, -4.37114e-11, 0, 0, 0, 0.001, -0.008, -0.001, 0)
+transform = Transform3D(-4.37114e-11, -0.001, 0, 0.001, -4.37114e-11, 0, 0, 0, 0.001, -0.007, -0.001, 0)
 mesh = SubResource("CapsuleMesh_yqded")
 surface_material_override/0 = SubResource("StandardMaterial3D_011fy")
 
@@ -113,5 +115,13 @@ surface_material_override/0 = SubResource("StandardMaterial3D_011fy")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.002, 0)
 shape = SubResource("BoxShape3D_ikvax")
 
+[node name="NavBall" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("4_dbkhy")
+volume_db = -40.5411
+pitch_scale = 2.0
+script = ExtResource("5_7ovt0")
+
+[connection signal="orientation_changed" from="." to="NavBall" method="_on_attitude_ball_orientation_changed"]
+[connection signal="orientation_stopped" from="." to="NavBall" method="_on_attitude_ball_orientation_stopped"]
 [connection signal="button_pressed" from="ResetButton" to="." method="_on_reset_button_pressed"]
 [connection signal="button_released" from="ResetButton" to="." method="_on_reset_button_released"]

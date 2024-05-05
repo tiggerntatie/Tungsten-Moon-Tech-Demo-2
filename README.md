@@ -16,6 +16,7 @@ Tungsten Moon will run in VR mode if a VR headset is detected. You can use full 
 * There are several starting locations on the moon that you can choose from, with a very primitive UI. 
 * A "radar altimeter" mode activates below 1000 meters altitude and will read correctly down to the surface of the planet.
 * Velocity is reported as ground-relative horizontal and vertical components.
+* An attitude "nav ball" helps to orient the pilot.
 * To help with achieving orbit, apoapsis and periapsis altitudes are reported (A. ALT and P.ALT) for the current spacecraft altitude and velocity vector.
 
 ## Controls
@@ -34,13 +35,13 @@ Some inputs perform an alternate function. Pressing the right shoulder button on
 * On a keyboard, PG-UP and PG-DN (keypad + or -) immediately set and hold full or zero thrust, respectively. You can then tweak the levels using the Ctrl + PG-UP and PG-DN keys.
 ### Other Controls
 * Menu button or Q or ESC key will quit the program.
-* X button or X key will toggle rotation stabilization mode (ON by default). 
+* X button or X key will toggle attitude rate mode (ON by default). 
 * There is an in-cockpit landing light toggle switch. There is no controller button or keyboard key mapped to this switch.
 * There is an in-cockpit button for refilling the propellant tank. There is no controller button or key for this.
 * B controller button or R key or LEFT VR controller B/Y button will restart at your current scenario location.
 * Left stick PUSH (controller) or V key or LEFT VR controller A/X button will reset your view position.
-* Keyboard [ or ] keys or RIGHT VR controller B/Y button will select one of five different starting locations above the surface of the moon. Your selected location will be saved and will also become the startup location the next time you run the program. The locations are:
-+161 degrees longitude, 89.9 degrees latitude, 0 degrees heading
+* There is an in-cockpit button to reset the attitude indicator. When the ship is stationary on the ground, the internal gyroscope and accelerometers can determine the rotation axis of the moon, and the ship's orientation with respect to the horizon, and pressing reset will initialize the indicator to show true heading (0 degrees N, 90 degrees E, etc.) and tilt. When the ship is aloft, and **not** rotating, then the reset button will force the indicator to show heading of zero degrees and level horizon, regardless of the ship's actual position. This is because there are no external references (i.e. gps satellites or ground beacons) that can determine true orientation or position. Future versions of the game will probably incorporate additional navigational aids and attitude indicator modes.
+* Keyboard [ or ] keys or RIGHT VR controller B/Y button will select one of five different starting locations above the surface of the moon. Your selected location will be saved and will also become the startup location the next time you run the program. The locations are: +161 degrees longitude, 89.9 degrees latitude, 0 degrees heading
 -134 degrees longitude, +31 degrees latitude, 90 degrees heading
 +46 degrees longitude, -10 degrees latitude, 0 degrees heading
 1 degrees longitude, +85 degrees latitude, 180 degrees heading

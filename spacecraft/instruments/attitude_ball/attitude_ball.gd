@@ -1,6 +1,9 @@
 @tool
 extends Node3D
 
+signal orientation_changed(rate : float, threshold : float)	# radians per second
+signal orientation_stopped
+
 @export_range(0.0, 359.9, 0.1) var heading_degrees : float = 0.0:
 	set(value):
 		heading_degrees = value
@@ -47,6 +50,7 @@ var orientation : Vector3 = Vector3(0.0, 0.0, 0.0):
 
 const TIME_TO_FAST_RESET := 1.0
 const TIME_TO_SLOW_RESET := 10.0
+const THRESHOLD_SOUND_RATE := 0.02 # rate at which the ball starts making noise
 var time_to_reset : float
 var current_orientation := Quaternion.from_euler(Vector3.UP)
 var reference_orientation := Quaternion.from_euler(Vector3.UP)
@@ -104,19 +108,23 @@ func _process(delta):
 	# the differnt "forward" axis of the ship and the ball, and
 	# the fact that roll rotation is reversed in a nav ball.
 	$Ball/Ball.quaternion = Quaternion(deltaq.z, deltaq.y, deltaq.x, deltaq.w)
+	var rate : float = saved_ship.angular_velocity.length()
+	if rate > THRESHOLD_SOUND_RATE:
+		orientation_changed.emit(rate, THRESHOLD_SOUND_RATE)
+	else:
+		orientation_stopped.emit()
 	
-func _on_reset_button_pressed(state):
+func _on_reset_button_pressed(_state):
 	# ship must be close to not rotating
 	if saved_ship.angular_damp or abs(saved_ship.angular_velocity.length() - saved_ship.LEVEL.moon_axis_rate) < saved_ship.STABILITY_MINIMUM_RATE:
 		if saved_ship.angular_damp:
 			time_to_reset = TIME_TO_SLOW_RESET
 			# target orientation is facing north, wings level at the current spherical position
+			# Getting euler angles for lat/lon/heading is mind-blowing. This code corresponds
+			# with the process used in Spacecraft/set_logical_position
 			var p : Vector3 = -saved_ship.MOON.position
-			print("p: ", p)
-			var ey := PI/2.0 - atan2(p.z,p.x)
-			print("ey: ", ey)
+			var ey := PI - atan2(p.z,p.x)
 			var ez := PI/2.0 - atan2(p.y, Vector2(p.x,p.z).length())
-			print("ez: ", ez)
 			target_orientation = Quaternion.from_euler(Vector3(0.0, ey, ez))
 		else:
 			# target orientation is the current ship orientation

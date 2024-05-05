@@ -135,7 +135,7 @@ layers = 4
 
 [node name="StabilizerButton" parent="." instance=ExtResource("11_jspjg")]
 transform = Transform3D(0.187533, -0.263709, -0.946197, 0.0505527, 0.964602, -0.258819, 0.980956, 0.000704471, 0.194226, 1.24905, 5.64931, -0.368)
-label_text = "Stabilizer"
+label_text = "Attitude Rate"
 layers = 4
 
 [node name="LandingLightButton" parent="." instance=ExtResource("11_jspjg")]
@@ -171,7 +171,7 @@ script = ExtResource("18_eedt2")
 
 [node name="StartRotation" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("19_5elai")
-volume_db = -1.39131
+volume_db = -4.0
 script = ExtResource("20_0u0mn")
 
 [node name="FlowSound" type="AudioStreamPlayer3D" parent="."]
@@ -181,7 +181,7 @@ script = ExtResource("22_g3a7g")
 
 [node name="HoldRotation" type="AudioStreamPlayer3D" parent="."]
 stream = ExtResource("23_bstsh")
-volume_db = -31.3913
+volume_db = -36.0
 attenuation_filter_db = -11.7
 script = ExtResource("24_4g0p2")
 

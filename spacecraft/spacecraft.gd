@@ -6,7 +6,7 @@ signal has_landed
 signal has_lifted_off
 signal state_updated(Spacecraft)	# pass spacecraft
 signal thrust_changed(float)
-signal torque_changed(Vector3, float) # new torque, threshold value
+signal torque_changed(newtorque: Vector3, oldtorque: Vector3, threshold: float) # new torque, old torque, threshold value
 
 const THRUST_INC = 10.0 	# Newtons
 const THRUST_MAX = 20000 	# Newtons
@@ -52,7 +52,6 @@ const TORQUE_THRESHOLD := 0.01	# torque below which we can turn off the sound
 @onready var ALTCTRLBUTTON : Node3D = $AltCtrlButton
 @onready var STABILIZERBUTTON : Node3D = $StabilizerButton
 @onready var LANDINGLIGHTBUTTON : Node3D = $LandingLightButton
-@onready var ATTITUDEBALL : Node3D = $AttitudeBall
 @onready var dv_logical_position := DVector3.new()
 @onready var dv_logical_velocity := DVector3.new(0,0,0)
 @onready var dv_gravity_force := DVector3.new()
@@ -337,9 +336,10 @@ func _process(delta):
 				#if v_correction_torque.length() < STABILITY_MINIMUM_TORQUE:
 				#	v_correction_torque = Vector3.ZERO
 				v_torque += v_correction_torque.limit_length()
-		if ((v_last_torque.length() < TORQUE_THRESHOLD and v_torque.length() >= TORQUE_THRESHOLD) or 
-			(v_last_torque.length() >= TORQUE_THRESHOLD and v_torque.length() < TORQUE_THRESHOLD)) :
-			torque_changed.emit(v_torque, TORQUE_THRESHOLD)
+#		if ((v_last_torque.length() < TORQUE_THRESHOLD and v_torque.length() >= TORQUE_THRESHOLD) or 
+#			(v_last_torque.length() >= TORQUE_THRESHOLD and v_torque.length() < TORQUE_THRESHOLD)) :
+		if v_last_torque.length() != v_torque.length():
+			torque_changed.emit(v_torque, v_last_torque, TORQUE_THRESHOLD)
 		v_last_torque = v_torque
 		# convert back to global spacce and apply
 		apply_torque(basis * v_torque * delta * 10000)
