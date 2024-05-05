@@ -185,7 +185,9 @@ volume_db = -31.3913
 attenuation_filter_db = -11.7
 script = ExtResource("24_4g0p2")
 
+[connection signal="has_landed" from="." to="AttitudeBall" method="_on_spacecraft_has_landed"]
 [connection signal="has_landed" from="." to="LandingRattle" method="_on_spacecraft_has_landed"]
+[connection signal="has_lifted_off" from="." to="AttitudeBall" method="_on_spacecraft_has_lifted_off"]
 [connection signal="state_updated" from="." to="AttitudeBall" method="_on_spacecraft_state_update"]
 [connection signal="thrust_changed" from="." to="FlowClick" method="_on_spacecraft_thrust_changed"]
 [connection signal="thrust_changed" from="." to="FlowSound" method="_on_spacecraft_thrust_changed"]

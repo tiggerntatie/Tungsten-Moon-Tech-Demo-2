@@ -46,6 +46,8 @@ var orientation : Vector3 = Vector3(0.0, 0.0, 0.0):
 		_orient_ball_from_angles()
 
 const TIME_TO_FAST_RESET := 1.0
+const TIME_TO_SLOW_RESET := 10.0
+var time_to_reset : float
 var current_orientation := Quaternion.from_euler(Vector3.UP)
 var reference_orientation := Quaternion.from_euler(Vector3.UP)
 var target_orientation := Quaternion.from_euler(Vector3.UP)		# the orientation we are seeking during reset
@@ -55,6 +57,7 @@ var reset_in_progress : bool = false
 var reset_weight : float
 var time_since_reset : float = 0.0
 var moon_rotation : float = 0.0
+var landed : bool = TYPE_NIL
 
 func _orient_ball_from_angles()->void:
 	$Ball/Ball.rotation_degrees = Vector3(0.0, 0.0, 0.0)
@@ -73,7 +76,7 @@ func _on_spacecraft_state_update(ship : Spacecraft):
 func _ready():
 	time_since_reset = 0.0
 	reset_in_progress = false
-	_orient_ball_from_angles()
+	$Ball/Ball.quaternion = reference_orientation
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -81,13 +84,18 @@ func _process(delta):
 		return
 	var reference : Quaternion = reference_orientation
 	time_since_reset += delta
+	# moon_rotation is our estimate of how far the moon has rotated since the ball was reset
 	moon_rotation = saved_ship.LEVEL.moon_axis_rate*time_since_reset
 	if reset_in_progress:
-		reset_weight = clamp(reset_weight + delta, 0.0, TIME_TO_FAST_RESET)
-		reference = reference_orientation.slerp(target_orientation, pow(reset_weight/TIME_TO_FAST_RESET, 0.2))
-		if reset_weight == TIME_TO_FAST_RESET:
+		reset_weight = clamp(reset_weight + delta, 0.0, time_to_reset)
+		# reference_orientation is initially aligned with moon, thereafter it is
+		# the same as the orientation at the end of the last reset. This slerp will
+		# create a series of reference orientations that vary from the initial, to the target orientation
+		reference = reference_orientation.slerp(target_orientation, pow(reset_weight/time_to_reset, 0.2))
+		if reset_weight == time_to_reset:
 			reset_in_progress = false
 			$ResetButton.state = true
+			# reset is complete. Set reference equal to the target_orientation
 			reference_orientation = target_orientation
 			reference = target_orientation
 	# This gives us the net rotation of the ship since the ball was reset
@@ -100,10 +108,23 @@ func _process(delta):
 func _on_reset_button_pressed(state):
 	# ship must be close to not rotating
 	if saved_ship.angular_damp or abs(saved_ship.angular_velocity.length() - saved_ship.LEVEL.moon_axis_rate) < saved_ship.STABILITY_MINIMUM_RATE:
+		if saved_ship.angular_damp:
+			time_to_reset = TIME_TO_SLOW_RESET
+			# target orientation is facing north, wings level at the current spherical position
+			var p : Vector3 = -saved_ship.MOON.position
+			print("p: ", p)
+			var ey := PI/2.0 - atan2(p.z,p.x)
+			print("ey: ", ey)
+			var ez := PI/2.0 - atan2(p.y, Vector2(p.x,p.z).length())
+			print("ez: ", ez)
+			target_orientation = Quaternion.from_euler(Vector3(0.0, ey, ez))
+		else:
+			# target orientation is the current ship orientation
+			target_orientation = saved_ship.quaternion
+			time_to_reset = TIME_TO_FAST_RESET
 		reset_in_progress = true
 		time_since_reset = 0.0
 		reset_weight = 0.0
-		target_orientation = saved_ship.quaternion
 
 
 func _on_reset_button_released():
@@ -113,8 +134,8 @@ func _on_reset_button_released():
 
 
 func _on_spacecraft_has_landed():
-	pass # Replace with function body.
+	landed = true
 
 
 func _on_spacecraft_has_lifted_off():
-	pass # Replace with function body.
+	landed = false
