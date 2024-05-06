@@ -23,7 +23,7 @@ const HORIZ_SPRING_K = 10000 # N/m
 const SPRING_K : Vector3 = Vector3(50000, 50000, 50000)
 const SPRING_DAMP : Vector3 = Vector3(10000, 10000, 10000)
 const STABILITY_COEFFICIENT := 20.0	# for stability feedback loop
-const STABILITY_MINIMUM_RATE := 0.0001
+const STABILITY_MINIMUM_RATE := 0.00001
 const RATE_FROM_TORQUE := 0.1	# how a torque command translates to rad/sec in rate mode
 const TORQUE_THRESHOLD := 0.01	# torque below which we can turn off the sound
 
@@ -65,6 +65,7 @@ const TORQUE_THRESHOLD := 0.01	# torque below which we can turn off the sound
 # projected impact point in global coordinates
 var v_impact_point := Vector3.INF
 var v_impact_normal := Vector3.INF
+var is_landed := false
 # UNROTATED captured logical position
 var dv_captured_logical_position : DVector3
 #var v_captured_impact_point := Vector3.INF
@@ -134,6 +135,7 @@ func reset_spacecraft():
 	altitude_agl = NAN
 	STABILIZERBUTTON.set_button(true)	# turn stabilizer on
 	LANDINGLIGHTBUTTON.set_button(false)	# lights on
+	is_landed = false
 	set_thrust(0.0)
 	reset_viewpoint()
 
@@ -228,6 +230,7 @@ func _process(delta):
 		# too much. reload the scenario!
 		LEVEL.scenario_input(false, false, true)
 	elif altitude_agl <= 0.0:
+		is_landed = true
 		angular_damp = 1	# use Godot to damp out the jiggles
 		if dv_captured_logical_position == null:
 			has_landed.emit()
@@ -255,9 +258,13 @@ func _process(delta):
 
 			v_thrust_global += dv_restoring_force.vector3()
 	else: # agl is undefined or above zero
-		has_lifted_off.emit()
-		angular_damp = 0
-		dv_captured_logical_position = null
+		if is_landed:
+			has_lifted_off.emit()
+			angular_damp = 0
+			dv_captured_logical_position = null
+			angular_velocity = Vector3.ZERO
+			is_landed = false
+
 
 
 	
@@ -341,7 +348,7 @@ func _process(delta):
 		if v_last_torque.length() != v_torque.length():
 			torque_changed.emit(v_torque, v_last_torque, TORQUE_THRESHOLD)
 		v_last_torque = v_torque
-		# convert back to global spacce and apply
+		# convert back to global space
 		apply_torque(basis * v_torque * delta * 10000)
 	
 	# Orbit State Calculation

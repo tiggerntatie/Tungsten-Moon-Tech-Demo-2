@@ -59,8 +59,6 @@ var saved_ship : Spacecraft
 var suspend_orientation : bool = false
 var reset_in_progress : bool = false
 var reset_weight : float
-var time_since_reset : float = 0.0
-var moon_rotation : float = 0.0
 var landed : bool = TYPE_NIL
 
 func _orient_ball_from_angles()->void:
@@ -73,12 +71,11 @@ func _on_spacecraft_state_update(ship : Spacecraft):
 	saved_ship = ship
 	# the game global frame is stationary (the moon), but it is really rotating, so 
 	# we need to add the rotation in for display purposese
-	current_orientation = ship.basis.rotated(Vector3.UP, moon_rotation).get_rotation_quaternion()
+	current_orientation = ship.basis.rotated(Vector3.UP, saved_ship.LEVEL.current_moon_rotation).get_rotation_quaternion()
 
 	
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	time_since_reset = 0.0
 	reset_in_progress = false
 	$Ball/Ball.quaternion = reference_orientation
 
@@ -87,9 +84,6 @@ func _process(delta):
 	if Engine.is_editor_hint():
 		return
 	var reference : Quaternion = reference_orientation
-	time_since_reset += delta
-	# moon_rotation is our estimate of how far the moon has rotated since the ball was reset
-	moon_rotation = saved_ship.LEVEL.moon_axis_rate*time_since_reset
 	if reset_in_progress:
 		reset_weight = clamp(reset_weight + delta, 0.0, time_to_reset)
 		# reference_orientation is initially aligned with moon, thereafter it is
@@ -122,16 +116,15 @@ func _on_reset_button_pressed(_state):
 			# target orientation is facing north, wings level at the current spherical position
 			# Getting euler angles for lat/lon/heading is mind-blowing. This code corresponds
 			# with the process used in Spacecraft/set_logical_position
-			var p : Vector3 = -saved_ship.MOON.position
+			var p : Vector3 = (-saved_ship.MOON.position).rotated(Vector3.UP, saved_ship.LEVEL.current_moon_rotation)
 			var ey := PI - atan2(p.z,p.x)
 			var ez := PI/2.0 - atan2(p.y, Vector2(p.x,p.z).length())
 			target_orientation = Quaternion.from_euler(Vector3(0.0, ey, ez))
 		else:
-			# target orientation is the current ship orientation
-			target_orientation = saved_ship.quaternion
+			# target orientation is the current ship orientation, corrected for moon rotation
+			target_orientation = saved_ship.basis.rotated(Vector3.UP, saved_ship.LEVEL.current_moon_rotation).get_rotation_quaternion()
 			time_to_reset = TIME_TO_FAST_RESET
 		reset_in_progress = true
-		time_since_reset = 0.0
 		reset_weight = 0.0
 
 
