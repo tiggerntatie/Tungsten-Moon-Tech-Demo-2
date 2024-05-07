@@ -58,8 +58,9 @@ var target_orientation := Quaternion.from_euler(Vector3.UP)		# the orientation w
 var saved_ship : Spacecraft
 var suspend_orientation : bool = false
 var reset_in_progress : bool = false
-var reset_weight : float
+var reset_weight : float = 1.0
 var landed : bool = TYPE_NIL
+var reset_rotation : float
 
 func _orient_ball_from_angles()->void:
 	$Ball/Ball.rotation_degrees = Vector3(0.0, 0.0, 0.0)
@@ -71,8 +72,7 @@ func _on_spacecraft_state_update(ship : Spacecraft):
 	saved_ship = ship
 	# the game global frame is stationary (the moon), but it is really rotating, so 
 	# we need to add the rotation in for display purposese
-	current_orientation = ship.basis.rotated(Vector3.UP, saved_ship.LEVEL.current_moon_rotation).get_rotation_quaternion()
-
+	current_orientation = ship.basis.rotated(Vector3.UP, saved_ship.LEVEL.current_moon_rotation - reset_rotation).get_rotation_quaternion()
 	
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -97,6 +97,7 @@ func _process(delta):
 			reference_orientation = target_orientation
 			reference = target_orientation
 	# This gives us the net rotation of the ship since the ball was reset
+	# don't do anything if there is no new orientation
 	var deltaq := reference.inverse()*current_orientation
 	# This transforms the delta quaternion of the ship to the ball, taking into account 
 	# the differnt "forward" axis of the ship and the ball, and
@@ -109,20 +110,21 @@ func _process(delta):
 		orientation_stopped.emit()
 	
 func _on_reset_button_pressed(_state):
+	reset_rotation = saved_ship.LEVEL.current_moon_rotation
 	# ship must be close to not rotating
-	if saved_ship.angular_damp or abs(saved_ship.angular_velocity.length() - saved_ship.LEVEL.moon_axis_rate) < saved_ship.STABILITY_MINIMUM_RATE:
-		if saved_ship.angular_damp:
+	if landed or abs(saved_ship.angular_velocity.length() - saved_ship.LEVEL.moon_axis_rate) < saved_ship.STABILITY_MINIMUM_RATE:
+		if landed:
 			time_to_reset = TIME_TO_SLOW_RESET
 			# target orientation is facing north, wings level at the current spherical position
 			# Getting euler angles for lat/lon/heading is mind-blowing. This code corresponds
 			# with the process used in Spacecraft/set_logical_position
-			var p : Vector3 = (-saved_ship.MOON.position).rotated(Vector3.UP, saved_ship.LEVEL.current_moon_rotation)
+			var p : Vector3 = -saved_ship.MOON.position
 			var ey := PI - atan2(p.z,p.x)
 			var ez := PI/2.0 - atan2(p.y, Vector2(p.x,p.z).length())
 			target_orientation = Quaternion.from_euler(Vector3(0.0, ey, ez))
 		else:
 			# target orientation is the current ship orientation, corrected for moon rotation
-			target_orientation = saved_ship.basis.rotated(Vector3.UP, saved_ship.LEVEL.current_moon_rotation).get_rotation_quaternion()
+			target_orientation = saved_ship.basis.get_rotation_quaternion()
 			time_to_reset = TIME_TO_FAST_RESET
 		reset_in_progress = true
 		reset_weight = 0.0

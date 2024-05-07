@@ -156,14 +156,15 @@ func reset_viewpoint():
 func set_logical_position(lat: float, lon: float, radius: float, altitude: float, heading: float, moon_rate: float):
 	# NOTE: Longitude zero is in the direction of +Z per Godot convention
 	# NOTE: Spacecraft rotation depends on spacecraft orientation facing +X
-	var phi: float = deg_to_rad(lon) + LEVEL.current_moon_rotation
+	var phi_physical: float = deg_to_rad(lon)
+	var phi_logical: float =  phi_physical + LEVEL.current_moon_rotation
 	var theta: float = deg_to_rad(lat)
 	var gamma: float = deg_to_rad(-heading)
-	dv_logical_position.x = (radius + altitude) * cos(theta)*sin(phi)
+	dv_logical_position.x = (radius + altitude) * cos(theta)*sin(phi_logical)
 	dv_logical_position.y = (radius + altitude) * sin(theta)
-	dv_logical_position.z = (radius + altitude) * cos(theta)*cos(phi)
+	dv_logical_position.z = (radius + altitude) * cos(theta)*cos(phi_logical)
 	dv_logical_velocity = get_landed_velocity(dv_logical_position, dv_logical_position.xz_length(), moon_rate)
-	var q1 : Quaternion = Quaternion.from_euler(Vector3(0.0, phi+PI/2.0, PI/2.0-theta))
+	var q1 : Quaternion = Quaternion.from_euler(Vector3(0.0, phi_physical+PI/2.0, PI/2.0-theta))
 	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, 0.0))
 	rotation = (q1*q2).get_euler()	# This rotates the ship to correspond to its unrotated position on the globe
 	reset_spacecraft()
