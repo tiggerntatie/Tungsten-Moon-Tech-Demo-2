@@ -1,0 +1,66 @@
+[gd_scene load_steps=8 format=3 uid="uid://b23ftpol4g2xu"]
+
+[ext_resource type="Script" path="res://spacecraft/indicators/seven_segment_digit.gd" id="1_d6ti1"]
+[ext_resource type="PackedScene" uid="uid://jalj3xsjros2" path="res://spacecraft/indicators/display_segment.tscn" id="2_pnoig"]
+[ext_resource type="Script" path="res://spacecraft/indicators/display_segment_dp.gd" id="3_7ki26"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_xobo7"]
+top_radius = 0.1
+bottom_radius = 0.1
+height = 0.001
+radial_segments = 8
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fu03g"]
+resource_local_to_scene = true
+albedo_color = Color(0.341176, 0.341176, 0.341176, 1)
+emission_enabled = true
+emission = Color(0.94902, 0, 0, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p2mkk"]
+albedo_color = Color(0.0823529, 0.0823529, 0.0823529, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_henyl"]
+size = Vector2(1.75, 2.5)
+
+[node name="SevenSegmentDigit" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.90735e-06, 0.00406837, -0.000120878)
+script = ExtResource("1_d6ti1")
+digit = 2
+dp = true
+
+[node name="DisplaySegmentA" parent="." instance=ExtResource("2_pnoig")]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0.00392425, 1.04, -0.000233173)
+state = true
+
+[node name="DisplaySegmentB" parent="." instance=ExtResource("2_pnoig")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.515, 0.52, 0)
+state = true
+
+[node name="DisplaySegmentC" parent="." instance=ExtResource("2_pnoig")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.515, -0.52, 0)
+state = true
+
+[node name="DisplaySegmentD" parent="." instance=ExtResource("2_pnoig")]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, -1.04, 0)
+
+[node name="DisplaySegmentE" parent="." instance=ExtResource("2_pnoig")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.515, -0.52, 0)
+
+[node name="DisplaySegmentF" parent="." instance=ExtResource("2_pnoig")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.515, 0.52, 0)
+
+[node name="DisplaySegmentG" parent="." instance=ExtResource("2_pnoig")]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="DisplaySegmentDP" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.762074, -1.04193, -0.00113416)
+mesh = SubResource("CylinderMesh_xobo7")
+surface_material_override/0 = SubResource("StandardMaterial3D_fu03g")
+script = ExtResource("3_7ki26")
+state = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.0998806, 0.00534695, -0.100834)
+material_override = SubResource("StandardMaterial3D_p2mkk")
+mesh = SubResource("PlaneMesh_henyl")
