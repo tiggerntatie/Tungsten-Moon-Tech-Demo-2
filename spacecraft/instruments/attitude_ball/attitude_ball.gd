@@ -4,6 +4,8 @@ extends Node3D
 signal orientation_changed(rate : float, threshold : float)	# radians per second
 signal orientation_stopped
 
+var timer : SceneTreeTimer = null
+
 @export_range(0.0, 359.9, 0.1) var heading_degrees : float = 0.0:
 	set(value):
 		heading_degrees = value
@@ -51,6 +53,7 @@ var orientation : Vector3 = Vector3(0.0, 0.0, 0.0):
 const TIME_TO_FAST_RESET := 1.0
 const TIME_TO_SLOW_RESET := 10.0
 const THRESHOLD_SOUND_RATE := 0.02 # rate at which the ball starts making noise
+const SOUND_UPDATE_PERIOD := 0.1	# calculate rate at this interval
 var time_to_reset : float
 var current_orientation := Quaternion.from_euler(Vector3.UP)
 var reference_orientation := Quaternion.from_euler(Vector3.UP)
@@ -61,6 +64,8 @@ var reset_in_progress : bool = false
 var reset_weight : float = 1.0
 var landed : bool = TYPE_NIL
 var reset_rotation : float
+var last_ball_quaternion : Quaternion
+var sound_playing := false
 
 func _orient_ball_from_angles()->void:
 	$Ball/Ball.rotation_degrees = Vector3(0.0, 0.0, 0.0)
@@ -78,6 +83,7 @@ func _on_spacecraft_state_update(ship : Spacecraft):
 func _ready():
 	reset_in_progress = false
 	$Ball/Ball.quaternion = reference_orientation
+	start_timer()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -103,11 +109,6 @@ func _process(delta):
 	# the differnt "forward" axis of the ship and the ball, and
 	# the fact that roll rotation is reversed in a nav ball.
 	$Ball/Ball.quaternion = Quaternion(deltaq.z, deltaq.y, deltaq.x, deltaq.w)
-	var rate : float = saved_ship.angular_velocity.length()
-	if rate > THRESHOLD_SOUND_RATE:
-		orientation_changed.emit(rate, THRESHOLD_SOUND_RATE)
-	else:
-		orientation_stopped.emit()
 	
 func _on_reset_button_pressed(_state):
 	reset_rotation = saved_ship.LEVEL.current_moon_rotation
@@ -142,3 +143,20 @@ func _on_spacecraft_has_landed():
 
 func _on_spacecraft_has_lifted_off():
 	landed = false
+
+func start_timer():
+	last_ball_quaternion = $Ball/Ball.quaternion
+	var scene := get_tree()
+	if scene != null:
+		timer = scene.create_timer(SOUND_UPDATE_PERIOD)
+		timer.timeout.connect(_on_timer_timeout)
+	
+func _on_timer_timeout():
+	var rate := last_ball_quaternion.angle_to($Ball/Ball.quaternion)/SOUND_UPDATE_PERIOD
+	if rate > THRESHOLD_SOUND_RATE:
+		orientation_changed.emit(rate, THRESHOLD_SOUND_RATE)
+		sound_playing = true
+	elif sound_playing:
+		orientation_stopped.emit()
+		sound_playing = false
+	start_timer()
