@@ -1,7 +1,7 @@
 @tool
-extends Node3D
+extends MeshInstance3D
 
 @export var state : bool = false:
 	set(value):
 		state = value
-		$MeshInstance3D.material_override.emission_enabled = state
+		material_override.emission_enabled = state

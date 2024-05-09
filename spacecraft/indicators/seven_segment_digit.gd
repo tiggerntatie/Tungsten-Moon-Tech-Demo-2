@@ -13,13 +13,14 @@ extends Node3D
 ]
 
 # on, then off segments
-@onready var digit_map : Array = [
+var digit_map : Array = [
 	[[0, 1, 2, 3, 4, 5], [6]],	# 0
 	[[1, 2], [0, 3, 4, 5, 6]],	# 1
 	[[0, 1, 3, 4, 6], [2, 5]],	# 2
 	[[0, 1, 2, 3, 6], [4, 5]],	# 3
 	[[1, 2, 5, 6], [0, 3, 4]],	# 4
-	[[0, 2, 3, 5, 6], [1, 4]],	# 6
+	[[0, 2, 3, 5, 6], [1, 4]],	# 5
+	[[0, 2, 3, 4, 5, 6], [1]],	# 6
 	[[0, 1, 2, 5], [3, 4, 6]],	# 7
 	[[0, 1, 2, 3, 4, 5, 6], []],	# 8
 	[[0, 1, 2, 3, 5, 6], [4]],	# 9
@@ -42,7 +43,7 @@ func _update_segments():
 	# off segments
 	for n in digit_map[digit][1]:
 		segment_list[n].state = false
-	digit_map[7].material_override.emission_enabled = dp
+	digit_map[7].emission_enabled = dp
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
