@@ -1,0 +1,90 @@
+[gd_scene load_steps=18 format=3 uid="uid://c0qfntb4icsy6"]
+
+[ext_resource type="Script" path="res://spacecraft/controls/PanelButton/button.gd" id="1_h61na"]
+[ext_resource type="PackedScene" uid="uid://cme66uldrjl2i" path="res://addons/godot-xr-tools/interactables/interactable_area_button.tscn" id="2_02dln"]
+[ext_resource type="PackedScene" uid="uid://dc5t2qgmhb2nf" path="res://addons/godot-xr-tools/objects/hand_pose_area.tscn" id="3_igafl"]
+[ext_resource type="Animation" uid="uid://cevirj0eagdrq" path="res://addons/godot-xr-tools/hands/animations/left/Sign 1.res" id="4_4jqu0"]
+[ext_resource type="Script" path="res://addons/godot-xr-tools/hands/poses/hand_pose_settings.gd" id="5_vv4b0"]
+[ext_resource type="Animation" uid="uid://bcwx6a6mhsoj2" path="res://addons/godot-xr-tools/hands/animations/right/Sign 1.res" id="6_8f5ll"]
+[ext_resource type="AudioStream" uid="uid://d05c1n871jqtr" path="res://spacecraft/audio/button_click_in.wav" id="7_00jjp"]
+[ext_resource type="Script" path="res://spacecraft/controls/PanelButton/click_in.gd" id="8_16xxp"]
+[ext_resource type="AudioStream" uid="uid://c8agvv4yq23pd" path="res://spacecraft/audio/button_click_out.wav" id="9_a0q28"]
+[ext_resource type="Script" path="res://spacecraft/controls/PanelButton/click_out.gd" id="10_2ojub"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hjfxk"]
+size = Vector3(0.02, 0.02, 0.01)
+
+[sub_resource type="BoxMesh" id="BoxMesh_svf3r"]
+size = Vector3(0.02, 0.02, 0.01)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4a4ei"]
+resource_local_to_scene = true
+albedo_color = Color(0, 0.278431, 0, 1)
+emission = Color(0, 0.858824, 0, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_oqlfc"]
+size = Vector3(0.02, 0.02, 0.01)
+
+[sub_resource type="Resource" id="Resource_xr4te"]
+script = ExtResource("5_vv4b0")
+open_pose = ExtResource("4_4jqu0")
+closed_pose = ExtResource("4_4jqu0")
+
+[sub_resource type="Resource" id="Resource_k7qh0"]
+script = ExtResource("5_vv4b0")
+open_pose = ExtResource("6_8f5ll")
+closed_pose = ExtResource("6_8f5ll")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8tqss"]
+size = Vector3(0.025, 0.025, 0.008)
+
+[node name="Button" type="Node3D"]
+script = ExtResource("1_h61na")
+
+[node name="Button" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Button"]
+shape = SubResource("BoxShape3D_hjfxk")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Button"]
+mesh = SubResource("BoxMesh_svf3r")
+surface_material_override/0 = SubResource("StandardMaterial3D_4a4ei")
+
+[node name="Label3D" type="Label3D" parent="Button"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.00547428)
+pixel_size = 0.0002
+text = "X"
+outline_size = 0
+
+[node name="InteractableAreaButton" parent="." instance=ExtResource("2_02dln")]
+button = NodePath("../Button")
+displacement = Vector3(0, 0, -0.004)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractableAreaButton"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.001)
+shape = SubResource("BoxShape3D_oqlfc")
+
+[node name="HandPoseArea" parent="." instance=ExtResource("3_igafl")]
+left_pose = SubResource("Resource_xr4te")
+right_pose = SubResource("Resource_k7qh0")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="HandPoseArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.00992041)
+shape = SubResource("BoxShape3D_8tqss")
+
+[node name="ClickIn" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("7_00jjp")
+volume_db = 1.42858
+script = ExtResource("8_16xxp")
+
+[node name="ClickOut" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("9_a0q28")
+volume_db = 1.42858
+script = ExtResource("10_2ojub")
+
+[connection signal="button_pressed" from="." to="ClickIn" method="_on_button_pressed"]
+[connection signal="button_released" from="." to="ClickOut" method="_on_button_released"]
+[connection signal="button_pressed" from="InteractableAreaButton" to="." method="_on_interactable_area_button_pressed"]
+[connection signal="button_released" from="InteractableAreaButton" to="." method="_on_interactable_area_button_released"]
+[connection signal="input_event" from="HandPoseArea" to="." method="_on_button_input_event"]
+[connection signal="mouse_exited" from="HandPoseArea" to="." method="_on_mouse_exited"]
