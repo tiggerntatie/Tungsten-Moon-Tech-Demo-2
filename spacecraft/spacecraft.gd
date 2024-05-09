@@ -7,6 +7,7 @@ signal has_lifted_off
 signal state_updated(Spacecraft)	# pass spacecraft
 signal thrust_changed(float)
 signal torque_changed(newtorque: Vector3, oldtorque: Vector3, threshold: float) # new torque, old torque, threshold value
+signal drift_changed(drift : Vector2)
 
 const THRUST_INC = 10.0 	# Newtons
 const THRUST_MAX = 20000 	# Newtons
@@ -75,6 +76,7 @@ var last_xz_radius : float
 var altitude_agl : float = NAN
 var altitude_radar : float = NAN
 var terrain_altitude : float = NAN
+const RADAR_RANGE := 2000.0
 #var v_altitude_agl : Vector3 = Vector3.INF
 
 # Sidestick State
@@ -212,7 +214,7 @@ func _process(delta):
 		
 	
 	var altitude_msl = get_altitude_msl()
-	GROUNDRADAR.target_position = to_local(MOON.position).normalized()*1000/MOON.scale_factor
+	GROUNDRADAR.target_position = to_local(MOON.position).normalized()*RADAR_RANGE/MOON.scale_factor
 	if GROUNDRADAR.is_colliding():
 		v_impact_point = GROUNDRADAR.get_collision_point()
 		v_impact_normal = GROUNDRADAR.get_collision_normal()
@@ -378,13 +380,15 @@ func _process(delta):
 	var v_global_unrot_hvel = v_logical_hvel.rotated(Vector3.UP, -LEVEL.current_moon_rotation)
 	# transformed to ship-local coordinates
 	var v_local_hvel = basis.inverse()*v_global_unrot_hvel
-	# obtain an angle in the local horizontal plane and DISPLAY it!
-	if v_local_hvel.length() < 0.1:
-		# don't display confusing information!
-		HUDHDRIFT.visible = false
-	else:
-		HUDHDRIFT.visible = true
-		HUDHDRIFT.rotation = atan2(v_local_hvel.z, v_local_hvel.x) - PI/2.0
+	# obtain vector for local vertical
+	var v_local_vertical = -(basis.inverse()*MOON.position)
+	# horizontal drift data only valid if within 45 degrees of vertical and in radar range
+	if v_local_vertical.angle_to(Vector3.UP) < PI/4 and not is_nan(altitude_radar):
+		# map the h drift onto our xz plane
+		v_local_hvel = Vector2(v_local_hvel.z, v_local_hvel.x).normalized()*v_local_hvel.length()
+		# obtain an angle in the local horizontal plane and DISPLAY it!
+		drift_changed.emit(v_local_hvel)
+	HUDHDRIFT.visible = false 	#FIXME we will remove this altogether
 	# altitude change direction
 	var vvel = dv_logical_position.vector3().normalized().dot(dv_logical_velocity.vector3())
 	if vvel > 0.1:

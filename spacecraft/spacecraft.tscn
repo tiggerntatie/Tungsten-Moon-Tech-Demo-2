@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://c08vubwsc2swp"]
+[gd_scene load_steps=28 format=3 uid="uid://c08vubwsc2swp"]
 
 [ext_resource type="Script" path="res://spacecraft/spacecraft.gd" id="1_b8yyq"]
 [ext_resource type="ArrayMesh" uid="uid://1woisy38wlky" path="res://spacecraft/RocketModel.obj" id="2_o0qaw"]
@@ -15,6 +15,7 @@
 [ext_resource type="AudioStream" uid="uid://boes466x3k2lw" path="res://spacecraft/audio/fan_hum.wav" id="13_huula"]
 [ext_resource type="PackedScene" uid="uid://c1dlge57vtwna" path="res://spacecraft/instruments/attitude_ball/attitude_ball.tscn" id="13_ufkbg"]
 [ext_resource type="Script" path="res://spacecraft/audio/fan_hum.gd" id="14_4f2dy"]
+[ext_resource type="PackedScene" uid="uid://d320wph6gg1hv" path="res://spacecraft/instruments/cross_pointer/cross_pointer.tscn" id="14_bfk7h"]
 [ext_resource type="AudioStream" uid="uid://cj57k6u8yyp4q" path="res://spacecraft/audio/landing_rattle.wav" id="15_4rpjs"]
 [ext_resource type="Script" path="res://spacecraft/audio/landing_rattle.gd" id="16_7xops"]
 [ext_resource type="AudioStream" uid="uid://crgrl1aopfbp" path="res://spacecraft/audio/flow_click.wav" id="17_4p3gk"]
@@ -150,6 +151,9 @@ is_toggle = false
 [node name="AttitudeBall" parent="." instance=ExtResource("13_ufkbg")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.31126, 5.4708, -0.365528)
 
+[node name="CrossPointer" parent="." instance=ExtResource("14_bfk7h")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.311, 5.471, -0.274503)
+
 [node name="FanHum" type="AudioStreamPlayer3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.836668, 5.90087, -0.64503)
 stream = ExtResource("13_huula")
@@ -185,6 +189,7 @@ volume_db = -36.0
 attenuation_filter_db = -11.7
 script = ExtResource("24_4g0p2")
 
+[connection signal="drift_changed" from="." to="CrossPointer" method="_on_spacecraft_drift_changed"]
 [connection signal="has_landed" from="." to="AttitudeBall" method="_on_spacecraft_has_landed"]
 [connection signal="has_landed" from="." to="LandingRattle" method="_on_spacecraft_has_landed"]
 [connection signal="has_lifted_off" from="." to="AttitudeBall" method="_on_spacecraft_has_lifted_off"]
