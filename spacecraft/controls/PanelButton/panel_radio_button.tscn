@@ -1,0 +1,44 @@
+[gd_scene load_steps=5 format=3 uid="uid://b6ceuwfru450i"]
+
+[ext_resource type="Script" path="res://spacecraft/controls/PanelButton/panel_radio_button.gd" id="1_oxtjo"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_glrdq"]
+resource_local_to_scene = true
+size = Vector3(0.12003, 0.024, 0.015)
+
+[sub_resource type="BoxMesh" id="BoxMesh_g8lmw"]
+resource_local_to_scene = true
+size = Vector3(0.12003, 0.024, 0.015)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_acs1d"]
+resource_local_to_scene = true
+albedo_color = Color(0.223529, 0.223529, 0.223529, 1)
+
+[node name="PanelRadioButton" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.12746e-05, -0.000195928, 0.000140071)
+script = ExtResource("1_oxtjo")
+label_text = "Hello"
+base_width = 0.12003
+layers = 4
+
+[node name="ButtonBase" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ButtonBase"]
+shape = SubResource("BoxShape3D_glrdq")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ButtonBase"]
+layers = 4
+mesh = SubResource("BoxMesh_g8lmw")
+surface_material_override/0 = SubResource("StandardMaterial3D_acs1d")
+
+[node name="Label3D" type="Label3D" parent="ButtonBase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5e-05, 0, 0.009)
+layers = 4
+pixel_size = 0.0004
+text = "Hello"
+horizontal_alignment = 0
+
+[connection signal="button_pressed" from="@Node3D@25720" to="@Node3D@25720/ClickIn" method="_on_button_pressed"]
+[connection signal="button_released" from="@Node3D@25720" to="@Node3D@25720/ClickOut" method="_on_button_released"]
+[connection signal="button_pressed" from="@Node3D@25721" to="@Node3D@25721/ClickIn" method="_on_button_pressed"]
+[connection signal="button_released" from="@Node3D@25721" to="@Node3D@25721/ClickOut" method="_on_button_released"]
