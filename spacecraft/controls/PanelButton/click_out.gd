@@ -1,4 +1,4 @@
 extends AudioStreamPlayer3D
 
-func _on_panel_button_released():
+func _on_button_released(name):
 	play()

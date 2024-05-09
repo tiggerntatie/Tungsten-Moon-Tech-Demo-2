@@ -1,8 +1,8 @@
 @tool
 extends Node3D
 
-signal button_pressed(state: bool)
-signal button_released
+signal button_pressed(name: String, state: bool)
+signal button_released(name: String)
 signal button_set(state: bool)
 
 @onready var LABEL : Label3D = $ButtonBase/Label3D
@@ -60,9 +60,9 @@ func _on_button_released(button):
 func set_button(value: bool) -> void:
 	if value != state:
 		if value:
-			button_pressed.emit(value)
+			button_pressed.emit(name, value)
 		else:
-			button_released.emit()
+			button_released.emit(name)
 	state = value
 	BUTTON.get_surface_override_material(0).emission_enabled = state
 	button_set.emit(state)
@@ -75,12 +75,12 @@ func press_button() -> void:
 		set_button(not state)
 	else:
 		BUTTON.get_surface_override_material(0).emission_enabled = true	
-		button_pressed.emit(state)
+		button_pressed.emit(name, state)
 
 func release_button() -> void:
 	if not is_toggle:
 		BUTTON.get_surface_override_material(0).emission_enabled = false
-		button_released.emit()
+		button_released.emit(name)
 
 func _on_button_input_event(camera, event, position, normal, shape_idx):
 	if event is InputEventMouseButton and event.get_button_index() == MOUSE_BUTTON_LEFT:
