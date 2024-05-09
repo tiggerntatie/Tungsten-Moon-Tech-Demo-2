@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Tungsten Moon Tech Demo 2"
-config/version="0.0.9"
+config/version="0.0.10"
 run/main_scene="res://splash_screen.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
 run/max_fps=90
