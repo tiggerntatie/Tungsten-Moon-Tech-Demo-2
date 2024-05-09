@@ -1,0 +1,107 @@
+[gd_scene load_steps=14 format=3 uid="uid://d320wph6gg1hv"]
+
+[ext_resource type="Script" path="res://spacecraft/instruments/cross_pointer/cross_pointer.gd" id="1_rxfuo"]
+[ext_resource type="PackedScene" uid="uid://b6ceuwfru450i" path="res://spacecraft/controls/PanelButton/panel_radio_button.tscn" id="2_m35pg"]
+[ext_resource type="Texture2D" uid="uid://da2o78lgidqoi" path="res://spacecraft/instruments/cross_pointer/CrossPointerBackground.png" id="3_g10ti"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rqkbo"]
+albedo_color = Color(0.223529, 0.223529, 0.223529, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0d7tn"]
+albedo_texture = ExtResource("3_g10ti")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_l5njs"]
+material = SubResource("StandardMaterial3D_0d7tn")
+size = Vector2(0.085, 0.085)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3rnfe"]
+albedo_color = Color(0.960784, 0.960784, 0.960784, 1)
+albedo_texture = ExtResource("3_g10ti")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_g0iu5"]
+size = Vector2(0.001, 0.085)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iojfh"]
+albedo_color = Color(0.941176, 0.564706, 0, 1)
+emission_enabled = true
+emission = Color(0.941176, 0.564706, 0, 1)
+emission_energy_multiplier = 0.5
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_jp354"]
+size = Vector2(0.085, 0.001)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8o66d"]
+albedo_color = Color(0.941176, 0.564706, 0, 1)
+emission_enabled = true
+emission = Color(0.941176, 0.564706, 0, 1)
+emission_energy_multiplier = 0.5
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_uinaa"]
+radius = 0.002
+height = 0.004
+radial_segments = 8
+rings = 4
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_waaok"]
+albedo_color = Color(0.341176, 0.341176, 0.341176, 1)
+emission_enabled = true
+emission = Color(0.94902, 0, 0, 1)
+
+[node name="CrossPointer" type="Node3D"]
+script = ExtResource("1_rxfuo")
+
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+layers = 4
+material_override = SubResource("StandardMaterial3D_rqkbo")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0050833, 0.013)
+size = Vector3(0.09, 0.09, 0.115)
+
+[node name="CSGBox3D" type="CSGBox3D" parent="CSGCombiner3D/CSGBox3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, -0.012)
+operation = 2
+size = Vector3(0.085, 0.085, 0.085)
+
+[node name="PanelRadioButton" parent="." instance=ExtResource("2_m35pg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.058, 0.033)
+label_text = ""
+base_width = 0.089
+buttons = ["x1", "x10", "x100"]
+active_button = "x1"
+
+[node name="Background" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0.022)
+layers = 4
+mesh = SubResource("PlaneMesh_l5njs")
+surface_material_override/0 = SubResource("StandardMaterial3D_3rnfe")
+
+[node name="XAxisBar" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.04067, 0, 0.025)
+layers = 4
+mesh = SubResource("PlaneMesh_g0iu5")
+surface_material_override/0 = SubResource("StandardMaterial3D_iojfh")
+
+[node name="YAxisBar" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.04067, 0.026)
+layers = 4
+mesh = SubResource("PlaneMesh_jp354")
+surface_material_override/0 = SubResource("StandardMaterial3D_8o66d")
+
+[node name="DataLED" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.0324925, -0.0366466, 0.022333)
+mesh = SubResource("CapsuleMesh_uinaa")
+surface_material_override/0 = SubResource("StandardMaterial3D_waaok")
+
+[node name="Timer" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="radio_button_pressed" from="PanelRadioButton" to="." method="_on_radio_button_pressed"]
+[connection signal="button_pressed" from="PanelRadioButton/@Node3D@120493" to="PanelRadioButton/@Node3D@120493/ClickIn" method="_on_button_pressed"]
+[connection signal="button_released" from="PanelRadioButton/@Node3D@120493" to="PanelRadioButton/@Node3D@120493/ClickOut" method="_on_button_released"]
+[connection signal="button_pressed" from="PanelRadioButton/@Node3D@120494" to="PanelRadioButton/@Node3D@120494/ClickIn" method="_on_button_pressed"]
+[connection signal="button_released" from="PanelRadioButton/@Node3D@120494" to="PanelRadioButton/@Node3D@120494/ClickOut" method="_on_button_released"]
+[connection signal="button_pressed" from="PanelRadioButton/@Node3D@120495" to="PanelRadioButton/@Node3D@120495/ClickIn" method="_on_button_pressed"]
+[connection signal="button_released" from="PanelRadioButton/@Node3D@120495" to="PanelRadioButton/@Node3D@120495/ClickOut" method="_on_button_released"]
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
