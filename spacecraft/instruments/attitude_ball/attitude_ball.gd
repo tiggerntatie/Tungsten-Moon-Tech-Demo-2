@@ -110,7 +110,7 @@ func _process(delta):
 	# the fact that roll rotation is reversed in a nav ball.
 	$Ball/Ball.quaternion = Quaternion(deltaq.z, deltaq.y, deltaq.x, deltaq.w)
 	
-func _on_reset_button_pressed(_state):
+func _on_reset_button_pressed(_name, _state):
 	reset_rotation = saved_ship.LEVEL.current_moon_rotation
 	# ship must be close to not rotating
 	if landed or abs(saved_ship.angular_velocity.length() - saved_ship.LEVEL.moon_axis_rate) < saved_ship.STABILITY_MINIMUM_RATE:
@@ -131,7 +131,7 @@ func _on_reset_button_pressed(_state):
 		reset_weight = 0.0
 
 
-func _on_reset_button_released():
+func _on_reset_button_released(_name):
 	if not reset_in_progress:
 		# do not signify that reset is underway
 		$ResetButton.state = true
