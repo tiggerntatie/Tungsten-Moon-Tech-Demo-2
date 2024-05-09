@@ -11,7 +11,7 @@ func _process(delta):
 	pass
 
 
-func _on_landing_light_pressed(state):
+func _on_landing_light_pressed(_name, state):
 	visible = state
 
 

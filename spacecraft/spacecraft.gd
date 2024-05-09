@@ -446,13 +446,13 @@ func _on_sidestick_output_changed(x, y):
 	sidestick_y = y
 
 ## Manage the "Stabilizer" button state
-func _on_stabilizer_pressed(state):
+func _on_stabilizer_pressed(_name, state):
 	rotation_rate_mode = state
 
 func _on_stabilizer_button_set(state):
 	rotation_rate_mode = state
 
-func _on_refuel_button_pressed(state):
+func _on_refuel_button_pressed(_name, _state):
 	fuel = FULL_FUEL	# FIXME this should be refilled some other way
 
 func _input(event: InputEvent) -> void:
