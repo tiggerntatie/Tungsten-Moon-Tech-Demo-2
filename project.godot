@@ -22,6 +22,7 @@ boot_splash/minimum_display_time=1000
 [autoload]
 
 XRToolsUserSettings="*res://addons/godot-xr-tools/user_settings/user_settings.gd"
+PanelBus="*res://panel_bus.gd"
 
 [display]
 
