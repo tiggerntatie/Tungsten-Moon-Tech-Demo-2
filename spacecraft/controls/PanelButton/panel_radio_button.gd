@@ -65,7 +65,7 @@ func _resize():
 		x_pos += button_width/2.0 + button_padding
 		var inst = button_scene.instantiate()
 		button_array.push_back(inst)
-		inst.button_pressed.connect(_on_button_pressed)
+		inst.pressed.connect(_on_button_pressed)
 		add_child(inst)
 		inst.legend = label
 		inst.width = button_width
@@ -89,5 +89,5 @@ func set_radio_button(legend : String) -> void:
 func _ready():
 	_resize()
 
-func _on_button_pressed(name: String, state: bool):
-	set_radio_button(name)
+func _on_button_pressed(name: String, legend: String, state: bool, light_state: bool):
+	set_radio_button(legend)

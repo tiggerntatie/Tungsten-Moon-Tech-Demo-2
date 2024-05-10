@@ -98,10 +98,4 @@ surface_material_override/0 = SubResource("StandardMaterial3D_waaok")
 one_shot = true
 
 [connection signal="radio_button_pressed" from="PanelRadioButton" to="." method="_on_radio_button_pressed"]
-[connection signal="button_pressed" from="PanelRadioButton/@Node3D@120493" to="PanelRadioButton/@Node3D@120493/ClickIn" method="_on_button_pressed"]
-[connection signal="button_released" from="PanelRadioButton/@Node3D@120493" to="PanelRadioButton/@Node3D@120493/ClickOut" method="_on_button_released"]
-[connection signal="button_pressed" from="PanelRadioButton/@Node3D@120494" to="PanelRadioButton/@Node3D@120494/ClickIn" method="_on_button_pressed"]
-[connection signal="button_released" from="PanelRadioButton/@Node3D@120494" to="PanelRadioButton/@Node3D@120494/ClickOut" method="_on_button_released"]
-[connection signal="button_pressed" from="PanelRadioButton/@Node3D@120495" to="PanelRadioButton/@Node3D@120495/ClickIn" method="_on_button_pressed"]
-[connection signal="button_released" from="PanelRadioButton/@Node3D@120495" to="PanelRadioButton/@Node3D@120495/ClickOut" method="_on_button_released"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
