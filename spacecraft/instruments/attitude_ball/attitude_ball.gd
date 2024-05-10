@@ -81,6 +81,7 @@ func _on_spacecraft_state_update(ship : Spacecraft):
 	
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	$ResetButton.set_button(true)
 	reset_in_progress = false
 	$Ball/Ball.quaternion = reference_orientation
 	start_timer()
@@ -98,7 +99,7 @@ func _process(delta):
 		reference = reference_orientation.slerp(target_orientation, pow(reset_weight/time_to_reset, 0.2))
 		if reset_weight == time_to_reset:
 			reset_in_progress = false
-			$ResetButton.state = true
+			$ResetButton.set_button(true)
 			# reset is complete. Set reference equal to the target_orientation
 			reference_orientation = target_orientation
 			reference = target_orientation
@@ -110,7 +111,7 @@ func _process(delta):
 	# the fact that roll rotation is reversed in a nav ball.
 	$Ball/Ball.quaternion = Quaternion(deltaq.z, deltaq.y, deltaq.x, deltaq.w)
 	
-func _on_reset_button_pressed(_name, _state):
+func _on_reset_button_pressed(_name, _legend, _state, _light_state):
 	reset_rotation = saved_ship.LEVEL.current_moon_rotation
 	# ship must be close to not rotating
 	if landed or abs(saved_ship.angular_velocity.length() - saved_ship.LEVEL.moon_axis_rate) < saved_ship.STABILITY_MINIMUM_RATE:
@@ -129,12 +130,13 @@ func _on_reset_button_pressed(_name, _state):
 			time_to_reset = TIME_TO_FAST_RESET
 		reset_in_progress = true
 		reset_weight = 0.0
+		$ResetButton.set_button(false)
 
 
-func _on_reset_button_released(_name):
+func _on_reset_button_released(_name, _legend, _state, _light_state):
 	if not reset_in_progress:
 		# do not signify that reset is underway
-		$ResetButton.state = true
+		$ResetButton.set_button(true)
 
 
 func _on_spacecraft_has_landed():

@@ -2,8 +2,8 @@
 
 [ext_resource type="Texture2D" uid="uid://bqf7wjkm1sdvo" path="res://spacecraft/instruments/attitude_ball/AIBall.png" id="1_a12wi"]
 [ext_resource type="Script" path="res://spacecraft/instruments/attitude_ball/attitude_ball.gd" id="1_q07ae"]
-[ext_resource type="PackedScene" uid="uid://bhsiske1duhng" path="res://spacecraft/controls/PanelButton/panel_button.tscn" id="2_raoxe"]
 [ext_resource type="AudioStream" uid="uid://q30hpi85cirn" path="res://spacecraft/instruments/attitude_ball/nav_ball.wav" id="4_dbkhy"]
+[ext_resource type="PackedScene" uid="uid://c0qfntb4icsy6" path="res://spacecraft/controls/PanelButton/button.tscn" id="5_2nola"]
 [ext_resource type="Script" path="res://spacecraft/instruments/attitude_ball/nav_ball_sound.gd" id="5_7ovt0"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_56w3p"]
@@ -78,14 +78,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, -0.012)
 operation = 2
 size = Vector3(0.085, 0.085, 0.085)
 
-[node name="ResetButton" parent="." instance=ExtResource("2_raoxe")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.058, 0.033)
-label_text = "RESET"
-base_width = 0.089
-is_toggle = false
-state = true
-layers = 4
-
 [node name="VirtualWings" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.04)
 
@@ -121,7 +113,14 @@ volume_db = -40.5411
 pitch_scale = 2.0
 script = ExtResource("5_7ovt0")
 
+[node name="ResetButton" parent="." instance=ExtResource("5_2nola")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.027435, -0.0568264, 0.0401757)
+legend = "RESET"
+light_automatic = true
+state = true
+light_state = true
+
 [connection signal="orientation_changed" from="." to="NavBall" method="_on_attitude_ball_orientation_changed"]
 [connection signal="orientation_stopped" from="." to="NavBall" method="_on_attitude_ball_orientation_stopped"]
-[connection signal="button_pressed" from="ResetButton" to="." method="_on_reset_button_pressed"]
-[connection signal="button_released" from="ResetButton" to="." method="_on_reset_button_released"]
+[connection signal="pressed" from="ResetButton" to="." method="_on_reset_button_pressed"]
+[connection signal="released" from="ResetButton" to="." method="_on_reset_button_released"]
