@@ -87,6 +87,9 @@ pixel_size = 0.0002
 text = "X"
 outline_size = 0
 
+[node name="Sprite3D" type="Sprite3D" parent="Button"]
+transform = Transform3D(0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 0, 0.0183043)
+
 [node name="InteractableAreaButton" parent="." instance=ExtResource("2_02dln")]
 button = NodePath("../Button")
 displacement = Vector3(0, 0, -0.004)
