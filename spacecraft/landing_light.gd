@@ -3,17 +3,7 @@ extends SpotLight3D
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	visible = $"../LandingLightButton".get_button()
+	Signals.connect("ButtonLight_changed", _on_landing_light_button_changed)
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-
-func _on_landing_light_pressed(_name, state):
-	visible = state
-
-
-func _on_landing_light_button_set(state):
+func _on_landing_light_button_changed(state, lightstate):
 	visible = state

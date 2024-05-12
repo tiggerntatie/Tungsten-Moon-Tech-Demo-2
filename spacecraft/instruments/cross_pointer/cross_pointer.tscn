@@ -64,7 +64,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, -0.012)
 operation = 2
 size = Vector3(0.085, 0.085, 0.085)
 
-[node name="PanelRadioButton" parent="." instance=ExtResource("2_m35pg")]
+[node name="RangeRadioButton" parent="." instance=ExtResource("2_m35pg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.058, 0.033)
 label_text = ""
 base_width = 0.089
@@ -97,5 +97,11 @@ surface_material_override/0 = SubResource("StandardMaterial3D_waaok")
 [node name="Timer" type="Timer" parent="."]
 one_shot = true
 
-[connection signal="radio_button_pressed" from="PanelRadioButton" to="." method="_on_radio_button_pressed"]
+[connection signal="radio_button_pressed" from="RangeRadioButton" to="." method="_on_radio_button_pressed"]
+[connection signal="pressed" from="RangeRadioButton/RangeRadioButtonbutton24" to="RangeRadioButton/RangeRadioButtonbutton24/ClickIn" method="_on_button_pressed"]
+[connection signal="released" from="RangeRadioButton/RangeRadioButtonbutton24" to="RangeRadioButton/RangeRadioButtonbutton24/ClickOut" method="_on_button_released"]
+[connection signal="pressed" from="RangeRadioButton/RangeRadioButtonbutton25" to="RangeRadioButton/RangeRadioButtonbutton25/ClickIn" method="_on_button_pressed"]
+[connection signal="released" from="RangeRadioButton/RangeRadioButtonbutton25" to="RangeRadioButton/RangeRadioButtonbutton25/ClickOut" method="_on_button_released"]
+[connection signal="pressed" from="RangeRadioButton/RangeRadioButtonbutton26" to="RangeRadioButton/RangeRadioButtonbutton26/ClickIn" method="_on_button_pressed"]
+[connection signal="released" from="RangeRadioButton/RangeRadioButtonbutton26" to="RangeRadioButton/RangeRadioButtonbutton26/ClickOut" method="_on_button_released"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

@@ -6,11 +6,26 @@ signal released(name: String, legend: String, state: bool, light_state: bool)
 signal changed(name: String, legend: String, state: bool, light_state: bool)
 signal light_changed(name: String, legend: String, state: bool, light_state: bool)
 
-@export var legend : String = "X":
+@export var legend : String = "":
 	set(value):
 		legend = value
 		_update_button()
+		
+@export var legend_image : Texture2D = null:
+	set(value):
+		legend_image = value
+		_update_button()
 
+@export_range(0.01, 100.0, 0.01) var legend_image_scale : float = 1.0:
+	set(value):
+		legend_image_scale = value
+		_update_button()
+
+@export var panel_label : String = "":
+	set(value):
+		panel_label = value
+		_update_button()
+		
 @export var width : float = 0.02:
 	set(value):
 		width = value
@@ -37,6 +52,8 @@ signal light_changed(name: String, legend: String, state: bool, light_state: boo
 		light_state = value
 		_set_state()
 				
+const default_legend_image_scale := 0.003
+				
 func _update_button():
 	$Button/MeshInstance3D.mesh.size.x = width
 	$Button/MeshInstance3D.mesh.size.y = height
@@ -54,7 +71,17 @@ func _update_button():
 	$InteractableAreaButton/CollisionShape3D.shape.size.y = height
 	$HandPoseArea/CollisionShape3D.shape.size.x = width + 0.005
 	$HandPoseArea/CollisionShape3D.shape.size.y = height + 0.005
-	$Button/Label3D.text = legend
+	$PanelText.position.x = width/2.0+$Guard/Right.mesh.size.x+0.005
+	$PanelText.text = panel_label
+	if legend_image == null:
+		$Button/Label3D.text = legend
+		$Button/Label3D.visible = true
+		$Button/Sprite3D.visible = false
+	else:
+		$Button/Sprite3D.texture = legend_image
+		$Button/Label3D.visible = false
+		$Button/Sprite3D.visible = true
+		$Button/Sprite3D.scale = Vector3.ONE * default_legend_image_scale * legend_image_scale
 	_set_state()
 	
 func _set_state():
@@ -68,28 +95,51 @@ func _set_state():
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	# define signals for reporting and changing state
+	if not Engine.is_editor_hint():
+		Signals.add_user_signal(name + "_pressed", [{"name":"state", "type": TYPE_BOOL}, {"name":"light_state", "type": TYPE_BOOL}])
+		Signals.add_user_signal(name + "_released", [{"name":"state", "type": TYPE_BOOL}, {"name":"light_state", "type": TYPE_BOOL}])
+		Signals.add_user_signal(name + "_changed", [{"name":"state", "type": TYPE_BOOL}, {"name":"light_state", "type": TYPE_BOOL}])
+		Signals.add_user_signal(name + "_light_changed", [{"name":"state", "type": TYPE_BOOL}, {"name":"light_state", "type": TYPE_BOOL}])
+		Signals.add_user_signal(name + "_press")
+		Signals.add_user_signal(name + "_set_state", [{"name":"state", "type": TYPE_BOOL}, {"name":"light_state", "type": TYPE_BOOL}])
+		Signals.add_user_signal(name + "_set_light_state", [{"name":"state", "type": TYPE_BOOL}, {"name":"light_state", "type": TYPE_BOOL}])
+		Signals.connect(name + "_press", _on_press)
+		Signals.connect(name + "_set_state", _on_set_state)
+		Signals.connect(name + "_set_light_state", _on_set_light_state)
 	_update_button()
+		
 
 func press_button() -> void:
+	pressed.emit(name, legend, state, light_state)
 	if is_toggle:
 		set_button(not state)
 	else:
-		pressed.emit(name, legend, state, light_state)
+		Signals.emit_signal(name + "_pressed", state, light_state)
 	
 func release_button() -> void:
 	released.emit(name, legend, state, light_state)
+	if not is_toggle:
+		Signals.emit_signal(name + "_released", state, light_state)
+
 
 # set the state
 func set_button(value : bool) -> void:
 	if value != state:
 		state = value
+		if light_automatic:
+			light_state = value
 		changed.emit(name, legend, state, light_state)
+		if not Engine.is_editor_hint():
+			Signals.emit_signal(name + "_changed", state, light_state)
 
 # set the state
 func set_button_light(value : bool) -> void:
 	if value != light_state:
 		light_state = value
 		light_changed.emit(name, legend, state, light_state)
+		if not Engine.is_editor_hint():
+			Signals.emit_signal(name + "_light_changed", state, light_state)
 
 func _on_interactable_area_button_pressed(button):
 	press_button()
@@ -101,12 +151,21 @@ func _on_button_input_event(camera, event, position, normal, shape_idx):
 	if event is InputEventMouseButton and event.get_button_index() == MOUSE_BUTTON_LEFT:
 		if event.is_pressed():
 			$InteractableAreaButton._on_button_entered($".")
-			press_button()
 		elif event.is_released():
 			$InteractableAreaButton._on_button_exited($".")
-			release_button()
 
 func _on_mouse_exited():
 	if $InteractableAreaButton.pressed:
 		$InteractableAreaButton._on_button_exited($".")
-		release_button()
+		
+# incocming signal to set button state
+func _on_set_state(state: bool) -> void:
+	set_button(state)
+
+# incoming signal to set light state
+func _on_set_light_state(state: bool) -> void:
+	set_button_light(state)
+
+# incoming signal to press button
+func _on_press() -> void:
+	press_button()

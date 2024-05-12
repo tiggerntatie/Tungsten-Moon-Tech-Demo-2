@@ -22,7 +22,7 @@ var radar_online : bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	$PanelRadioButton.set_radio_button("x1")
+	$RangeRadioButton.set_radio_button("x1")
 	
 # called periodically so we can slew the pointers
 func _process(delta):

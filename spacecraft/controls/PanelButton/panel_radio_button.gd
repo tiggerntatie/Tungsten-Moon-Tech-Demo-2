@@ -6,41 +6,49 @@ signal radio_button_pressed(legend : String)
 @export var label_text : String:
 	set(value):
 		label_text = value
-		call_deferred("_resize")
+		if Engine.is_editor_hint():
+			call_deferred("_resize")
 		
 const DEFAULT_BASE_WIDTH : float = 0.12
 @export var base_width : float =  DEFAULT_BASE_WIDTH:
 	set(value):
 		base_width = value
-		call_deferred("_resize")
+		if Engine.is_editor_hint():
+			call_deferred("_resize")
 
 var button_qty : int
 @export var buttons : Array = ["0", "1"]:
 	set(value):
 		buttons = value
 		button_qty = value.size()
-		call_deferred("_resize")
+		if Engine.is_editor_hint():
+			call_deferred("_resize")
 
 @export var button_width : float = 0.02:
 	set(value):
 		button_width = value
-		call_deferred("_resize")
+		if Engine.is_editor_hint():
+			call_deferred("_resize")
 
 @export var button_padding : float = 0.005:
 	set(value):
 		button_padding = value
-		call_deferred("_resize")
+		if Engine.is_editor_hint():
+			call_deferred("_resize")
 
 @export var active_button : String = "0":
 	set(value):
 		active_button = value
-		call_deferred("_illuminate_buttons")
+		if Engine.is_editor_hint():
+			call_deferred("_resize")
+		_illuminate_buttons()
 
 ## Render Layer
 @export_flags_2d_render var layers:
 	set(value):
 		layers = value
-		call_deferred("_resize")
+		if Engine.is_editor_hint():
+			call_deferred("_resize")
 
 var button_array := []
 var button_scene
@@ -61,18 +69,19 @@ func _resize():
 	$ButtonBase/MeshInstance3D.mesh.size.x = width
 	$ButtonBase/CollisionShape3D.shape.size.x = width
 	var x_pos = -width/2.0
+	var butt_index := 0
 	for label in buttons:
 		x_pos += button_width/2.0 + button_padding
 		var inst = button_scene.instantiate()
 		button_array.push_back(inst)
 		inst.pressed.connect(_on_button_pressed)
 		add_child(inst)
+		inst.name = name + "button" + str(butt_index)
 		inst.legend = label
 		inst.width = button_width
 		inst.position = Vector3(x_pos, 0.0, 0.008)
 		x_pos += button_width/2.0 + button_padding
 	$ButtonBase/Label3D.position.x = x_pos
-	_illuminate_buttons()
 	
 func _illuminate_buttons() -> void:
 	for butt in button_array:

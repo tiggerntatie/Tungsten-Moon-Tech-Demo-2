@@ -37,3 +37,8 @@ layers = 4
 pixel_size = 0.0004
 text = "Hello"
 horizontal_alignment = 0
+
+[connection signal="pressed" from="@Node3D@24945" to="@Node3D@24945/ClickIn" method="_on_button_pressed"]
+[connection signal="released" from="@Node3D@24945" to="@Node3D@24945/ClickOut" method="_on_button_released"]
+[connection signal="pressed" from="@Node3D@24946" to="@Node3D@24946/ClickIn" method="_on_button_pressed"]
+[connection signal="released" from="@Node3D@24946" to="@Node3D@24946/ClickOut" method="_on_button_released"]

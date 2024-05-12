@@ -11,7 +11,6 @@
 [ext_resource type="PackedScene" uid="uid://bft3xyxs31ci3" path="res://addons/godot-xr-tools/functions/function_pose_detector.tscn" id="6_bteek"]
 [ext_resource type="Script" path="res://spacecraft/landing_light.gd" id="9_u56vm"]
 [ext_resource type="PackedScene" uid="uid://neklbt0jds8q" path="res://spacecraft/controls/sidestick/sidestick.tscn" id="10_e5xbv"]
-[ext_resource type="PackedScene" uid="uid://bhsiske1duhng" path="res://spacecraft/controls/PanelButton/panel_button.tscn" id="11_jspjg"]
 [ext_resource type="AudioStream" uid="uid://boes466x3k2lw" path="res://spacecraft/audio/fan_hum.wav" id="13_huula"]
 [ext_resource type="PackedScene" uid="uid://c1dlge57vtwna" path="res://spacecraft/instruments/attitude_ball/attitude_ball.tscn" id="13_ufkbg"]
 [ext_resource type="Script" path="res://spacecraft/audio/fan_hum.gd" id="14_4f2dy"]
@@ -26,6 +25,7 @@
 [ext_resource type="Script" path="res://spacecraft/audio/flow_sound.gd" id="22_g3a7g"]
 [ext_resource type="AudioStream" uid="uid://gy817b38k5sc" path="res://spacecraft/audio/thruster_hiss.wav" id="23_bstsh"]
 [ext_resource type="Script" path="res://spacecraft/audio/hold_rotation.gd" id="24_4g0p2"]
+[ext_resource type="PackedScene" uid="uid://brpwj7lggpk1t" path="res://spacecraft/panels/button_panel.tscn" id="27_guree"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_63e0r"]
 size = Vector3(7.7, 7.7, 7.7)
@@ -39,6 +39,9 @@ gravity_scale = 0.0
 inertia = Vector3(100000, 100000, 100000)
 continuous_cd = true
 script = ExtResource("1_b8yyq")
+
+[node name="ButtonPanel" parent="." instance=ExtResource("27_guree")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.22188, 5.68733, -0.366841)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.01, 0, 0, 0, -4.37114e-10, 0.01, 0, -0.01, -4.37114e-10, 0, 0, 0)
@@ -129,25 +132,6 @@ transform = Transform3D(-0.268748, -0.191108, -0.944062, 0.963162, -0.043508, -0
 [node name="SideStick" parent="." instance=ExtResource("10_e5xbv")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.18881, 5.21135, -0.322783)
 
-[node name="AltCtrlButton" parent="." instance=ExtResource("11_jspjg")]
-transform = Transform3D(0.186862, -0.264385, -0.946141, 0.0512264, 0.964417, -0.259375, 0.98105, 0, 0.193757, 1.24134, 5.68063, -0.368222)
-label_text = "Alternate Ctrl"
-layers = 4
-
-[node name="StabilizerButton" parent="." instance=ExtResource("11_jspjg")]
-transform = Transform3D(0.187533, -0.263709, -0.946197, 0.0505527, 0.964602, -0.258819, 0.980956, 0.000704471, 0.194226, 1.24905, 5.64931, -0.368)
-label_text = "Attitude Rate"
-layers = 4
-
-[node name="LandingLightButton" parent="." instance=ExtResource("11_jspjg")]
-transform = Transform3D(0.187533, -0.263709, -0.946197, 0.0505527, 0.964602, -0.258819, 0.980956, 0.000704471, 0.194226, 1.27814, 5.567, -0.368)
-label_text = "Landing Light"
-
-[node name="RefuelButton" parent="." instance=ExtResource("11_jspjg")]
-transform = Transform3D(0.187533, -0.263709, -0.946197, 0.0505527, 0.964602, -0.258819, 0.980956, 0.000704471, 0.194226, 1.28674, 5.53516, -0.368)
-label_text = "Fill Prop. Tank"
-is_toggle = false
-
 [node name="AttitudeBall" parent="." instance=ExtResource("13_ufkbg")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.31126, 5.4708, -0.365528)
 
@@ -206,8 +190,3 @@ script = ExtResource("24_4g0p2")
 [connection signal="input_vector2_changed" from="XROrigin3D/XRRight" to="." method="_on_xr_right_input_vector_2_changed"]
 [connection signal="throttle_output_changed" from="Throttle" to="." method="_on_throttle_output_changed"]
 [connection signal="sidestick_output_changed" from="SideStick" to="." method="_on_sidestick_output_changed"]
-[connection signal="button_pressed" from="StabilizerButton" to="." method="_on_stabilizer_pressed"]
-[connection signal="button_set" from="StabilizerButton" to="." method="_on_stabilizer_button_set"]
-[connection signal="button_pressed" from="LandingLightButton" to="LandingLight" method="_on_landing_light_pressed"]
-[connection signal="button_set" from="LandingLightButton" to="LandingLight" method="_on_landing_light_button_set"]
-[connection signal="button_pressed" from="RefuelButton" to="." method="_on_refuel_button_pressed"]

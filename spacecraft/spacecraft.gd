@@ -50,9 +50,7 @@ const TORQUE_THRESHOLD := 0.01	# torque below which we can turn off the sound
 @onready var PITCHPIVOT : Node3D = $YawPivot/PitchPivot
 @onready var THROTTLE : Node3D = $Throttle
 @onready var SIDESTICK : Node3D = $SideStick
-@onready var ALTCTRLBUTTON : Node3D = $AltCtrlButton
 @onready var STABILIZERBUTTON : Node3D = $StabilizerButton
-@onready var LANDINGLIGHTBUTTON : Node3D = $LandingLightButton
 @onready var dv_logical_position := DVector3.new()
 @onready var dv_logical_velocity := DVector3.new(0,0,0)
 @onready var dv_gravity_force := DVector3.new()
@@ -88,6 +86,7 @@ var v_last_torque := Vector3.ZERO
 var rotation_rate_mode : bool
 var ui_thrust_lock : bool
 var mouse_button_2 : bool
+var alternate_control : bool
 
 # Asynchronous XR inputs
 var left_ax := false
@@ -135,8 +134,12 @@ func reset_spacecraft():
 	v_torque = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
 	altitude_agl = NAN
-	STABILIZERBUTTON.set_button(true)	# turn stabilizer on
-	LANDINGLIGHTBUTTON.set_button(false)	# lights on
+	Signals.emit_signal("ButtonLight_set_state", true)
+	Signals.emit_signal("ButtonLight_set_state", false)
+	alternate_control = false
+	rotation_rate_mode = true
+	Signals.emit_signal("ButtonAlternateControl_set_state", alternate_control)
+	Signals.emit_signal("ButtonRateMode_set_state", rotation_rate_mode)
 	is_landed = false
 	set_thrust(0.0)
 	reset_viewpoint()
@@ -178,6 +181,10 @@ func get_altitude_msl() -> float:
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	# external global signals
+	Signals.connect("ButtonRefuel_pressed", _on_refuel_button_pressed)
+	Signals.connect("ButtonAlternateControl_changed", _on_alternate_control_changed)
+	Signals.connect("ButtonRateMode_changed", _on_rotation_rate_mode_changed)
 	#Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	dv_logical_position =  MOON.get_logical_position(self)
 	dv_gravity_force = DVector3.Mul(mass, MOON.get_acceleration(dv_logical_position))
@@ -301,7 +308,7 @@ func _process(delta):
 		var horiz_vel = JOY_SENS * Input.get_axis("Viewpoint Left", "Viewpoint Right")
 		var forward_vel : float = 0.0
 		var upward_vel : float = 0.0
-		if ALTCTRLBUTTON.get_button():
+		if alternate_control:
 			upward_vel = JOY_SENS * Input.get_axis("Viewpoint Down", "Viewpoint Up")
 		else:
 			forward_vel = JOY_SENS * Input.get_axis("Viewpoint Backward", "Viewpoint Forward")
@@ -310,7 +317,7 @@ func _process(delta):
 			$YawPivot/PitchPivot.rotation.z += JOY_SENS * Input.get_axis("Viewpoint Pan Down", "Viewpoint Pan Up")
 			$YawPivot/PitchPivot.rotation.z = clamp($YawPivot/PitchPivot.rotation.z, -PI/2, PI/2)
 		else:
-			if ALTCTRLBUTTON.get_button():
+			if alternate_control:
 				SIDESTICK.set_sidestick(-(Input.get_axis("Yaw Right", "Yaw Left") - right_primary.x), Input.get_axis("Pitch Forward", "Pitch Backward") - right_primary.y)
 			else:
 				SIDESTICK.set_sidestick(-(Input.get_axis("Roll Right", "Roll Left") - right_primary.x), Input.get_axis("Pitch Forward", "Pitch Backward") - right_primary.y)
@@ -329,7 +336,7 @@ func _process(delta):
 		v_torque = Vector3.ZERO
 		v_torque.y += Input.get_axis("Yaw Right Always", "Yaw Left Always")
 		v_torque.z += sidestick_y
-		if ALTCTRLBUTTON.get_button():
+		if alternate_control:
 			v_torque.y -= sidestick_x
 		else:
 			v_torque.x += sidestick_x
@@ -445,21 +452,20 @@ func _on_sidestick_output_changed(x, y):
 	sidestick_x = x
 	sidestick_y = y
 
-## Manage the "Stabilizer" button state
-func _on_stabilizer_pressed(_name, state):
+func _on_alternate_control_changed(state: bool, light_state: bool) -> void:
+	alternate_control = state
+
+func _on_rotation_rate_mode_changed(state: bool, light_state: bool) -> void:
 	rotation_rate_mode = state
 
-func _on_stabilizer_button_set(state):
-	rotation_rate_mode = state
-
-func _on_refuel_button_pressed(_name, _state):
+func _on_refuel_button_pressed(_state, _light_state):
 	fuel = FULL_FUEL	# FIXME this should be refilled some other way
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("Toggle Thrust Lock"):
 		ui_thrust_lock = not ui_thrust_lock
 	elif event.is_action_pressed("Alternate Control"):
-		ALTCTRLBUTTON.press_button()
+		Signals.emit_signal("ButtonAlternateControl_press")
 	elif event.is_action_pressed("Rotation Damp Toggle"):
 		STABILIZERBUTTON.press_button()
 	elif (event is InputEventMouseButton and event.get_button_index() == MOUSE_BUTTON_RIGHT):
@@ -502,5 +508,4 @@ func _on_xr_left_input_vector_2_changed(name, value):
 func _on_xr_right_input_vector_2_changed(name, value):
 	if name == "primary":
 		right_primary = value
-
 
