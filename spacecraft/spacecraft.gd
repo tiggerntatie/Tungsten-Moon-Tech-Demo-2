@@ -50,7 +50,6 @@ const TORQUE_THRESHOLD := 0.01	# torque below which we can turn off the sound
 @onready var PITCHPIVOT : Node3D = $YawPivot/PitchPivot
 @onready var THROTTLE : Node3D = $Throttle
 @onready var SIDESTICK : Node3D = $SideStick
-@onready var STABILIZERBUTTON : Node3D = $StabilizerButton
 @onready var dv_logical_position := DVector3.new()
 @onready var dv_logical_velocity := DVector3.new(0,0,0)
 @onready var dv_gravity_force := DVector3.new()
@@ -467,7 +466,7 @@ func _input(event: InputEvent) -> void:
 	elif event.is_action_pressed("Alternate Control"):
 		Signals.emit_signal("ButtonAlternateControl_press")
 	elif event.is_action_pressed("Rotation Damp Toggle"):
-		STABILIZERBUTTON.press_button()
+		Signals.emit_signal("ButtonRateMode_press")
 	elif (event is InputEventMouseButton and event.get_button_index() == MOUSE_BUTTON_RIGHT):
 		mouse_button_2 = event.is_pressed()
 	elif event is InputEventMouseMotion and mouse_button_2:
