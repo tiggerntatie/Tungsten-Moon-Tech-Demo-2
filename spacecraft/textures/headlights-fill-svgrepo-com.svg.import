@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://r6vmjmp53twt"
-path.s3tc="res://.godot/imported/warning-circle-svgrepo-com.svg-887cb68052fe06c6f6e1070fb66a115c.s3tc.ctex"
+uid="uid://6gn6i5cil5gm"
+path.s3tc="res://.godot/imported/headlights-fill-svgrepo-com.svg-9358b808d014dd9a12dbdfd6aa352644.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://spacecraft/textures/warning-circle-svgrepo-com.svg"
-dest_files=["res://.godot/imported/warning-circle-svgrepo-com.svg-887cb68052fe06c6f6e1070fb66a115c.s3tc.ctex"]
+source_file="res://spacecraft/textures/headlights-fill-svgrepo-com.svg"
+dest_files=["res://.godot/imported/headlights-fill-svgrepo-com.svg-9358b808d014dd9a12dbdfd6aa352644.s3tc.ctex"]
 
 [params]
 

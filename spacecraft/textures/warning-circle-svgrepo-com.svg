@@ -1,4 +1,58 @@
-<?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
-<svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M19.5 12C19.5 16.1421 16.1421 19.5 12 19.5C7.85786 19.5 4.5 16.1421 4.5 12C4.5 7.85786 7.85786 4.5 12 4.5C16.1421 4.5 19.5 7.85786 19.5 12ZM21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12ZM11.25 13.5V8.25H12.75V13.5H11.25ZM11.25 15.75V14.25H12.75V15.75H11.25Z" fill="#080341"/>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+
+<svg
+   width="800px"
+   height="800px"
+   viewBox="0 0 24 24"
+   fill="none"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="warning-circle-svgrepo-com.svg"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.42125"
+     inkscape:cx="400"
+     inkscape:cy="400"
+     inkscape:window-width="2558"
+     inkscape:window-height="1341"
+     inkscape:window-x="2552"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg1" />
+  <path
+     fill-rule="evenodd"
+     clip-rule="evenodd"
+     d="M19.5 12C19.5 16.1421 16.1421 19.5 12 19.5C7.85786 19.5 4.5 16.1421 4.5 12C4.5 7.85786 7.85786 4.5 12 4.5C16.1421 4.5 19.5 7.85786 19.5 12ZM21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12ZM11.25 13.5V8.25H12.75V13.5H11.25ZM11.25 15.75V14.25H12.75V15.75H11.25Z"
+     fill="#080341"
+     id="path1" />
+  <path
+     style="fill:#f9f9f9;fill-opacity:1;stroke-width:0.703606"
+     d="M 384.52067,699.27301 C 353.7522,697.16141 332.18969,693.06349 305.7168,684.29646 202.78138,650.20733 125.99855,562.5735 105.633,455.93668 96.002721,405.5112 99.654901,352.79565 116.14313,304.23351 c 8.83707,-26.02747 18.8766,-46.39149 34.47707,-69.93272 28.9034,-43.61544 68.66854,-78.81675 115.58594,-102.32021 71.35229,-35.744198 154.18295,-41.418839 229.83608,-15.74582 25.78766,8.75108 46.09754,18.77593 69.65699,34.38231 67.18988,44.5083 113.77653,114.64916 128.71815,193.79806 7.00627,37.11369 6.87944,75.71453 -0.37135,113.02418 -23.25314,119.65119 -118.15704,214.08601 -238.10933,236.93243 -22.34438,4.25576 -51.58277,6.26239 -71.41601,4.90127 z m 40.80915,-50.19257 c 104.39316,-10.49616 191.8283,-85.98006 217.29897,-187.59705 12.26832,-48.94532 9.76151,-99.94138 -7.21501,-146.77488 -25.21176,-69.55226 -80.5143,-124.93437 -149.77447,-149.98997 -61.29017,-22.17238 -128.81475,-19.71026 -188.27694,6.86505 -27.06474,12.09599 -52.84919,29.94485 -74.31927,51.44626 -26.15681,26.19499 -46.0042,57.27416 -58.32456,91.33084 -20.03036,55.36908 -20.03036,115.90954 0,171.27862 20.49734,56.65997 62.02745,104.98589 115.31664,134.18657 28.6695,15.70992 63.81575,26.47972 95.33861,29.21442 4.83729,0.41964 10.21988,0.88451 11.9613,1.03304 5.2646,0.44902 30.11155,-0.2003 37.99473,-0.9929 z"
+     id="path2"
+     transform="scale(0.03)" />
+  <path
+     style="fill:#f9f9f9;fill-opacity:1;stroke-width:0.703606"
+     d="M 375.37379,362.70888 V 275.46174 H 400 424.62621 v 87.24714 87.24714 H 400 375.37379 Z"
+     id="path3"
+     transform="scale(0.03)" />
+  <path
+     style="fill:#f9f9f9;fill-opacity:1;stroke-width:0.703606"
+     d="M 375.37379,499.91205 V 475.28584 H 400 424.62621 v 24.62621 24.62621 H 400 375.37379 Z"
+     id="path4"
+     transform="scale(0.03)" />
 </svg>
