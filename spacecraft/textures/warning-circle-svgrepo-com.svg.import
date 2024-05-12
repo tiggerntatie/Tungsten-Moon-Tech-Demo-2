@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://r6vmjmp53twt"
-path="res://.godot/imported/warning-circle-svgrepo-com.svg-46207e2ddc10ad0eba975b4eb99b38d5.ctex"
+path="res://.godot/imported/warning-circle-svgrepo-com.svg-887cb68052fe06c6f6e1070fb66a115c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://spacecraft/controls/PanelButton/warning-circle-svgrepo-com.svg"
-dest_files=["res://.godot/imported/warning-circle-svgrepo-com.svg-46207e2ddc10ad0eba975b4eb99b38d5.ctex"]
+source_file="res://spacecraft/textures/warning-circle-svgrepo-com.svg"
+dest_files=["res://.godot/imported/warning-circle-svgrepo-com.svg-887cb68052fe06c6f6e1070fb66a115c.ctex"]
 
 [params]
 
