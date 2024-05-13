@@ -26,26 +26,27 @@ var digit_map : Array = [
 	[[0, 1, 2, 3, 5, 6], [4]],	# 9
 ]
 
-@export_range(0, 9, 1) var digit : int = 0:
+var digit : int = 0:
 	set(value):
 		digit = value
 		_update_segments()
 		
-@export var dp : bool = false:
+var dp : bool = false:
 	set(value):
 		dp = value
 		_update_segments()
 
 func _update_segments():
 	# on segments
-	for n in digit_map[digit][0]:
-		segment_list[n].state = true
-	# off segments
-	for n in digit_map[digit][1]:
-		segment_list[n].state = false
-	digit_map[7].emission_enabled = dp
+	if not Engine.is_editor_hint():
+		for n in digit_map[digit][0]:
+			segment_list[n].state = true
+		# off segments
+		for n in digit_map[digit][1]:
+			segment_list[n].state = false
+		segment_list[7].get_surface_override_material(0).emission_enabled = dp
 
 # Called when the node enters the scene tree for the first time.
-func _ready():
-	_update_segments()
+#func _ready():
+#	_update_segments()
 

@@ -1,7 +1,8 @@
 @tool
 extends MeshInstance3D
 
-@export var state : bool = false:
+@onready var state : bool = false:
 	set(value):
 		state = value
-		material_override.emission_enabled = state
+		if not Engine.is_editor_hint():
+			material_override.emission_enabled = state

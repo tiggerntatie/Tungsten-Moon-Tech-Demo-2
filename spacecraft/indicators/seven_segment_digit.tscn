@@ -14,7 +14,6 @@ rings = 1
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fu03g"]
 resource_local_to_scene = true
 albedo_color = Color(0.341176, 0.341176, 0.341176, 1)
-emission_enabled = true
 emission = Color(0.94902, 0, 0, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p2mkk"]
@@ -26,43 +25,41 @@ size = Vector2(1.75, 2.5)
 [node name="SevenSegmentDigit" type="Node3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.90735e-06, 0.00406837, -0.000120878)
 script = ExtResource("1_d6ti1")
-dp = true
 
 [node name="DisplaySegmentA" parent="." instance=ExtResource("2_pnoig")]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0.00392425, 1.04, -0.000233173)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0.767525, -0.203524, 0.11)
 state = true
 
 [node name="DisplaySegmentB" parent="." instance=ExtResource("2_pnoig")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.515, 0.52, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2786, -0.723524, 0.11)
 state = true
 
 [node name="DisplaySegmentC" parent="." instance=ExtResource("2_pnoig")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.515, -0.52, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2786, -1.76352, 0.11)
 state = true
 
 [node name="DisplaySegmentD" parent="." instance=ExtResource("2_pnoig")]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, -1.04, 0)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0.7636, -2.28352, 0.11)
 state = true
 
 [node name="DisplaySegmentE" parent="." instance=ExtResource("2_pnoig")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.515, -0.52, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2486, -1.76352, 0.11)
 state = true
 
 [node name="DisplaySegmentF" parent="." instance=ExtResource("2_pnoig")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.515, 0.52, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2486, -0.723524, 0.11)
 state = true
 
 [node name="DisplaySegmentG" parent="." instance=ExtResource("2_pnoig")]
-transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0.7636, -1.24352, 0.11)
 
 [node name="DisplaySegmentDP" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.762074, -1.04193, -0.00113416)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 1.5256, -2.28552, 0.11)
 mesh = SubResource("CylinderMesh_xobo7")
 surface_material_override/0 = SubResource("StandardMaterial3D_fu03g")
 script = ExtResource("3_7ki26")
-state = true
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.0998806, 0.00534695, -0.100834)
+[node name="Background" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.875, -1.25, 0.1)
 material_override = SubResource("StandardMaterial3D_p2mkk")
 mesh = SubResource("PlaneMesh_henyl")
