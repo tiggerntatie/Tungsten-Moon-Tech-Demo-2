@@ -1,19 +1,248 @@
-[gd_scene load_steps=2 format=3 uid="uid://by3xeakiorqrc"]
+[gd_scene load_steps=9 format=3 uid="uid://by3xeakiorqrc"]
 
 [ext_resource type="Script" path="res://spacecraft/indicators/seven_segment_display.gd" id="1_wen0i"]
 
+[sub_resource type="PlaneMesh" id="PlaneMesh_hbie6"]
+resource_local_to_scene = true
+size = Vector2(0.027, 0.015)
+
+[sub_resource type="Shader" id="Shader_vumfn"]
+code = "// NOTE: Shader automatically converted from Godot Engine 4.2.1.stable's StandardMaterial3D.
+
+shader_type spatial;
+render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
+
+const int MAX_DIGITS = 8;
+const int DP = 100;
+const int DASH = 16;
+const int BLANK = 300;
+const int SEGS[17] = {
+	0x3f,	// zero
+	0x06, // one
+	0x5b, // two
+	0x4f, // three
+	0x66, // four
+	0x6d, // five
+	0x7d, // six
+	0x07, // seven
+	0x7f, // eight
+	0x6f, // nine
+	0x77, // ten/A
+	0x7c, // eleven/b
+	0x39, // twelve/C
+	0x5e, // thirteen/d
+	0x79, // fourteen/E
+	0x71, // fifteen/F
+	0x40  // sixteen -- dash --
+};
+const float MULTIPLIERS[8] = {1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0, 1000000.0, 10000000.0};
+const vec2 A = vec2(0.25, 0.1);
+const vec2 B = vec2(0.2, 0.5);
+const vec2 C = vec2(0.15, 0.9);
+const vec2 D = vec2(0.75, 0.1);
+const vec2 EE = vec2(0.7, 0.5);
+const vec2 F = vec2(0.65, 0.9);
+const vec2 DecP = vec2(0.9, 0.9);
+const vec2 C1 = vec2(0.94, 0.65);
+const vec2 C2 = vec2(0.94, 0.35);
+const float T = 0.049;	// half-thickness of a horizontal segment
+const float T2 = 0.078; 	// half-thickness of a vertical segment
+
+group_uniforms SevenSegment;
+uniform float value = 1.0;
+uniform int number_of_digits = 4;
+uniform int decimals = 0;
+uniform bool colons = false;
+uniform bool dashes = false;
+
+group_uniforms;
+
+uniform vec4 albedo : source_color;
+uniform sampler2D texture_albedo : source_color,filter_linear_mipmap,repeat_enable;
+uniform float point_size : hint_range(0,128);
+uniform float roughness : hint_range(0,1);
+uniform sampler2D texture_metallic : hint_default_white,filter_linear_mipmap,repeat_enable;
+uniform vec4 metallic_texture_channel;
+uniform sampler2D texture_roughness : hint_roughness_r,filter_linear_mipmap,repeat_enable;
+uniform float specular;
+uniform float metallic;
+uniform sampler2D texture_emission : source_color, hint_default_black,filter_linear_mipmap,repeat_enable;
+uniform vec4 emission : source_color;
+uniform float emission_energy;
+uniform vec3 uv1_scale;
+uniform vec3 uv1_offset;
+uniform vec3 uv2_scale;
+uniform vec3 uv2_offset;
+
+
+void vertex() {
+	UV=UV*uv1_scale.xy+uv1_offset.xy;
+}
+
+bool is_in_horizontal_segment(vec2 L, vec2 R, vec2 uv) {
+	float d = abs(uv.y - L.y);
+	return d < T && d < min(clamp(uv.x-L.x-0.02,0,T),clamp(R.x-uv.x-0.02,0,T));
+}
+
+bool is_in_vertical_segment(vec2 TT, vec2 BB, vec2 uv, float slope) {
+	float x0 = (BB.y - uv.y)*slope + BB.x;	
+	float d = abs(uv.x - x0);
+	return d < T2 && d < min(clamp(BB.y-uv.y-0.02,0,T2),clamp(uv.y-TT.y-0.02,0,T2));
+}
+
+// evaluate digit with normalized uv covering digit cell
+float get_segment(int digit, vec2 uv, bool dec, bool col) {
+	int s = SEGS[digit];
+	float slope = (A.x-C.x)/(C.y-A.y);
+	if ((s & 0x01) != 0 && is_in_horizontal_segment(A, D, uv)) return 1.0;
+	if ((s & 0x08) != 0 && is_in_horizontal_segment(C, F, uv)) return 1.0;
+	if ((s & 0x40) != 0 && is_in_horizontal_segment(B, EE, uv)) return 1.0;
+	if ((s & 0x02) != 0 && is_in_vertical_segment(D, EE, uv, slope)) return 1.0;
+	if ((s & 0x04) != 0 && is_in_vertical_segment(EE, F, uv, slope)) return 1.0;
+	if ((s & 0x10) != 0 && is_in_vertical_segment(B, C, uv, slope)) return 1.0;
+	if ((s & 0x20) != 0 && is_in_vertical_segment(A, B, uv, slope)) return 1.0;
+	if (dec && abs(uv.x-DecP.x) <= T2 && abs(uv.y-DecP.y) <= T) return 1.0;
+	if (col && abs(uv.x-C1.x) <= 0.07 && abs(uv.y-C1.y) <= 0.05) return 1.0;
+	if (col && abs(uv.x-C2.x) <= 0.07 && abs(uv.y-C2.y) <= 0.05) return 1.0;
+	return 0.0;
+}
+
+int get_digit(int digit_num, int ivalue) {
+	if (ivalue == 0 && digit_num == 0) return 0;
+	int iv = ivalue;
+	for (int i = 0; i < digit_num; i++) {
+		iv = iv / 10;
+	}
+	return iv - 10*(iv/10);
+}
+
+int find_digit_qty(int v) {
+	int _v = v;
+	int ret = 1;
+	while (_v > 9) {
+		_v /= 10;
+		ret += 1;
+	}
+	return ret;
+}
+
+float render(vec2 uv) {
+	// which of the digits in the display gets hit by this uv
+	int digit_num = number_of_digits - int(floor(uv.x * float(number_of_digits))) - 1;  // zero based from right
+	bool colon = colons && (digit_num == 2 || digit_num == 4 || digit_num == 6);
+	// produce a set of uvs normalized to the digit box	
+	vec2 normalized_uv = vec2( (uv.x - float(number_of_digits-digit_num-1)/float(number_of_digits))*float(number_of_digits), uv.y);
+	// multiply to handle decimals
+	int ivalue = abs(int(value*MULTIPLIERS[decimals]));
+	if (dashes) return get_segment(DASH, normalized_uv, false, false);
+	int required_digits = find_digit_qty(ivalue);
+	if (value < 0.0) {
+		// negative number symbol
+		if (digit_num == required_digits) return get_segment(DASH, normalized_uv, false, false);
+		required_digits += 1;
+	}
+	// unable to display?
+	if (required_digits > number_of_digits) return get_segment(DASH, normalized_uv, false, false);
+	required_digits = max(required_digits, decimals+1);
+	if (!colons && digit_num+1 > required_digits) return 0.0;  // leading blanks
+	return get_segment(get_digit(digit_num, ivalue), normalized_uv, decimals != 0 && digit_num == decimals, colon);
+}
+
+void fragment() {
+	vec2 base_uv = UV;
+	vec4 albedo_tex = texture(texture_albedo,base_uv);
+	ALBEDO = albedo.rgb * albedo_tex.rgb;
+	float metallic_tex = dot(texture(texture_metallic,base_uv),metallic_texture_channel);
+	METALLIC = metallic_tex * metallic;
+	vec4 roughness_texture_channel = vec4(1.0,0.0,0.0,0.0);
+	float roughness_tex = dot(texture(texture_roughness,base_uv),roughness_texture_channel);
+	ROUGHNESS = roughness_tex * roughness;
+	SPECULAR = specular;
+	vec3 emission_tex = texture(texture_emission,base_uv).rgb;
+	float energy = emission_energy;
+	if (base_uv.x > 1.0/float(number_of_digits))
+		energy = 0.0;
+	EMISSION = (emission.rgb+emission_tex)*emission_energy*render(base_uv);
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7rl7q"]
+resource_local_to_scene = true
+render_priority = 0
+shader = SubResource("Shader_vumfn")
+shader_parameter/value = 22.0
+shader_parameter/number_of_digits = 3
+shader_parameter/decimals = 0
+shader_parameter/colons = false
+shader_parameter/dashes = false
+shader_parameter/albedo = Color(0, 0, 0, 1)
+shader_parameter/point_size = 1.0
+shader_parameter/roughness = 0.0
+shader_parameter/metallic_texture_channel = null
+shader_parameter/specular = 0.5
+shader_parameter/metallic = 1.0
+shader_parameter/emission = Color(0.94902, 0, 0, 1)
+shader_parameter/emission_energy = 0.7
+shader_parameter/uv1_scale = Vector3(1, 1, 1)
+shader_parameter/uv1_offset = Vector3(0, 0, 0)
+shader_parameter/uv2_scale = Vector3(1, 1, 1)
+shader_parameter/uv2_offset = Vector3(0, 0, 0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_jl68w"]
+size = Vector3(0.001, 0.015, 0.003)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p6gbl"]
+albedo_color = Color(0.223529, 0.223529, 0.223529, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_68x4f"]
+resource_local_to_scene = true
+size = Vector3(0.029, 0.001, 0.003)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d133f"]
+albedo_color = Color(0.223529, 0.223529, 0.223529, 1)
+
 [node name="SevenSegmentDisplay" type="Node3D"]
-transform = Transform3D(0.006, 0, 0, 0, 0.006, 0, 0, 0, 0.006, 0, 0, 0)
 script = ExtResource("1_wen0i")
-number_of_digits = 2
-label_text = "M/S"
+display_value = 22.0
+number_of_digits = 3
+label_text = "text"
 
 [node name="PanelText" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.85, -1.25, 0.001)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0288, -0.0075, 0.001)
 layers = 4
-pixel_size = 0.02
+pixel_size = 0.00015625
 modulate = Color(0, 0, 0, 1)
-text = "M/S"
-font_size = 60
+text = "text"
+font_size = 64
 outline_size = 0
 horizontal_alignment = 0
+
+[node name="Display" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.0135, -0.0075, 0.001)
+layers = 4
+mesh = SubResource("PlaneMesh_hbie6")
+surface_material_override/0 = SubResource("ShaderMaterial_7rl7q")
+
+[node name="FrameL" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0005, -0.0075, 0.0015)
+layers = 4
+mesh = SubResource("BoxMesh_jl68w")
+surface_material_override/0 = SubResource("StandardMaterial3D_p6gbl")
+
+[node name="FrameR" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0275, -0.0075, 0.0015)
+layers = 4
+mesh = SubResource("BoxMesh_jl68w")
+surface_material_override/0 = SubResource("StandardMaterial3D_p6gbl")
+
+[node name="FrameT" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0135, 0.0005, 0.0015)
+layers = 4
+mesh = SubResource("BoxMesh_68x4f")
+surface_material_override/0 = SubResource("StandardMaterial3D_d133f")
+
+[node name="FrameB" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0135, -0.0155, 0.0015)
+layers = 4
+mesh = SubResource("BoxMesh_68x4f")
+surface_material_override/0 = SubResource("StandardMaterial3D_d133f")
