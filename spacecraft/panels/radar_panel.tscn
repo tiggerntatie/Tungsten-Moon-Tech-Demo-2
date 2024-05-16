@@ -1,0 +1,46 @@
+[gd_scene load_steps=5 format=3 uid="uid://b1yvgmo32f10l"]
+
+[ext_resource type="PackedScene" uid="uid://d320wph6gg1hv" path="res://spacecraft/instruments/cross_pointer/cross_pointer.tscn" id="1_krsoc"]
+[ext_resource type="PackedScene" uid="uid://by3xeakiorqrc" path="res://spacecraft/indicators/seven_segment_display.tscn" id="2_o1ycc"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_05u7v"]
+size = Vector2(0.1, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6fmqh"]
+albedo_color = Color(0.556863, 0.556863, 0.556863, 1)
+
+[node name="RadarPanel" type="Node3D"]
+
+[node name="Panel" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+layers = 4
+mesh = SubResource("PlaneMesh_05u7v")
+surface_material_override/0 = SubResource("StandardMaterial3D_6fmqh")
+
+[node name="CrossPointer" parent="." instance=ExtResource("1_krsoc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.025, -0.019)
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.034, 0.0925352, 0.001)
+layers = 4
+pixel_size = 0.0001
+modulate = Color(0, 0, 0, 1)
+text = "RADAR"
+font_size = 64
+outline_size = 0
+uppercase = true
+
+[node name="DisplayRadarAltitude" parent="." instance=ExtResource("2_o1ycc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.045, 0.085, 0)
+number_of_digits = 5
+label_text = "m ALT"
+
+[node name="DisplayRadarVerticalSpeed" parent="." instance=ExtResource("2_o1ycc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.045, 0.065, 0)
+number_of_digits = 5
+label_text = "m/s VSPD"
+
+[node name="DisplayRadarHorizontalSpeed" parent="." instance=ExtResource("2_o1ycc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.045, 0.045, 0)
+number_of_digits = 5
+label_text = "m/s HSPD"
