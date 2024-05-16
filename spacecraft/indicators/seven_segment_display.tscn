@@ -4,9 +4,10 @@
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_hbie6"]
 resource_local_to_scene = true
-size = Vector2(0.027, 0.015)
+size = Vector2(0.036, 0.015)
 
 [sub_resource type="Shader" id="Shader_vumfn"]
+resource_local_to_scene = true
 code = "// NOTE: Shader automatically converted from Godot Engine 4.2.1.stable's StandardMaterial3D.
 
 shader_type spatial;
@@ -50,7 +51,7 @@ const float T2 = 0.078; 	// half-thickness of a vertical segment
 
 group_uniforms SevenSegment;
 uniform float value = 1.0;
-uniform int number_of_digits = 4;
+uniform int number_of_digits = 3;
 uniform int decimals = 0;
 uniform bool colons = false;
 uniform bool dashes = false;
@@ -136,6 +137,7 @@ float render(vec2 uv) {
 	int ivalue = abs(int(value*MULTIPLIERS[decimals]));
 	if (dashes) return get_segment(DASH, normalized_uv, false, false);
 	int required_digits = find_digit_qty(ivalue);
+	required_digits = max(required_digits, decimals+1);
 	if (value < 0.0) {
 		// negative number symbol
 		if (digit_num == required_digits) return get_segment(DASH, normalized_uv, false, false);
@@ -143,7 +145,6 @@ float render(vec2 uv) {
 	}
 	// unable to display?
 	if (required_digits > number_of_digits) return get_segment(DASH, normalized_uv, false, false);
-	required_digits = max(required_digits, decimals+1);
 	if (!colons && digit_num+1 > required_digits) return 0.0;  // leading blanks
 	return get_segment(get_digit(digit_num, ivalue), normalized_uv, decimals != 0 && digit_num == decimals, colon);
 }
@@ -170,9 +171,9 @@ void fragment() {
 resource_local_to_scene = true
 render_priority = 0
 shader = SubResource("Shader_vumfn")
-shader_parameter/value = 22.0
-shader_parameter/number_of_digits = 3
-shader_parameter/decimals = 0
+shader_parameter/value = 123.4
+shader_parameter/number_of_digits = 4
+shader_parameter/decimals = 1
 shader_parameter/colons = false
 shader_parameter/dashes = false
 shader_parameter/albedo = Color(0, 0, 0, 1)
@@ -189,6 +190,7 @@ shader_parameter/uv2_scale = Vector3(1, 1, 1)
 shader_parameter/uv2_offset = Vector3(0, 0, 0)
 
 [sub_resource type="BoxMesh" id="BoxMesh_jl68w"]
+resource_local_to_scene = true
 size = Vector3(0.001, 0.015, 0.003)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p6gbl"]
@@ -196,19 +198,20 @@ albedo_color = Color(0.223529, 0.223529, 0.223529, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_68x4f"]
 resource_local_to_scene = true
-size = Vector3(0.029, 0.001, 0.003)
+size = Vector3(0.038, 0.001, 0.003)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d133f"]
 albedo_color = Color(0.223529, 0.223529, 0.223529, 1)
 
 [node name="SevenSegmentDisplay" type="Node3D"]
 script = ExtResource("1_wen0i")
-display_value = 22.0
-number_of_digits = 3
+display_value = 123.4
+number_of_digits = 4
+number_of_decimals = 1
 label_text = "text"
 
 [node name="PanelText" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0288, -0.0075, 0.001)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0378, -0.0075, 0.001)
 layers = 4
 pixel_size = 0.00015625
 modulate = Color(0, 0, 0, 1)
@@ -218,7 +221,7 @@ outline_size = 0
 horizontal_alignment = 0
 
 [node name="Display" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.0135, -0.0075, 0.001)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.018, -0.0075, 0.001)
 layers = 4
 mesh = SubResource("PlaneMesh_hbie6")
 surface_material_override/0 = SubResource("ShaderMaterial_7rl7q")
@@ -230,19 +233,19 @@ mesh = SubResource("BoxMesh_jl68w")
 surface_material_override/0 = SubResource("StandardMaterial3D_p6gbl")
 
 [node name="FrameR" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0275, -0.0075, 0.0015)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0365, -0.0075, 0.0015)
 layers = 4
 mesh = SubResource("BoxMesh_jl68w")
 surface_material_override/0 = SubResource("StandardMaterial3D_p6gbl")
 
 [node name="FrameT" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0135, 0.0005, 0.0015)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.018, 0.0005, 0.0015)
 layers = 4
 mesh = SubResource("BoxMesh_68x4f")
 surface_material_override/0 = SubResource("StandardMaterial3D_d133f")
 
 [node name="FrameB" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0135, -0.0155, 0.0015)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.018, -0.0155, 0.0015)
 layers = 4
 mesh = SubResource("BoxMesh_68x4f")
 surface_material_override/0 = SubResource("StandardMaterial3D_d133f")
