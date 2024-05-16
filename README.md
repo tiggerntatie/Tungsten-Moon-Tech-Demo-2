@@ -62,7 +62,6 @@ These starting positions provide various combinations of sun and/or planet shine
 * The landing logic occcasionally glitches when landing on the seam between scenery meshes (you fall through the ground). Just press R to start over.
 
 ## Road Map
-* Add sound effects: button clicks, auditory thrust level, landing rattle, etc.
 * Add landing pads at various locations.
 * Rebuild the spacecraft from the ground up with better detail and ergonomics.
 * Objectives, challenges, achievements.
