@@ -20,9 +20,15 @@ var xy_cmd_normalized := Vector2.ZERO
 # radar online
 var radar_online : bool = false
 
+func create_signals() -> void:
+	Signals.add_user_signal(name + "_drift_changed", [{"name":"drift", "type": TYPE_VECTOR2}])
+	Signals.connect(name + "_drift_changed", _on_spacecraft_drift_changed)
+
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	$RangeRadioButton.set_radio_button("x1")
+	create_signals()
 	
 # called periodically so we can slew the pointers
 func _process(delta):

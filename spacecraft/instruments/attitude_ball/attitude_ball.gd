@@ -66,6 +66,7 @@ var landed : bool = TYPE_NIL
 var reset_rotation : float
 var last_ball_quaternion : Quaternion
 var sound_playing := false
+var signals_connected := false
 
 func _orient_ball_from_angles()->void:
 	$Ball/Ball.rotation_degrees = Vector3(0.0, 0.0, 0.0)
@@ -73,12 +74,20 @@ func _orient_ball_from_angles()->void:
 	$Ball/Ball.rotate_x(deg_to_rad(pitch_degrees))
 	$Ball/Ball.rotate_z(deg_to_rad(-roll_degrees))
 	
-func _on_spacecraft_state_update(ship : Spacecraft):
-	saved_ship = ship
+func _on_spacecraft_state_update(ship : Object):
+	saved_ship = ship as Spacecraft
 	# the game global frame is stationary (the moon), but it is really rotating, so 
 	# we need to add the rotation in for display purposese
 	current_orientation = ship.basis.rotated(Vector3.UP, saved_ship.LEVEL.current_moon_rotation - reset_rotation).get_rotation_quaternion()
 	
+func connect_signals() -> void:
+	# and connect to them
+	if Signals.has_signal("Spacecraft_landed"):
+		Signals.connect("Spacecraft_state_changed", _on_spacecraft_state_update)
+		Signals.connect("Spacecraft_landed", _on_spacecraft_has_landed)
+		Signals.connect("Spacecraft_lifted_off", _on_spacecraft_has_lifted_off)
+		signals_connected = true
+		
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	$ResetButton.set_button(true)
@@ -88,6 +97,8 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	if not signals_connected:
+		connect_signals()
 	if Engine.is_editor_hint():
 		return
 	var reference : Quaternion = reference_orientation
@@ -141,7 +152,6 @@ func _on_reset_button_released(_name, _legend, _state, _light_state):
 
 func _on_spacecraft_has_landed():
 	landed = true
-
 
 func _on_spacecraft_has_lifted_off():
 	landed = false
