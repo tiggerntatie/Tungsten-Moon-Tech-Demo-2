@@ -53,6 +53,7 @@ signal light_changed(name: String, legend: String, state: bool, light_state: boo
 		_set_state()
 				
 const default_legend_image_scale := 0.003
+var _signals_created : bool = false
 				
 func _update_button():
 	$Button/MeshInstance3D.mesh.size.x = width
@@ -93,10 +94,9 @@ func _set_state():
 	else:
 		$Button/Label3D.modulate = Color(1.0, 1.0, 1.0)
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	# define signals for reporting and changing state
-	if not Engine.is_editor_hint():
+func create_signals() -> void:
+	# only create global signals for renamed buttons
+	if name != "Button":
 		Signals.add_user_signal(name + "_pressed", [{"name":"state", "type": TYPE_BOOL}, {"name":"light_state", "type": TYPE_BOOL}])
 		Signals.add_user_signal(name + "_released", [{"name":"state", "type": TYPE_BOOL}, {"name":"light_state", "type": TYPE_BOOL}])
 		Signals.add_user_signal(name + "_changed", [{"name":"state", "type": TYPE_BOOL}, {"name":"light_state", "type": TYPE_BOOL}])
@@ -107,6 +107,13 @@ func _ready():
 		Signals.connect(name + "_press", _on_press)
 		Signals.connect(name + "_set_state", _on_set_state)
 		Signals.connect(name + "_set_light_state", _on_set_light_state)
+		_signals_created = true
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	# define signals for reporting and changing state
+	if not Engine.is_editor_hint():
+		create_signals()
 	_update_button()
 		
 
@@ -114,12 +121,12 @@ func press_button() -> void:
 	pressed.emit(name, legend, state, light_state)
 	if is_toggle:
 		set_button(not state)
-	else:
+	elif _signals_created:
 		Signals.emit_signal(name + "_pressed", state, light_state)
 	
 func release_button() -> void:
 	released.emit(name, legend, state, light_state)
-	if not is_toggle:
+	if not is_toggle and _signals_created:
 		Signals.emit_signal(name + "_released", state, light_state)
 
 
@@ -130,7 +137,7 @@ func set_button(value : bool) -> void:
 		if light_automatic:
 			light_state = value
 		changed.emit(name, legend, state, light_state)
-		if not Engine.is_editor_hint():
+		if not Engine.is_editor_hint() and _signals_created:
 			Signals.emit_signal(name + "_changed", state, light_state)
 
 # set the state
@@ -138,7 +145,7 @@ func set_button_light(value : bool) -> void:
 	if value != light_state:
 		light_state = value
 		light_changed.emit(name, legend, state, light_state)
-		if not Engine.is_editor_hint():
+		if not Engine.is_editor_hint() and _signals_created:
 			Signals.emit_signal(name + "_light_changed", state, light_state)
 
 func _on_interactable_area_button_pressed(button):
