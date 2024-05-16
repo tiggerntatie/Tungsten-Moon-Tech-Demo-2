@@ -1,8 +1,8 @@
-[gd_scene load_steps=28 format=3 uid="uid://c08vubwsc2swp"]
+[gd_scene load_steps=27 format=3 uid="uid://c08vubwsc2swp"]
 
 [ext_resource type="Script" path="res://spacecraft/spacecraft.gd" id="1_b8yyq"]
 [ext_resource type="ArrayMesh" uid="uid://1woisy38wlky" path="res://spacecraft/RocketModel.obj" id="2_o0qaw"]
-[ext_resource type="PackedScene" uid="uid://d3kot1052qj27" path="res://spacecraft/instrument_panel.tscn" id="3_da1pl"]
+[ext_resource type="PackedScene" uid="uid://cv8mg7imvk6k2" path="res://spacecraft/panels/imu_panel.tscn" id="3_8jw78"]
 [ext_resource type="PackedScene" uid="uid://bdwmserhqai5h" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_physics_hand_low.tscn" id="3_k0geh"]
 [ext_resource type="PackedScene" path="res://addons/godot-xr-tools/misc/vr_common_shader_cache.tscn" id="3_m2ksy"]
 [ext_resource type="Script" path="res://addons/godot-xr-tools/functions/function_pickup.gd" id="4_ltj2u"]
@@ -12,9 +12,7 @@
 [ext_resource type="Script" path="res://spacecraft/landing_light.gd" id="9_u56vm"]
 [ext_resource type="PackedScene" uid="uid://neklbt0jds8q" path="res://spacecraft/controls/sidestick/sidestick.tscn" id="10_e5xbv"]
 [ext_resource type="AudioStream" uid="uid://boes466x3k2lw" path="res://spacecraft/audio/fan_hum.wav" id="13_huula"]
-[ext_resource type="PackedScene" uid="uid://c1dlge57vtwna" path="res://spacecraft/instruments/attitude_ball/attitude_ball.tscn" id="13_ufkbg"]
 [ext_resource type="Script" path="res://spacecraft/audio/fan_hum.gd" id="14_4f2dy"]
-[ext_resource type="PackedScene" uid="uid://d320wph6gg1hv" path="res://spacecraft/instruments/cross_pointer/cross_pointer.tscn" id="14_bfk7h"]
 [ext_resource type="AudioStream" uid="uid://cj57k6u8yyp4q" path="res://spacecraft/audio/landing_rattle.wav" id="15_4rpjs"]
 [ext_resource type="Script" path="res://spacecraft/audio/landing_rattle.gd" id="16_7xops"]
 [ext_resource type="AudioStream" uid="uid://crgrl1aopfbp" path="res://spacecraft/audio/flow_click.wav" id="17_4p3gk"]
@@ -25,6 +23,7 @@
 [ext_resource type="Script" path="res://spacecraft/audio/flow_sound.gd" id="22_g3a7g"]
 [ext_resource type="AudioStream" uid="uid://gy817b38k5sc" path="res://spacecraft/audio/thruster_hiss.wav" id="23_bstsh"]
 [ext_resource type="Script" path="res://spacecraft/audio/hold_rotation.gd" id="24_4g0p2"]
+[ext_resource type="PackedScene" uid="uid://b1yvgmo32f10l" path="res://spacecraft/panels/radar_panel.tscn" id="26_bjwo4"]
 [ext_resource type="PackedScene" uid="uid://brpwj7lggpk1t" path="res://spacecraft/panels/button_panel.tscn" id="27_guree"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_63e0r"]
@@ -41,7 +40,13 @@ continuous_cd = true
 script = ExtResource("1_b8yyq")
 
 [node name="ButtonPanel" parent="." instance=ExtResource("27_guree")]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.22188, 5.68733, -0.366841)
+transform = Transform3D(0.207912, -0.339354, -0.917394, 0, 0.937889, -0.346936, 0.978148, 0.072132, 0.194998, 1.17787, 5.74323, -0.547033)
+
+[node name="IMUPanel" parent="." instance=ExtResource("3_8jw78")]
+transform = Transform3D(-0.393338, -0.0305503, -0.918886, -0.00449319, 0.9995, -0.0313071, 0.919383, -0.00818555, -0.393279, 1.21753, 5.563, -0.379954)
+
+[node name="RadarPanel" parent="." instance=ExtResource("26_bjwo4")]
+transform = Transform3D(-0.642775, -0.0257182, -0.765623, -0.011632, 0.999649, -0.0238139, 0.765967, -0.00640127, -0.642848, 1.16387, 5.56099, -0.293078)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.01, 0, 0, 0, -4.37114e-10, 0.01, 0, -0.01, -4.37114e-10, 0, 0, 0)
@@ -91,18 +96,15 @@ ranged_enable = false
 [node name="FunctionPoseDetector" parent="XROrigin3D/XRRight" instance=ExtResource("6_bteek")]
 
 [node name="YawPivot" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 5.628, -0.575)
+transform = Transform3D(0.99863, 0, -0.052336, 0, 1, 0, 0.052336, 0, 0.99863, 0.6, 5.628, -0.575)
 
 [node name="PitchPivot" type="Node3D" parent="YawPivot"]
-transform = Transform3D(0.974229, 0.225564, 0, -0.225564, 0.974229, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(0.993572, 0.113203, 0, -0.113203, 0.993572, 0, 0, 0, 0.999999, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="YawPivot/PitchPivot"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 fov = 37.8493
 far = 300000.0
-
-[node name="InstrumentPanel" parent="." instance=ExtResource("3_da1pl")]
-transform = Transform3D(-0.310347, 0.154323, -0.048673, 0.151618, 0.314105, 0.0291598, 0.0565385, 0.00477134, -0.34537, 1.28147, 5.31345, -0.562522)
 
 [node name="SpotLight3D" type="SpotLight3D" parent="."]
 transform = Transform3D(0.167574, 0.353867, -0.920161, -0.064964, 0.935295, 0.347856, 0.983717, 0.00148564, 0.17972, 0.574802, 5.54278, -0.456192)
@@ -131,12 +133,6 @@ transform = Transform3D(-0.268748, -0.191108, -0.944062, 0.963162, -0.043508, -0
 
 [node name="SideStick" parent="." instance=ExtResource("10_e5xbv")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.18881, 5.21135, -0.322783)
-
-[node name="AttitudeBall" parent="." instance=ExtResource("13_ufkbg")]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.31126, 5.4708, -0.365528)
-
-[node name="CrossPointer" parent="." instance=ExtResource("14_bfk7h")]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.311, 5.471, -0.274503)
 
 [node name="FanHum" type="AudioStreamPlayer3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.836668, 5.90087, -0.64503)
@@ -173,11 +169,15 @@ volume_db = -36.0
 attenuation_filter_db = -11.7
 script = ExtResource("24_4g0p2")
 
-[connection signal="drift_changed" from="." to="CrossPointer" method="_on_spacecraft_drift_changed"]
-[connection signal="has_landed" from="." to="AttitudeBall" method="_on_spacecraft_has_landed"]
-[connection signal="has_landed" from="." to="LandingRattle" method="_on_spacecraft_has_landed"]
-[connection signal="has_lifted_off" from="." to="AttitudeBall" method="_on_spacecraft_has_lifted_off"]
-[connection signal="state_updated" from="." to="AttitudeBall" method="_on_spacecraft_state_update"]
+[node name="DisplayTimer" type="Timer" parent="."]
+wait_time = 0.1
+autostart = true
+
+[node name="NavballTimer" type="Timer" parent="."]
+wait_time = 0.05
+autostart = true
+
+[connection signal="landed" from="." to="LandingRattle" method="_on_spacecraft_has_landed"]
 [connection signal="thrust_changed" from="." to="FlowClick" method="_on_spacecraft_thrust_changed"]
 [connection signal="thrust_changed" from="." to="FlowSound" method="_on_spacecraft_thrust_changed"]
 [connection signal="torque_changed" from="." to="StartRotation" method="_on_spacecraft_torque_changed"]
@@ -190,3 +190,5 @@ script = ExtResource("24_4g0p2")
 [connection signal="input_vector2_changed" from="XROrigin3D/XRRight" to="." method="_on_xr_right_input_vector_2_changed"]
 [connection signal="throttle_output_changed" from="Throttle" to="." method="_on_throttle_output_changed"]
 [connection signal="sidestick_output_changed" from="SideStick" to="." method="_on_sidestick_output_changed"]
+[connection signal="timeout" from="DisplayTimer" to="." method="_on_display_timer_timeout"]
+[connection signal="timeout" from="NavballTimer" to="." method="_on_navball_timer_timeout"]

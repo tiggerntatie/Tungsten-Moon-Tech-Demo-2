@@ -2,12 +2,9 @@ class_name Spacecraft
 
 extends RigidBody3D
 
-signal has_landed
-signal has_lifted_off
-signal state_updated(Spacecraft)	# pass spacecraft
 signal thrust_changed(float)
 signal torque_changed(newtorque: Vector3, oldtorque: Vector3, threshold: float) # new torque, old torque, threshold value
-signal drift_changed(drift : Vector2)
+signal landed
 
 const THRUST_INC = 10.0 	# Newtons
 const THRUST_MAX = 20000 	# Newtons
@@ -32,16 +29,6 @@ const TORQUE_THRESHOLD := 0.01	# torque below which we can turn off the sound
 @onready var MOON : Node3D = $"../SmartMoon"
 @onready var GROUNDRADAR : RayCast3D = $GroundRadar
 @onready var COLLISIONSHAPE : CollisionShape3D = $CollisionShape3D
-@onready var HUDHVEL : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_HSpeed/HVEL
-@onready var HUDHDRIFT : Control = $InstrumentPanel/SubViewport/InstrumentCanvas/L_HSpeed/DRIFT
-@onready var HUDVVEL : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_VSpeed/VVEL
-@onready var HUDVDIR : Control = $InstrumentPanel/SubViewport/InstrumentCanvas/L_VSpeed/DIR
-@onready var HUDALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Altitude/ALT
-@onready var HUDRALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_RAltitude/RALT
-@onready var HUDTHRUST : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Thrust/THRUST
-@onready var HUDFUEL : ProgressBar = $InstrumentPanel/SubViewport/InstrumentCanvas/L_Fuel/FUEL
-@onready var HUDAALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_OrbitApoapsis/AALT
-@onready var HUDPALT : Label = $InstrumentPanel/SubViewport/InstrumentCanvas/L_OrbitPeriapsis/PALT
 @onready var CAMERA : Camera3D = $YawPivot/PitchPivot/Camera3D
 @onready var XRREFERENCE : Marker3D = $XRReferencePosition
 @onready var XRCAMERA : XRCamera3D = $"XROrigin3D/XRCamera3D"
@@ -71,10 +58,11 @@ var thrust : float = 0.0
 var dv_last_position : DVector3
 var last_xz_radius : float
 var altitude_agl : float = NAN
+var altitude_agl_previous : float = NAN
+var vertical_velocity_agl : float = 0.0
 var altitude_radar : float = NAN
 var terrain_altitude : float = NAN
 const RADAR_RANGE := 2000.0
-#var v_altitude_agl : Vector3 = Vector3.INF
 
 # Sidestick State
 var sidestick_x : float = 0.0
@@ -86,6 +74,8 @@ var rotation_rate_mode : bool
 var ui_thrust_lock : bool
 var mouse_button_2 : bool
 var alternate_control : bool
+var update_displays : bool = false
+var update_navball : bool = false
 
 # Asynchronous XR inputs
 var left_ax := false
@@ -133,6 +123,8 @@ func reset_spacecraft():
 	v_torque = Vector3.ZERO
 	angular_velocity = Vector3.ZERO
 	altitude_agl = NAN
+	altitude_agl_previous = NAN
+	vertical_velocity_agl = 0.0
 	Signals.emit_signal("ButtonLight_set_state", true)
 	Signals.emit_signal("ButtonLight_set_state", false)
 	alternate_control = false
@@ -180,6 +172,10 @@ func get_altitude_msl() -> float:
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	# locally owned global signals
+	Signals.add_user_signal(name + "_state_changed", [{"name":"ship", "type": TYPE_OBJECT}])
+	Signals.add_user_signal(name + "_lifted_off")
+	Signals.add_user_signal(name + "_landed")
 	# external global signals
 	Signals.connect("ButtonRefuel_pressed", _on_refuel_button_pressed)
 	Signals.connect("ButtonAlternateControl_changed", _on_alternate_control_changed)
@@ -230,8 +226,22 @@ func _process(delta):
 		altitude_radar = NAN
 
 	if not is_nan(altitude_radar):
+		if is_nan(altitude_agl):	# reset the radar displays
+			Signals.emit_signal("DisplayRadarAltitude_set_valid", true)
+			Signals.emit_signal("DisplayRadarHorizontalSpeed_set_valid", true)
+			Signals.emit_signal("DisplayRadarVerticalSpeed_set_valid", true)
 		altitude_agl = altitude_msl - terrain_altitude
+		if not is_nan(altitude_agl_previous):
+			var vvel : float = (altitude_agl - altitude_agl_previous) / delta
+			# filter this a bit
+			vertical_velocity_agl = (vertical_velocity_agl * 49.0 + vvel) / 50.0
+		altitude_agl_previous = altitude_agl
+
 	else:
+		if not is_nan(altitude_agl):
+			Signals.emit_signal("DisplayRadarAltitude_set_valid", false)
+			Signals.emit_signal("DisplayRadarHorizontalSpeed_set_valid", false)
+			Signals.emit_signal("DisplayRadarVerticalSpeed_set_valid", false)
 		altitude_agl = NAN
 	
 	# compute an impact restoring force
@@ -242,7 +252,8 @@ func _process(delta):
 		is_landed = true
 		angular_damp = 1	# use Godot to damp out the jiggles
 		if dv_captured_logical_position == null:
-			has_landed.emit()
+			Signals.emit_signal(name + "_landed")
+			landed.emit()
 			dv_captured_logical_position = dv_logical_position.copy()
 			dv_captured_logical_position.rotate_y(-LEVEL.current_moon_rotation) # UNrotate
 		var dv_captured = dv_captured_logical_position.copy()
@@ -267,8 +278,8 @@ func _process(delta):
 
 			v_thrust_global += dv_restoring_force.vector3()
 	else: # agl is undefined or above zero
-		if is_landed:
-			has_lifted_off.emit()
+		if is_landed: 
+			Signals.emit_signal(name + "_lifted_off")
 			angular_damp = 0
 			dv_captured_logical_position = null
 			angular_velocity = Vector3.ZERO
@@ -360,73 +371,70 @@ func _process(delta):
 		# convert back to global space
 		apply_torque(basis * v_torque * delta * 10000)
 	
-	# Orbit State Calculation
-	var GM = MOON.LogicalM*MOON.G
-	var P0 = dv_logical_position.vector3().cross(dv_logical_velocity.vector3()).length()
-	var r0 = dv_logical_position.vector3().length()
-	var v0 = dv_logical_velocity.vector3().length()
-	var discriminant = GM*GM/P0/P0 - 2.0*GM/r0 + v0*v0
-	var PA = 0.0
-	var AA = 0.0
-	if discriminant >= 0.0:
-		PA = P0/(GM/P0 + sqrt(discriminant)) - MOON.physical_radius
-		AA = P0/(GM/P0 - sqrt(discriminant)) - MOON.physical_radius
-				
-	# HUD Updates
-	var v_ground_logical_velocity = get_landed_velocity(dv_logical_position, dv_logical_position.xz_length(), LEVEL.moon_axis_rate).vector3()
-	var v_logical_velocity = dv_logical_velocity.vector3()
-	# logical ground normal
-	var v_normal = dv_logical_position.vector3().normalized()
-	# logical velocity, relative to ground
-	var v_logical_ground_rel_velocity = v_logical_velocity-v_ground_logical_velocity
-	var v_logical_hvel = v_logical_ground_rel_velocity - v_logical_ground_rel_velocity.dot(v_normal) * v_normal
-	# scalar horizontal velocity
-	var hvel = v_logical_hvel.length()
-	# unrotated logical ground relative horizontal.. 
-	var v_global_unrot_hvel = v_logical_hvel.rotated(Vector3.UP, -LEVEL.current_moon_rotation)
-	# transformed to ship-local coordinates
-	var v_local_hvel = basis.inverse()*v_global_unrot_hvel
-	# obtain vector for local vertical
-	var v_local_vertical = -(basis.inverse()*MOON.position)
-	# horizontal drift data only valid if within 45 degrees of vertical and in radar range
-	if v_local_vertical.angle_to(Vector3.UP) < PI/4 and not is_nan(altitude_radar):
-		# map the h drift onto our xz plane
-		v_local_hvel = Vector2(v_local_hvel.z, v_local_hvel.x).normalized()*v_local_hvel.length()
-		# obtain an angle in the local horizontal plane and DISPLAY it!
-		drift_changed.emit(v_local_hvel)
-	HUDHDRIFT.visible = false 	#FIXME we will remove this altogether
-	# altitude change direction
-	var vvel = dv_logical_position.vector3().normalized().dot(dv_logical_velocity.vector3())
-	if vvel > 0.1:
-		HUDVDIR.modulate = Color.WHITE
-		HUDVDIR.visible = true
-		HUDVDIR.rotation = -PI/2.0
-	elif vvel < -0.1:
-		HUDVDIR.modulate = Color.RED
-		HUDVDIR.visible = true
-		HUDVDIR.rotation = PI/2.0
-	else:
-		HUDVDIR.visible = false
-	HUDHVEL.text = str(hvel).pad_decimals(1) + " m/s"
-	HUDVVEL.text = str(abs(vvel)).pad_decimals(1) + " m/s"
-	HUDALT.text = str(altitude_msl/1000.0).pad_decimals(2) + " km"
-	if is_nan(altitude_agl):
-		HUDRALT.text = "no signal"
-	else:
-		HUDRALT.text = str(altitude_agl).pad_decimals(1) + " m"
-	HUDTHRUST.text = str(v_thrust.y).pad_decimals(0) + " N"
-	HUDFUEL.value = 100.0*fuel/FULL_FUEL
-	if AA > 0.0:
-		HUDAALT.text = str(AA/1000.0).pad_decimals(2) + " km"
-	else:
-		HUDAALT.text = "---"
-	if PA > 0.0:
-		HUDPALT.text = str(PA/1000.0).pad_decimals(2) + " km"
-	else:
-		HUDPALT.text = "---"		
+	if update_displays:
+		# Orbit State Calculation
+		var GM = MOON.LogicalM*MOON.G
+		var P0 = dv_logical_position.vector3().cross(dv_logical_velocity.vector3()).length()
+		var r0 = dv_logical_position.vector3().length()
+		var v0 = dv_logical_velocity.vector3().length()
+		var discriminant = GM*GM/P0/P0 - 2.0*GM/r0 + v0*v0
+		var PA = 0.0
+		var AA = 0.0
+		if discriminant >= 0.0:
+			PA = P0/(GM/P0 + sqrt(discriminant)) - MOON.physical_radius
+			AA = P0/(GM/P0 - sqrt(discriminant)) - MOON.physical_radius
+					
+		# Display Updates
+		var v_ground_logical_velocity = get_landed_velocity(dv_logical_position, dv_logical_position.xz_length(), LEVEL.moon_axis_rate).vector3()
+		var v_logical_velocity = dv_logical_velocity.vector3()
+		# logical ground normal
+		var v_normal = dv_logical_position.vector3().normalized()
+		# logical velocity, relative to ground
+		var v_logical_ground_rel_velocity = v_logical_velocity-v_ground_logical_velocity
+		var v_logical_hvel = v_logical_ground_rel_velocity - v_logical_ground_rel_velocity.dot(v_normal) * v_normal
+		# scalar horizontal velocity
+		var hvel = v_logical_hvel.length()
+		# unrotated logical ground relative horizontal.. 
+		var v_global_unrot_hvel = v_logical_hvel.rotated(Vector3.UP, -LEVEL.current_moon_rotation)
+		# transformed to ship-local coordinates
+		var v_local_hvel = basis.inverse()*v_global_unrot_hvel
+		# obtain vector for local vertical
+		var v_local_vertical = -(basis.inverse()*MOON.position)
+		# horizontal drift data only valid if within 45 degrees of vertical and in radar range
+		if v_local_vertical.angle_to(Vector3.UP) < PI/4 and not is_nan(altitude_radar):
+			# map the h drift onto our xz plane
+			v_local_hvel = Vector2(v_local_hvel.z, v_local_hvel.x).normalized()*v_local_hvel.length()
+			# obtain an angle in the local horizontal plane and DISPLAY it!
+			Signals.emit_signal("CrossPointer_drift_changed", v_local_hvel)
+			Signals.emit_signal("DisplayRadarHorizontalSpeed_set_value", hvel)
+			Signals.emit_signal("DisplayRadarHorizontalSpeed_set_valid", true)
+		else:
+			Signals.emit_signal("DisplayRadarHorizontalSpeed_set_valid", false)
+		# altitude change direction
+		Signals.emit_signal("DisplayRadarVerticalSpeed_set_value", vertical_velocity_agl)
+		Signals.emit_signal("DisplayIMUAltitude_set_value", altitude_msl/1000.0)
+		Signals.emit_signal("DisplayIMUSpeed_set_value", v_logical_velocity.length())
+		Signals.emit_signal("DisplayRadarAltitude_set_value", altitude_agl)
+		Signals.emit_signal("DisplayFuelPercentage_set_value", 100.0*fuel/FULL_FUEL)
+		if AA > 0.0:
+			Signals.emit_signal("DisplayIMUApoapsis_set_value", AA/1000.0)
+			Signals.emit_signal("DisplayIMUApoapsis_set_valid", true)
+		else:
+			Signals.emit_signal("DisplayIMUApoapsis_set_valid", false)
+		if PA > 0.0:
+			Signals.emit_signal("DisplayIMUPeriapsis_set_value", PA/1000.0)
+			Signals.emit_signal("DisplayIMUPeriapsis_set_valid", true)
+		else:
+			Signals.emit_signal("DisplayIMUPeriapsis_set_valid", false)
 	
-	# Inform interested parties!
-	state_updated.emit(self)
+		# done with display updates
+		update_displays = false
+	if update_navball:
+		# Inform interested parties!
+		Signals.emit_signal(name + "_state_changed", self as Object)
+		update_navball = false
+		
+	
 	
 func change_thrust(step : float, value : float):
 	if value != 0.0:
@@ -508,3 +516,8 @@ func _on_xr_right_input_vector_2_changed(name, value):
 	if name == "primary":
 		right_primary = value
 
+func _on_display_timer_timeout():
+	update_displays = true
+
+func _on_navball_timer_timeout():
+	update_navball = true
