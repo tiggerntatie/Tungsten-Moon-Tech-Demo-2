@@ -18,7 +18,7 @@ Tungsten Moon will run in VR mode if a VR headset is detected. You can use full 
 * Velocity is reported as ground-relative horizontal and vertical components.
 * An attitude "nav ball" helps to orient the pilot.
 * A horizontal drift indicator shows the cockpit-relative forward/backwards and left/right motion of the ship. This is derived from doppler radar data and will only operate below the 2000 meter radar altitude limit, and when the ship is within 45 degrees of horizontal. Three speed ranges, 1x, 10x, and 100x are selectable with buttons on the display.
-* To help with achieving orbit, apoapsis and periapsis altitudes are reported (A. ALT and P.ALT) for the current spacecraft altitude and velocity vector.
+* To help with achieving orbit, apoapsis and periapsis altitudes are reported ("ORBITAL APSIDES" AA and PA, respectively) for the current spacecraft altitude and velocity vector.
 
 ## Controls
 Some inputs perform an alternate function. Pressing the right shoulder button on the controller or the SHIFT key on the keyboard toggles the ALTERNATE control mode. There is also an in-cockpit UI button that you can activate with a mouse or VR controller.
