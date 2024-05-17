@@ -34,6 +34,7 @@ Some inputs perform an alternate function. Pressing the right shoulder button on
 * The in-cockpit THROTTLE handle also works with a mouse or VR hand controller.
 * On a game controller, thrust soft lock is toggled using the left shoulder button. The left trigger is used to manually control the thrust from zero to maximum. Once you have a thrust level you like, press the lock button again to hold that thrust.  
 * On a keyboard, PG-UP and PG-DN (keypad + or -) immediately set and hold full or zero thrust, respectively. You can then tweak the levels using the Ctrl + PG-UP and PG-DN keys.
+* The effect of your throttle input is displayed on the IMU accelerometer. The nominal gravitational acceleration on the surface of the moon is 1.6 m/s/s. If you hold the ship acceleration at 1.6 during flight, then you  will be assured of maintaining a constant velocity, relative to the surface (which could include *no* velocity). When the ship is flown at an angle, it will accelerate sideways under thrust, and slightly *more* than 1.6 m/s/s acceleration is required to maintain altitude.
 ### Other Controls
 * Menu button or Q or ESC key will quit the program.
 * X button or X key will toggle attitude rate mode (ON by default). 

@@ -414,6 +414,7 @@ func _process(delta):
 		Signals.emit_signal("DisplayRadarVerticalSpeed_set_value", vertical_velocity_agl)
 		Signals.emit_signal("DisplayIMUAltitude_set_value", altitude_msl/1000.0)
 		Signals.emit_signal("DisplayIMUSpeed_set_value", v_logical_velocity.length())
+		Signals.emit_signal("DisplayIMUAcceleration_set_value", v_thrust_global.length()/net_mass)
 		Signals.emit_signal("DisplayRadarAltitude_set_value", altitude_agl)
 		Signals.emit_signal("DisplayFuelPercentage_set_value", 100.0*fuel/FULL_FUEL)
 		if AA > 0.0:
