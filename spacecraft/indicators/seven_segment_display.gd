@@ -12,7 +12,6 @@ extends Node3D
 			
 @export var display_is_valid : bool = true:
 	set(value):
-		print("2")
 		display_is_valid = value
 		if Engine.is_editor_hint():
 			_display_is_ready = true
