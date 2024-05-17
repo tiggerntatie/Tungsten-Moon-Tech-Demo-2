@@ -6,10 +6,13 @@ extends Node3D
 		display_value = value
 		if Engine.is_editor_hint():
 			_display_is_ready = true
-		_update_panel()
+			call_deferred("_update_panel")
+		else:
+			_update_panel()
 			
 @export var display_is_valid : bool = true:
 	set(value):
+		print("2")
 		display_is_valid = value
 		if Engine.is_editor_hint():
 			_display_is_ready = true
@@ -18,41 +21,44 @@ extends Node3D
 @export_range(1, 8, 1) var number_of_digits : int = 1:
 	set(value):
 		number_of_digits = value
-		_update_panel()
 		if Engine.is_editor_hint():
-			_layout_panel()
+			call_deferred("_layout_panel")
+		else:
+			_update_panel()
 			
 @export_range(0, 7, 1) var number_of_decimals : int = 0:
 	set(value):
 		number_of_decimals = value
-		_update_panel()
 		if Engine.is_editor_hint():
-			_layout_panel()
+			call_deferred("_layout_panel")
+		else:
+			_update_panel()
 
 @export var display_colons : bool = false:
 	set(value):
 		display_colons = value
-		_update_panel()
 		if Engine.is_editor_hint():
-			_layout_panel()
-
+			call_deferred("_layout_panel")
+		else:
+			_update_panel()
+			
 @export var label_text : String = "":
 	set(value):
 		label_text = value
 		if Engine.is_editor_hint():
-			_layout_panel()
+			call_deferred("_layout_panel")
 
 @export var digit_height : float = 0.015:
 	set(value):
 		digit_height = value
 		if Engine.is_editor_hint():
-			_layout_panel()
+			call_deferred("_layout_panel")
 			
 @export var label_height : float = 0.01:
 	set(value):
 		label_height = value
 		if Engine.is_editor_hint():
-			_layout_panel()
+			call_deferred("_layout_panel")
 
 const FRAME_WIDTH = 0.001	
 const FRAME_DEPTH = 0.003
