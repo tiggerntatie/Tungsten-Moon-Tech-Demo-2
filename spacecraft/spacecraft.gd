@@ -334,12 +334,12 @@ func _process(delta):
 		var v_move = Quaternion.from_euler(
 			Vector3(0.0, $YawPivot.rotation.y, $YawPivot/PitchPivot.rotation.z))*Vector3(forward_vel, upward_vel, horiz_vel)
 		var new_eye = $YawPivot.position + v_move
-		if (new_eye.x < 1.05 and 
-			new_eye.x > 0.0 and
-			new_eye.y > 4.5 and
-			new_eye.y < 6.05 and 
-			new_eye.z > -0.75 and new_eye.z < 0.75 and 
-			new_eye.y < (-5.0/6.0)*new_eye.x + 6.675):
+		if (new_eye.x < 1.8 and 
+			new_eye.x > 1.2 and
+			new_eye.y > 5 and
+			new_eye.y < 5.7 and 
+			new_eye.z > -0.3 and new_eye.z < 0.3):
+			#new_eye.y < (-5.0/6.0)*new_eye.x + 6.675):
 			$YawPivot.position = new_eye
 		
 		# oddly, this has to be here to keep the ship rotating		
