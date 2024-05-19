@@ -154,18 +154,21 @@ attenuation_filter_db = -49.3
 script = ExtResource("18_eedt2")
 
 [node name="StartRotation" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.97411, 0)
 stream = ExtResource("19_5elai")
 volume_db = -4.0
 script = ExtResource("20_0u0mn")
 
 [node name="FlowSound" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.03934, 0)
 stream = ExtResource("21_2fodt")
 volume_db = 0.714283
 script = ExtResource("22_g3a7g")
 
 [node name="HoldRotation" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.974, 0)
 stream = ExtResource("23_bstsh")
-volume_db = -36.0
+volume_db = -42.6667
 attenuation_filter_db = -11.7
 script = ExtResource("24_4g0p2")
 
@@ -176,6 +179,9 @@ autostart = true
 [node name="NavballTimer" type="Timer" parent="."]
 wait_time = 0.05
 autostart = true
+
+[node name="Marker3D" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.19097, 5.69177, -0.80784)
 
 [connection signal="landed" from="." to="LandingRattle" method="_on_spacecraft_has_landed"]
 [connection signal="thrust_changed" from="." to="FlowClick" method="_on_spacecraft_thrust_changed"]
