@@ -247,6 +247,7 @@ func _process(delta):
 	# compute an impact restoring force
 	if altitude_agl < -2.0:
 		# too much. reload the scenario!
+		print("Crashed under ground!")
 		LEVEL.scenario_input(false, false, true)
 	elif altitude_agl <= 0.0:
 		is_landed = true
@@ -265,6 +266,7 @@ func _process(delta):
 		var dv_position_delta = DVector3.Sub(dv_estimated_logical_position, dv_captured)
 		# too much spring deflection.. reload scenario
 		if dv_position_delta.length() > 1.0:
+			print("Landing exceeded landing gear margins!")
 			LEVEL.scenario_input(false, false, true)
 		else:
 			var dv_restoring_force = DVector3.Mul(-SPRING_K.y, dv_position_delta)
@@ -304,6 +306,8 @@ func _process(delta):
 	right_by = false
 	left_by = false
 	# ignore other inputs if we are chhanging scenarios
+	if p or n or r:
+		print("Control input: ", p, n, r)
 	if not LEVEL.scenario_input(p, n, r):
 		if left_primary.y != 0.0:
 			change_thrust(delta, left_primary.y)	# will move throttle if manipulated (up or down)
