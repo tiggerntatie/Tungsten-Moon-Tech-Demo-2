@@ -44,6 +44,24 @@ extends MeshInstance3D
 		if Engine.is_editor_hint():
 			_rebuild_model()
 
+@export var engine_bell_length : float = 0.4:
+	set(value):
+		engine_bell_length = value
+		if Engine.is_editor_hint():
+			_rebuild_model()
+
+@export var engine_bell_exit_diameter : float = 1.5:
+	set(value):
+		engine_bell_exit_diameter = value
+		if Engine.is_editor_hint():
+			_rebuild_model()
+
+@export var landing_pad_diameter : float = 1.0:
+	set(value):
+		landing_pad_diameter = value
+		if Engine.is_editor_hint():
+			_rebuild_model()
+
 @export var cockpit_window_width : float = 1.0:
 	set(value):
 		cockpit_window_width = value
@@ -662,18 +680,38 @@ func _compute_derived_parameters():
 	C_ = D_ + Vector3(0.0, ship_top_deck_height - pressure_hull_thickness, 0.0)
 	B_ = D_ + Vector3(0.0, ship_top_deck_height, 0.0)
 	A_ = B_ + Vector3(0.0, turret_height, 0.0)
-	_build_turret()
-	_build_body()
-	_build_cabin()
-	_build_window()
 	
 
 func _build_mesh():
 	_compute_derived_parameters()
+	_build_turret()
+	_build_body()
+	_build_cabin()
+	_build_window()
+
+var bell_instance : MeshInstance3D
+func _build_engine_bell():
+	var bell : CylinderMesh
+	bell_instance = MeshInstance3D.new()
+	bell = CylinderMesh.new()
+	bell.bottom_radius = engine_bell_exit_diameter/2.0
+	bell.top_radius = bell.bottom_radius * 0.7
+	bell.cap_top = false
+	bell.cap_bottom = false
+	bell.radial_segments = 16
+	bell.height = engine_bell_length
+	bell_instance.mesh = bell
+	bell_instance.position.y = ship_bottom - bell.height/2.0
+	bell_instance.set_surface_override_material(0, exterior_material)
+	bell_instance.name = "bell"
+	add_child(bell_instance)
 
 func _ready():
 	_build_mesh()
+	_build_engine_bell()
 
 func _rebuild_model():
 	mesh.clear_surfaces()
+	bell_instance.queue_free()
 	_build_mesh()
+	_build_engine_bell()
