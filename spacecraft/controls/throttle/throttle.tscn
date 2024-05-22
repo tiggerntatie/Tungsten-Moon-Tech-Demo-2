@@ -84,7 +84,7 @@ transform = Transform3D(-0.753526, -0.262894, -0.602566, 0.20532, -0.964824, 0.1
 hand_pose = SubResource("Resource_pt8a0")
 
 [node name="Label3D" type="Label3D" parent="SliderOrigin/XRToolsInteractableSlider/SliderBody/HandleMesh"]
-transform = Transform3D(-3.09086e-08, 0.707107, 0.707107, -1, -4.37114e-08, 0, 3.09086e-08, -0.707107, 0.707107, 0.0152917, -6.40284e-10, 0.014627)
+transform = Transform3D(-4.37114e-08, 0.97347, -0.228816, -1, -4.25517e-08, 1.00019e-08, 0, 0.228816, 0.97347, -0.00451084, 4.07454e-10, 0.0195217)
 pixel_size = 0.0005
 modulate = Color(0.615686, 0.615686, 0.615686, 1)
 text = "THROTTLE"
