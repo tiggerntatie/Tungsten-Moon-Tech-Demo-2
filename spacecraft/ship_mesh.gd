@@ -116,6 +116,12 @@ extends MeshInstance3D
 		if Engine.is_editor_hint():
 			_rebuild_model()
 
+@export var window_frame_material : StandardMaterial3D:
+	set(value):
+		window_frame_material = value
+		if Engine.is_editor_hint():
+			_rebuild_model()
+
 const cockpit_glass_thickness := 0.005	
 const cockpit_frame_thickness := 0.03
 
@@ -464,11 +470,11 @@ func _add_frame_normal_edges(va: Array, normal_vector: Vector3):
 	var vqty := va.size()
 	for n in range(vqty):
 		var ea := [va[n], va[(n+1)%vqty], va[(n+1)%vqty]+nev, va[n]+nev]
-		_add_frame_surface(ea, false, false, exterior_material)
+		_add_frame_surface(ea, false, false, window_frame_material)
 
 
 # construct a single quadrilateral surface as part of a window pane, with or without an opening
-func _add_frame_surface(va: Array, opening: bool, normal_edge: bool, material : StandardMaterial3D):
+func _add_frame_surface(va: Array, opening: bool, normal_edge: bool, material ):
 	var surface_array = []
 	var normal_vector : Vector3 = -(Vector3(va[2]-va[1]).cross(Vector3(va[1]-va[0]))).normalized()
 	# compute unit vectors for edges
@@ -531,7 +537,7 @@ func _add_frame_surface(va: Array, opening: bool, normal_edge: bool, material : 
 	mesh.surface_set_material(idx, material)
 	
 # construct a single triangular surface as part of a window pane, with or without an opening
-func _add_triangle_frame_surface(va: Array, opening: bool, normal_edge: bool, material : StandardMaterial3D):
+func _add_triangle_frame_surface(va: Array, opening: bool, normal_edge: bool, material):
 	var surface_array = []
 	var normal_vector : Vector3 = -(Vector3(va[2]-va[1]).cross(Vector3(va[1]-va[0]))).normalized()
 	# compute unit vectors for edges
@@ -597,7 +603,7 @@ func _add_triangle_frame_surface(va: Array, opening: bool, normal_edge: bool, ma
 # va is list of vertices in clockwise order
 func _build_window_pane(va: Array, add_frame: Callable):
 	var normal_vector : Vector3 = -(Vector3(va[2]-va[1]).cross(Vector3(va[1]-va[0]))).normalized()
-	add_frame.call(va, true, false, interior_material)
+	add_frame.call(va, true, false, window_frame_material)
 	var vw = []
 	for v in va:
 		vw.append(v + normal_vector*(cockpit_glass_thickness/2.0))
