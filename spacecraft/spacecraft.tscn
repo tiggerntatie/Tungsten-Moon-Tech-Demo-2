@@ -1,7 +1,6 @@
-[gd_scene load_steps=41 format=3 uid="uid://c08vubwsc2swp"]
+[gd_scene load_steps=40 format=3 uid="uid://c08vubwsc2swp"]
 
 [ext_resource type="Script" path="res://spacecraft/spacecraft.gd" id="1_b8yyq"]
-[ext_resource type="ArrayMesh" uid="uid://1woisy38wlky" path="res://spacecraft/RocketModel.obj" id="2_o0qaw"]
 [ext_resource type="PackedScene" uid="uid://cv8mg7imvk6k2" path="res://spacecraft/panels/imu_panel.tscn" id="3_8jw78"]
 [ext_resource type="PackedScene" uid="uid://bdwmserhqai5h" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_physics_hand_low.tscn" id="3_k0geh"]
 [ext_resource type="PackedScene" path="res://addons/godot-xr-tools/misc/vr_common_shader_cache.tscn" id="3_m2ksy"]
@@ -2787,12 +2786,6 @@ transform = Transform3D(-4.14985e-08, 0.314142, -0.949376, 1.37316e-08, 0.949376
 [node name="RadarPanel" parent="." instance=ExtResource("26_bjwo4")]
 transform = Transform3D(-0.00383609, 0.313969, -0.949425, -0.0115991, 0.949355, 0.313992, 0.999926, 0.012217, -4.15007e-08, 1.944, 5.412, 0.245)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(0.01, 0, 0, 0, -4.37114e-10, 0.01, 0, -0.01, -4.37114e-10, 0, 0, 0)
-visible = false
-layers = 3
-mesh = ExtResource("2_o0qaw")
-
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.928, -0.032)
 shape = SubResource("BoxShape3D_63e0r")
@@ -2936,6 +2929,8 @@ interior_material = SubResource("StandardMaterial3D_anafy")
 gasket_material = SubResource("StandardMaterial3D_p15jb")
 window_material = SubResource("StandardMaterial3D_w1cfg")
 window_frame_material = SubResource("StandardMaterial3D_o7twy")
+
+[node name="EngineBell" type="MeshInstance3D" parent="ShipV2"]
 
 [connection signal="landed" from="." to="LandingRattle" method="_on_spacecraft_has_landed"]
 [connection signal="thrust_changed" from="." to="FlowClick" method="_on_spacecraft_thrust_changed"]
