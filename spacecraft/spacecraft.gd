@@ -319,24 +319,21 @@ func _process(delta):
 		if not ui_thrust_lock:
 			set_thrust(Input.get_action_strength("Thrust Analog"), false)
 
-		var horiz_vel = JOY_SENS * Input.get_axis("Viewpoint Left", "Viewpoint Right")
+		var horiz_vel: float
 		var forward_vel : float = 0.0
-		var upward_vel : float = 0.0
 		if alternate_control:
-			upward_vel = JOY_SENS * Input.get_axis("Viewpoint Down", "Viewpoint Up")
-		else:
 			forward_vel = JOY_SENS * Input.get_axis("Viewpoint Backward", "Viewpoint Forward")
-		if Input.is_action_pressed("Viewpoint Pan Mode"):
+			horiz_vel = JOY_SENS * Input.get_axis("Viewpoint Left", "Viewpoint Right")
+		else:
 			$YawPivot.rotation.y -= JOY_SENS * Input.get_axis("Viewpoint Pan Left", "Viewpoint Pan Right")
 			$YawPivot/PitchPivot.rotation.z += JOY_SENS * Input.get_axis("Viewpoint Pan Down", "Viewpoint Pan Up")
 			$YawPivot/PitchPivot.rotation.z = clamp($YawPivot/PitchPivot.rotation.z, -PI/2, PI/2)
+		if alternate_control:
+			SIDESTICK.set_sidestick(-(Input.get_axis("Yaw Right", "Yaw Left") - right_primary.x), Input.get_axis("Pitch Forward", "Pitch Backward") - right_primary.y)
 		else:
-			if alternate_control:
-				SIDESTICK.set_sidestick(-(Input.get_axis("Yaw Right", "Yaw Left") - right_primary.x), Input.get_axis("Pitch Forward", "Pitch Backward") - right_primary.y)
-			else:
-				SIDESTICK.set_sidestick(-(Input.get_axis("Roll Right", "Roll Left") - right_primary.x), Input.get_axis("Pitch Forward", "Pitch Backward") - right_primary.y)
+			SIDESTICK.set_sidestick(-(Input.get_axis("Roll Right", "Roll Left") - right_primary.x), Input.get_axis("Pitch Forward", "Pitch Backward") - right_primary.y)
 		var v_move = Quaternion.from_euler(
-			Vector3(0.0, $YawPivot.rotation.y, $YawPivot/PitchPivot.rotation.z))*Vector3(forward_vel, upward_vel, horiz_vel)
+			Vector3(0.0, $YawPivot.rotation.y, $YawPivot/PitchPivot.rotation.z))*Vector3(forward_vel, 0.0, horiz_vel)
 		var new_eye = $YawPivot.position + v_move
 		if (new_eye.x < 1.8 and 
 			new_eye.x > 1.2 and
