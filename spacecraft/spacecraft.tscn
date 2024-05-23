@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=3 uid="uid://c08vubwsc2swp"]
+[gd_scene load_steps=42 format=3 uid="uid://c08vubwsc2swp"]
 
 [ext_resource type="Script" path="res://spacecraft/spacecraft.gd" id="1_b8yyq"]
 [ext_resource type="PackedScene" uid="uid://cv8mg7imvk6k2" path="res://spacecraft/panels/imu_panel.tscn" id="3_8jw78"]
@@ -1423,24 +1423,12 @@ _surfaces = [{
 "vertex_data": PackedByteArray(0, 0, 0, 64, 154, 153, 137, 64, 154, 153, 153, 190, 205, 204, 204, 63, 154, 153, 121, 64, 0, 0, 0, 191, 205, 204, 204, 63, 154, 153, 137, 64, 0, 0, 0, 191, 255, 255, 84, 213, 0, 0, 84, 213, 255, 255, 84, 213, 0, 0, 84, 213, 255, 255, 84, 213, 0, 0, 84, 213)
 }]
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_6netq"]
-radius = 0.1
-height = 5.96699
-radial_segments = 16
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_te2jy"]
-radius = 0.1
-height = 4.82234
-radial_segments = 16
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_uasex"]
-radius = 0.1
-height = 4.82234
-radial_segments = 16
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_icd14"]
-height = 0.3
-radial_segments = 16
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iy5xx"]
+albedo_color = Color(0.254902, 0.254902, 0.254902, 1)
+metallic = 1.0
+clearcoat_enabled = true
+clearcoat = 0.21
+clearcoat_roughness = 1.0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_63e0r"]
 size = Vector3(7.7, 7.7, 7.7)
@@ -1479,88 +1467,10 @@ gasket_material = SubResource("StandardMaterial3D_p15jb")
 window_material = SubResource("StandardMaterial3D_w1cfg")
 window_frame_material = SubResource("StandardMaterial3D_o7twy")
 
-[node name="LandingLeg1" type="Node3D" parent="ShipV2"]
+[node name="LandingLegs" type="Node3D" parent="ShipV2"]
 transform = Transform3D(0.999941, 0, 0.0109013, 0, 1, 0, -0.0109013, 0, 0.999941, 0, 0, 0)
 script = ExtResource("29_8dxpt")
-
-[node name="TopBar" type="MeshInstance3D" parent="ShipV2/LandingLeg1"]
-transform = Transform3D(0.521413, -0.477628, 0.707107, 0.675467, 0.73739, 0, -0.521413, 0.477628, 0.707107, 2.575, 2.2, -2.575)
-mesh = SubResource("CapsuleMesh_6netq")
-
-[node name="LeftBar" type="MeshInstance3D" parent="ShipV2/LandingLeg1"]
-transform = Transform3D(0.427581, -0.662834, 0.614676, 0.840328, 0.542079, 2.7626e-07, -0.333203, 0.516529, 0.78878, 2.39822, 1.3, -2.75178)
-mesh = SubResource("CapsuleMesh_te2jy")
-
-[node name="RightBar" type="MeshInstance3D" parent="ShipV2/LandingLeg1"]
-transform = Transform3D(0.333203, -0.516529, 0.78878, 0.840328, 0.542079, -2.7626e-07, -0.427581, 0.662834, 0.614676, 2.75178, 1.3, -2.39822)
-mesh = SubResource("CapsuleMesh_uasex")
-
-[node name="Pad" type="MeshInstance3D" parent="ShipV2/LandingLeg1"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.15, -4)
-mesh = SubResource("CylinderMesh_icd14")
-
-[node name="LandingLeg2" type="Node3D" parent="ShipV2"]
-transform = Transform3D(0.999941, 0, 0.0109013, 0, 1, 0, -0.0109013, 0, 0.999941, 0, 0, 0)
-script = ExtResource("29_8dxpt")
-angle_degrees = 135.0
-
-[node name="TopBar" type="MeshInstance3D" parent="ShipV2/LandingLeg2"]
-transform = Transform3D(-0.521413, 0.477628, 0.707107, 0.675467, 0.73739, 0, -0.521413, 0.477628, -0.707107, -2.575, 2.2, -2.575)
-mesh = SubResource("CapsuleMesh_6netq")
-
-[node name="LeftBar" type="MeshInstance3D" parent="ShipV2/LandingLeg2"]
-transform = Transform3D(-0.333203, 0.516529, 0.78878, 0.840328, 0.542079, 2.7626e-07, -0.427581, 0.662834, -0.614676, -2.75178, 1.3, -2.39822)
-mesh = SubResource("CapsuleMesh_te2jy")
-
-[node name="RightBar" type="MeshInstance3D" parent="ShipV2/LandingLeg2"]
-transform = Transform3D(-0.427581, 0.662834, 0.614676, 0.840328, 0.542079, -2.7626e-07, -0.333203, 0.516529, -0.78878, -2.39822, 1.3, -2.75178)
-mesh = SubResource("CapsuleMesh_uasex")
-
-[node name="Pad" type="MeshInstance3D" parent="ShipV2/LandingLeg2"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.15, -4)
-mesh = SubResource("CylinderMesh_icd14")
-
-[node name="LandingLeg3" type="Node3D" parent="ShipV2"]
-transform = Transform3D(0.999941, 0, 0.0109013, 0, 1, 0, -0.0109013, 0, 0.999941, 0, 0, 0)
-script = ExtResource("29_8dxpt")
-angle_degrees = 225.0
-
-[node name="TopBar" type="MeshInstance3D" parent="ShipV2/LandingLeg3"]
-transform = Transform3D(-0.521413, 0.477628, -0.707107, 0.675467, 0.73739, 0, 0.521413, -0.477628, -0.707107, -2.575, 2.2, 2.575)
-mesh = SubResource("CapsuleMesh_6netq")
-
-[node name="LeftBar" type="MeshInstance3D" parent="ShipV2/LandingLeg3"]
-transform = Transform3D(-0.427581, 0.662834, -0.614676, 0.840328, 0.542079, 2.7626e-07, 0.333203, -0.516529, -0.78878, -2.39822, 1.3, 2.75178)
-mesh = SubResource("CapsuleMesh_te2jy")
-
-[node name="RightBar" type="MeshInstance3D" parent="ShipV2/LandingLeg3"]
-transform = Transform3D(-0.333203, 0.516529, -0.78878, 0.840328, 0.542079, -2.7626e-07, 0.427581, -0.662834, -0.614676, -2.75178, 1.3, 2.39822)
-mesh = SubResource("CapsuleMesh_uasex")
-
-[node name="Pad" type="MeshInstance3D" parent="ShipV2/LandingLeg3"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.15, 4)
-mesh = SubResource("CylinderMesh_icd14")
-
-[node name="LandingLeg4" type="Node3D" parent="ShipV2"]
-transform = Transform3D(0.999941, 0, 0.0109013, 0, 1, 0, -0.0109013, 0, 0.999941, 0, 0, 0)
-script = ExtResource("29_8dxpt")
-angle_degrees = 315.0
-
-[node name="TopBar" type="MeshInstance3D" parent="ShipV2/LandingLeg4"]
-transform = Transform3D(0.521413, -0.477627, -0.707107, 0.675467, 0.73739, 4.24454e-08, 0.521413, -0.477628, 0.707107, 2.575, 2.2, 2.575)
-mesh = SubResource("CapsuleMesh_6netq")
-
-[node name="LeftBar" type="MeshInstance3D" parent="ShipV2/LandingLeg4"]
-transform = Transform3D(0.333203, -0.516529, -0.78878, 0.840328, 0.542079, 2.7626e-07, 0.427581, -0.662834, 0.614676, 2.75178, 1.3, 2.39822)
-mesh = SubResource("CapsuleMesh_te2jy")
-
-[node name="RightBar" type="MeshInstance3D" parent="ShipV2/LandingLeg4"]
-transform = Transform3D(0.427581, -0.662834, -0.614676, 0.840328, 0.542079, 3.74877e-07, 0.333202, -0.516529, 0.78878, 2.39822, 1.3, 2.75178)
-mesh = SubResource("CapsuleMesh_uasex")
-
-[node name="Pad" type="MeshInstance3D" parent="ShipV2/LandingLeg4"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.15, 4)
-mesh = SubResource("CylinderMesh_icd14")
+leg_material = SubResource("StandardMaterial3D_iy5xx")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.928, -0.032)
