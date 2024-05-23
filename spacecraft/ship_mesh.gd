@@ -712,6 +712,7 @@ func _ready():
 
 func _rebuild_model():
 	mesh.clear_surfaces()
-	bell_instance.queue_free()
+	if bell_instance:
+		bell_instance.queue_free()
 	_build_mesh()
 	_build_engine_bell()
