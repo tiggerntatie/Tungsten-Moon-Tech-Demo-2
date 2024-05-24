@@ -117,6 +117,9 @@ func _ready():
 			
 			# Turn off v-sync
 			DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+			# can I stop full screen?
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+			DisplayServer.window_set_size(Vector2i(1920, 1080))
 		
 			# Change our main viewport to putput to the HMD
 			get_viewport().use_xr = true
