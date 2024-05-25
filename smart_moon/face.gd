@@ -166,6 +166,7 @@ func _load_mesh(chunk : MeshInstance3D, path : String, collpath : String):
 	var staticbody = StaticBody3D.new()
 	var collshape = CollisionShape3D.new()
 	staticbody.add_child(collshape)
+	staticbody.collision_layer = 512  # mask 10 dedicated to terrain only!
 	var shape : Shape3D = ResourceLoader.load(collpath)
 	collshape.set_shape(shape)
 	chunk.add_child(staticbody)
