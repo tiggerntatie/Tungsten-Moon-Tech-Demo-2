@@ -24,6 +24,10 @@ const STABILITY_COEFFICIENT := 20.0	# for stability feedback loop
 const STABILITY_MINIMUM_RATE := 0.00001
 const RATE_FROM_TORQUE := 0.1	# how a torque command translates to rad/sec in rate mode
 const TORQUE_THRESHOLD := 0.01	# torque below which we can turn off the sound
+const VERTICAL_VELOCITY_TC := 0.3 # seconds timme constant for filtering
+const ROLL_INPUT_TC := 0.25 # seconds time constant for joystick x-axis
+const PITCH_INPUT_TC := 0.25 # y-axis
+const STICK_NULL := 0.1	# sidestick null zone
 
 @onready var LEVEL : Node3D = $".."
 @onready var MOON : Node3D = $"../SmartMoon"
@@ -67,6 +71,8 @@ const RADAR_RANGE := 2000.0
 # Sidestick State
 var sidestick_x : float = 0.0
 var sidestick_y : float = 0.0
+var sidestick_filtered_x : float = 0.0
+var sidestick_filtered_y : float = 0.0
 var v_last_torque := Vector3.ZERO
 
 # UI State 
@@ -85,7 +91,11 @@ var right_by := false
 var left_primary := Vector2.ZERO
 var right_primary := Vector2.ZERO
 
-	
+# simple exponential filter
+func exponential_filter(delta : float, time_constant : float, prev_output : float, raw_input : float) -> float:
+	var weight : float = time_constant/delta
+	return ((weight-1.0)*prev_output + raw_input)/weight
+
 # Calculate new position and velocity for each step
 # 4th order runge kutte integration
 func process_physics(delta, dv_position, dv_velocity, v_th, mass_param):
@@ -176,10 +186,14 @@ func _ready():
 	Signals.add_user_signal(name + "_state_changed", [{"name":"ship", "type": TYPE_OBJECT}])
 	Signals.add_user_signal(name + "_lifted_off")
 	Signals.add_user_signal(name + "_landed")
+	Signals.add_user_signal(
+		"astronomy_tick", 
+		[{"name":"sidereal_days", "type": TYPE_INT},{"name":"seconds", "type":TYPE_INT}])
 	# external global signals
 	Signals.connect("ButtonRefuel_pressed", _on_refuel_button_pressed)
 	Signals.connect("ButtonAlternateControl_changed", _on_alternate_control_changed)
 	Signals.connect("ButtonRateMode_changed", _on_rotation_rate_mode_changed)
+	Signals.connect("astronomy_tick", _on_astronomy_tick)
 	#Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	dv_logical_position =  MOON.get_logical_position(self)
 	dv_gravity_force = DVector3.Mul(mass, MOON.get_acceleration(dv_logical_position))
@@ -234,7 +248,8 @@ func _process(delta):
 		if not is_nan(altitude_agl_previous):
 			var vvel : float = (altitude_agl - altitude_agl_previous) / delta
 			# filter this a bit
-			vertical_velocity_agl = (vertical_velocity_agl * 49.0 + vvel) / 50.0
+			vertical_velocity_agl = exponential_filter(
+				delta, VERTICAL_VELOCITY_TC, vertical_velocity_agl, vvel)
 		altitude_agl_previous = altitude_agl
 
 	else:
@@ -346,11 +361,13 @@ func _process(delta):
 		# oddly, this has to be here to keep the ship rotating		
 		v_torque = Vector3.ZERO
 		v_torque.y += Input.get_axis("Yaw Right Always", "Yaw Left Always")
-		v_torque.z += sidestick_y
+		sidestick_filtered_x = exponential_filter(delta, PITCH_INPUT_TC, sidestick_filtered_x, sidestick_x)
+		sidestick_filtered_y = exponential_filter(delta, PITCH_INPUT_TC, sidestick_filtered_y, sidestick_y)
+		v_torque.z += sidestick_filtered_y
 		if alternate_control:
-			v_torque.y -= sidestick_x
+			v_torque.y -= sidestick_filtered_x
 		else:
-			v_torque.x += sidestick_x
+			v_torque.x += sidestick_filtered_x
 		# rotational stabilization, but only if we're not damping oscillations using angular_damp
 		# a body that is not rotating in global game space is actually spinning with the moon rate
 		if rotation_rate_mode:
@@ -457,7 +474,9 @@ func _on_throttle_output_changed(value):
 	else:
 		v_thrust.y = THRUST_MIN + (THRUST_MAX - THRUST_MIN)*value
 
-func _on_sidestick_output_changed(x, y):
+func _on_sidestick_output_changed(x:float, y:float) -> void:
+	var x_nulled : float = 0.0 if abs(x) < STICK_NULL else (x - sign(x)*STICK_NULL)/(1.0-STICK_NULL)
+	var y_nulled : float = 0.0 if abs(y) < STICK_NULL else (y - sign(y)*STICK_NULL)/(1.0-STICK_NULL)
 	sidestick_x = x
 	sidestick_y = y
 
@@ -523,3 +542,10 @@ func _on_display_timer_timeout():
 
 func _on_navball_timer_timeout():
 	update_navball = true
+
+func _on_astronomy_tick(current_moon_rotation_count: int, astronomy_seconds: int):
+	Signals.emit_signal("DisplayDays_set_value", current_moon_rotation_count)
+	var hours : float = floor(astronomy_seconds / 3600.0)
+	var minutes : float = floor((astronomy_seconds - hours*3600.0)/60.0)
+	var seconds : float = astronomy_seconds - hours*3600.0 - minutes*60.0
+	Signals.emit_signal("DisplayHHMMSS_set_value", hours*10000.0 + minutes*100.0 + seconds)
