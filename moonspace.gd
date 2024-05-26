@@ -24,6 +24,7 @@ var xr_interface: XRInterface
 @export_range(0.0, 1.0, 0.01) var default_star_energy : float = 1.0
 ## Computed parameters
 var astronomy_starting_seconds : float
+var astronomy_seconds := 0.0
 
 
 ## SOLAR PARAMETERS
@@ -209,9 +210,16 @@ func _process(delta):
 	
 	var step: float = delta * astronomy_speed_factor
 	current_moon_rotation += moon_axis_rate * step
+	var _last_seconds = astronomy_seconds
+	astronomy_seconds += step	# seconds within current moon rotation cycle
+	if floor(astronomy_seconds) != floor(_last_seconds):
+		# one tick - emit a clock update
+		Signals.emit_signal("astronomy_tick", current_moon_rotation_count, int(floor(astronomy_seconds)))
+
 	if current_moon_rotation > TAU:
 		current_moon_rotation -= TAU
 		current_moon_rotation_count += 1
+		astronomy_seconds = 0.0
 	
 	# now, base starting seconds on moon rotations
 	astronomy_starting_seconds = (current_moon_rotation_count * TAU + current_moon_rotation)/moon_axis_rate
