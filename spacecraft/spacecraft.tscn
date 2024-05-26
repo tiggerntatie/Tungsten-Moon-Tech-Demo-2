@@ -2787,12 +2787,15 @@ script = ExtResource("1_b8yyq")
 
 [node name="ButtonPanel" parent="." instance=ExtResource("27_guree")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.97453, 5.50004, 0)
+metadata/_edit_lock_ = true
 
 [node name="IMUPanel" parent="." instance=ExtResource("3_8jw78")]
 transform = Transform3D(-4.14985e-08, 0.314142, -0.949376, 1.37316e-08, 0.949376, 0.314142, 1, 0, -4.37114e-08, 1.94432, 5.41221, -0.245326)
+metadata/_edit_lock_ = true
 
 [node name="RadarPanel" parent="." instance=ExtResource("26_bjwo4")]
 transform = Transform3D(-0.00383609, 0.313969, -0.949425, -0.0115991, 0.949355, 0.313992, 0.999926, 0.012217, -4.15007e-08, 1.944, 5.412, 0.245)
+metadata/_edit_lock_ = true
 
 [node name="ShipV2" type="Node3D" parent="."]
 
