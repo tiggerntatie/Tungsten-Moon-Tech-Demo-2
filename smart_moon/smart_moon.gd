@@ -29,6 +29,7 @@ signal all_meshes_loaded
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	if not Engine.is_editor_hint():
+		Signals.add_user_signal("moon_position_changed", [{"name":"dv_position", "type": TYPE_OBJECT}])
 		LEVEL =  get_node("/root/Level")
 	on_data_changed()
 			
@@ -72,6 +73,7 @@ var mesh_count : int
 @onready var dv_position : DVector3 = DVector3.FromVector3(position):
 	set (val):
 		dv_position = val
+		Signals.emit_signal("moon_position_changed", dv_position)
 		update_high_precision_chunks()
 		position = val.vector3()
 

@@ -1,4 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://vq08fdnsmq00"]
+[gd_scene load_steps=5 format=3 uid="uid://vq08fdnsmq00"]
+
+[ext_resource type="Script" path="res://terrain_objects/terrain_object.gd" id="1_7o3by"]
+[ext_resource type="Resource" uid="uid://cpyimrebtcomr" path="res://smart_moon/moon_data.tres" id="2_w8pd7"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_i8evq"]
 top_radius = 15.0
@@ -9,6 +12,8 @@ radial_segments = 16
 radius = 15.0
 
 [node name="LandingPad" type="Node3D"]
+script = ExtResource("1_7o3by")
+moon_data = ExtResource("2_w8pd7")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 collision_layer = 512

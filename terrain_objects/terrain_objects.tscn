@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://ck2yjbdsp2r72"]
+
+[ext_resource type="PackedScene" uid="uid://vq08fdnsmq00" path="res://terrain_objects/landing_pads/landing_pad.tscn" id="1_5jh7j"]
+
+[node name="TerrainObjects" type="Node3D"]
+
+[node name="LandingPad1" parent="." instance=ExtResource("1_5jh7j")]
