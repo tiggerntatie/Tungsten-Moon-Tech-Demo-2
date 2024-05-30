@@ -2,6 +2,7 @@
 extends Node3D
 
 signal meshes_loaded(value: float)
+signal all_meshes_loaded
 
 @export var moon_data : MoonData:
 	set(val):
@@ -35,13 +36,21 @@ func _ready():
 func _process(delta):
 	pass
 
+# get a list of faces (excludes non-face children!)
+func get_faces():
+	var faces := []
+	for child in get_children():
+		if is_instance_of(child, MoonSmartFace):
+			faces.append(child)
+	return faces
+	
 
 func on_data_changed():
 	if not Engine.is_editor_hint():
 		scale = Vector3.ONE*MOON_SCALE
 	mesh_max_count = 0
 	mesh_count = 0
-	for face in get_children():
+	for face in get_faces():
 		face.generate_meshes(moon_data, resolution_power, chunk_resolution_power)
 	reset_high_precision_chunks()
 
@@ -80,7 +89,7 @@ func scale_high_precision_chunks():
 
 func reset_high_precision_chunks():
 	high_precision_chunks.clear()
-	for face : MoonSmartFace in get_children():
+	for face in get_faces():
 		face.reset_high_precision_chunks()
 
 
@@ -136,6 +145,25 @@ func set_logical_position_from_physical(body: Spacecraft, xz_radius: float = 0.0
 	dv_temp_logical_position.rotate_y(LEVEL.current_moon_rotation, xz_radius)  # rotate the logical position according to moon rotation
 	body.dv_logical_position = dv_temp_logical_position	# stuff the logical position back on the spacecraft
 
+
+func get_terrain_altitude(lat: float, lon: float) -> float:
+	# commpute probe altitude
+	var lat_rad : float = deg_to_rad(lat)
+	var lon_rad : float = deg_to_rad(lon)
+	var probe_radius : float = moon_data.radius * scale.x * 1.05	# 5%  above surface
+	var rel_position : Vector3 = Vector3(
+		cos(lat_rad)*sin(lon_rad),
+		sin(lat_rad),
+		cos(lat_rad)*cos(lon_rad))
+	$TerrainProbe.global_position = probe_radius * rel_position + global_position
+	$TerrainProbe.target_position = -rel_position * moon_data.radius * scale.x * 0.10 # relative
+	$TerrainProbe.force_raycast_update()
+	if not $TerrainProbe.is_colliding():
+		await all_meshes_loaded		# presumably meshes not ready
+		$TerrainProbe.force_raycast_update()
+	var surf_point : Vector3 = $TerrainProbe.get_collision_point()  # global
+	return (surf_point - position).length() - moon_data.radius * scale.x
+
 # convert a physical position to logical
 # is there no need to in
 func get_logical_from_physical(pos : Vector3) -> DVector3:
@@ -154,4 +182,6 @@ func _on_face_loaded(normal, total_meshes):
 func _on_mesh_loaded():
 	mesh_count += 1
 	if not Engine.is_editor_hint():
+		if mesh_count == 6*mesh_max_count:
+			all_meshes_loaded.emit()  # ALL done
 		meshes_loaded.emit(mesh_count/(6*mesh_max_count))

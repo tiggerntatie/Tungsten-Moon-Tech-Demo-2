@@ -167,6 +167,11 @@ func _ready():
 	current_solar_rotation = solar_orbit_rotation + solar_orbit_rate*astronomy_starting_seconds
 	current_planet_orbit_rotation = planet_orbit_rotation + planet_orbit_rate*astronomy_starting_seconds
 	
+	# place objects on the moon #FIXME
+	#var pad_scene = load("res://terrain_objects/landing_pads/landing_pad.tscn")
+	#var pad_instance = pad_scene.instantiate()
+	# MOON.place_node_on_terrain(pad_instance, 89.9, 161.0, 0.0, 5.0)
+	
 	# Load state?
 	var err = config.load(CONFIG_FILE_NAME)
 	if err != OK: 
@@ -186,11 +191,12 @@ func save_scenario(index : int):
 func load_scenario(index : int):
 	# Supply initial spacecraft position
 	print("Locating to long: ", scenario_list[index]["long"], " lat: ", scenario_list[index]["lat"], " hdg: ", scenario_list[index]["heading"])
+	var altitude : float = await MOON.get_terrain_altitude(scenario_list[index]["lat"], scenario_list[index]["long"])
 	SPACECRAFT.set_logical_position(
 		scenario_list[index]["lat"], 
 		scenario_list[index]["long"], 
 		MOON.physical_radius, 
-		scenario_list[index]["altitude"],
+		altitude,
 		scenario_list[index]["heading"],
 		moon_axis_rate)
 	MOON.reset_scenario()
