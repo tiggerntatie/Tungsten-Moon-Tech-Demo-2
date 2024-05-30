@@ -45,32 +45,6 @@ planet_orbit_rotation = 5.088
 planet_axis_direction = Vector3(0.7, 0.7, 0)
 planet_axis_period_hours = 11.7
 moon_axis_period_hours = 10.0
-scenario_list = [{
-"altitude": 4.0,
-"heading": 0.0,
-"lat": 89.9,
-"long": 161.0
-}, {
-"altitude": 1475.0,
-"heading": 90.0,
-"lat": 31.0,
-"long": 226.0
-}, {
-"altitude": 2.0,
-"heading": 0.0,
-"lat": -10.0,
-"long": 46.0
-}, {
-"altitude": 252.0,
-"heading": 180.0,
-"lat": 85.0,
-"long": 1.0
-}, {
-"altitude": 3.0,
-"heading": 90.0,
-"lat": 45.0,
-"long": 120.0
-}]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_hfpdn")

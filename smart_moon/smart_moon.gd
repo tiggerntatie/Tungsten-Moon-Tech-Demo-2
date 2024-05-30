@@ -145,24 +145,18 @@ func set_logical_position_from_physical(body: Spacecraft, xz_radius: float = 0.0
 	dv_temp_logical_position.rotate_y(LEVEL.current_moon_rotation, xz_radius)  # rotate the logical position according to moon rotation
 	body.dv_logical_position = dv_temp_logical_position	# stuff the logical position back on the spacecraft
 
-
+# this returns a terrain altitude (relative to msl) for any vector position on the moon surface
+# it is generated from the 2d random field used to generate the mesh, but will *differ* from
+# actual height, especially near the center of a face
 func get_terrain_altitude(lat: float, lon: float) -> float:
-	# commpute probe altitude
 	var lat_rad : float = deg_to_rad(lat)
 	var lon_rad : float = deg_to_rad(lon)
-	var probe_radius : float = moon_data.radius * scale.x * 1.05	# 5%  above surface
 	var rel_position : Vector3 = Vector3(
 		cos(lat_rad)*sin(lon_rad),
 		sin(lat_rad),
 		cos(lat_rad)*cos(lon_rad))
-	$TerrainProbe.global_position = probe_radius * rel_position + global_position
-	$TerrainProbe.target_position = -rel_position * moon_data.radius * scale.x * 0.10 # relative
-	$TerrainProbe.force_raycast_update()
-	if not $TerrainProbe.is_colliding():
-		await all_meshes_loaded		# presumably meshes not ready
-		$TerrainProbe.force_raycast_update()
-	var surf_point : Vector3 = $TerrainProbe.get_collision_point()  # global
-	return (surf_point - position).length() - moon_data.radius * scale.x
+	var est_height = (moon_data.point_on_moon(rel_position).length()-moon_data.radius)*scale.x
+	return est_height
 
 # convert a physical position to logical
 # is there no need to in

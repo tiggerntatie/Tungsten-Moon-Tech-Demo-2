@@ -94,13 +94,14 @@ var current_solar_rotation : float
 ## GAME STATE
 @export_group("Spacecraft Start Scenarios")
 @export var scenario_list : Array = [
-	{"long": 161.0, "lat": 89.9, "heading": 0.0, "altitude": 7.0},
-	{"long": 225.0, "lat": 30.0, "heading": 90.0, "altitude": 1558.0},
-	{"long": 45.0, "lat": -10.0, "heading": 0.0, "altitude": 7.0},
-	{"long": 0.0, "lat": 85.0, "heading": 180.0, "altitude": 302.0},
-	{"long": 280.0, "lat": -10.0, "heading": 0.0, "altitude": 7.0},
+	{"long": 161.0, "lat": 89.9, "heading": 0.0},
+	{"long": 224.0, "lat": 30.0, "heading": 90.0},
+	{"long": 45.1, "lat": -10.0, "heading": 0.0},
+	{"long": 0.1, "lat": 85.0, "heading": 180.0},
+	{"long": 280.0, "lat": -10.0, "heading": 0.0},
 ]
 var scenario_index : int = 0
+var scenario_loaded : bool = false
 const CONFIG_FILE_NAME = "user://settings.cfg"
 @onready var config = ConfigFile.new()
 
@@ -182,21 +183,21 @@ func _ready():
 		if scenario_index >= scenario_list.size():
 			scenario_index = 0
 			save_scenario(scenario_index)
-	load_scenario(scenario_index)
 		
 func save_scenario(index : int):
 	config.set_value("Scenario", "index", index)
 	config.save(CONFIG_FILE_NAME)
 
-func load_scenario(index : int):
+# loads scenario, false if unable
+func load_scenario(index : int)-> void:
 	# Supply initial spacecraft position
 	print("Locating to long: ", scenario_list[index]["long"], " lat: ", scenario_list[index]["lat"], " hdg: ", scenario_list[index]["heading"])
-	var altitude : float = await MOON.get_terrain_altitude(scenario_list[index]["lat"], scenario_list[index]["long"])
+	var terrain_altitude : float = MOON.get_terrain_altitude(scenario_list[index]["lat"], scenario_list[index]["long"])
 	SPACECRAFT.set_logical_position(
 		scenario_list[index]["lat"], 
 		scenario_list[index]["long"], 
 		MOON.physical_radius, 
-		altitude,
+		terrain_altitude + 3.0,
 		scenario_list[index]["heading"],
 		moon_axis_rate)
 	MOON.reset_scenario()
@@ -211,6 +212,11 @@ func body_is_visible(dv_log_pos : DVector3, moon_phys_pos : Vector3, moon_radius
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	# this will keep trying to load a scenario, if a scenario needs to be loaded!
+	if not scenario_loaded:
+		load_scenario(scenario_index)
+		scenario_loaded = true
+	
 	# update shader parameters 
 	# Rotate starfield to account for Tungsten Moon rotation
 	
@@ -274,7 +280,7 @@ func scenario_input(prev : bool, next : bool, restart : bool) -> bool:
 	if prev or next:
 		save_scenario(scenario_index)
 	if prev or next or restart:
-		load_scenario(scenario_index)
+		scenario_loaded = false # let the process routine load it up
 		return true
 	return false
 
