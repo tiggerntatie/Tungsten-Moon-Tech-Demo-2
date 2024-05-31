@@ -29,7 +29,9 @@ signal all_meshes_loaded
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	if not Engine.is_editor_hint():
-		Signals.add_user_signal("moon_position_changed", [{"name":"dv_position", "type": TYPE_OBJECT}])
+		Signals.add_user_signal(
+			"moon_position_changed", 
+			[{"name":"dv_position", "type": TYPE_OBJECT},{"name":"scale", "type":TYPE_VECTOR3}])
 		LEVEL =  get_node("/root/Level")
 	on_data_changed()
 			
@@ -57,6 +59,7 @@ func on_data_changed():
 
 
 const G = 6.674E-11
+
 const rhoW = 19250.0 # kg/m^3
 const SHRINK_ALTITUDE = 10000 # meters above ground
 const SHRINK_FACTOR = 4
@@ -73,7 +76,7 @@ var mesh_count : int
 @onready var dv_position : DVector3 = DVector3.FromVector3(position):
 	set (val):
 		dv_position = val
-		Signals.emit_signal("moon_position_changed", dv_position)
+		Signals.emit_signal("moon_position_changed", dv_position, scale)
 		update_high_precision_chunks()
 		position = val.vector3()
 
@@ -122,12 +125,10 @@ func set_from_logical_position(body: Spacecraft, xz_radius: float = 0.0):
 			scale_factor = SHRINK_FACTOR
 			var scalef = MOON_SCALE/scale_factor
 			scale = Vector3(scalef, scalef, scalef)
-			scale_high_precision_chunks()
 	elif r - SHRINK_ALTITUDE <= physical_radius: # below transition region
 		if scale_factor > 1.0:
 			scale_factor = 1.0
 			scale = Vector3(MOON_SCALE, MOON_SCALE, MOON_SCALE)
-			scale_high_precision_chunks()
 	
 	# p.sub(DVector3.Div(body.dv_logical_position, scale_factor))
 	# make a copy of logical position
@@ -137,6 +138,8 @@ func set_from_logical_position(body: Spacecraft, xz_radius: float = 0.0):
 	# scale it and create a new position
 	p.sub(DVector3.Div(dv_unrotated_logical_position, scale_factor))
 	dv_position = p
+	Signals.emit_signal("moon_position_changed", dv_position, scale)
+	scale_high_precision_chunks()
 	
 # update the spacecraft logical position, based on planet position
 func set_logical_position_from_physical(body: Spacecraft, xz_radius: float = 0.0):
@@ -147,21 +150,9 @@ func set_logical_position_from_physical(body: Spacecraft, xz_radius: float = 0.0
 	dv_temp_logical_position.rotate_y(LEVEL.current_moon_rotation, xz_radius)  # rotate the logical position according to moon rotation
 	body.dv_logical_position = dv_temp_logical_position	# stuff the logical position back on the spacecraft
 
-# this returns a terrain altitude (relative to msl) for any vector position on the moon surface
-# it is generated from the 2d random field used to generate the mesh, but will *differ* from
-# actual height, especially near the center of a face
-func get_terrain_altitude(lat: float, lon: float) -> float:
-	var lat_rad : float = deg_to_rad(lat)
-	var lon_rad : float = deg_to_rad(lon)
-	var rel_position : Vector3 = Vector3(
-		cos(lat_rad)*sin(lon_rad),
-		sin(lat_rad),
-		cos(lat_rad)*cos(lon_rad))
-	var est_height = (moon_data.point_on_moon(rel_position).length()-moon_data.radius)*scale.x
-	return est_height
 
 # convert a physical position to logical
-# is there no need to in
+# is there no need to in  FIXME this isn't referenced anywhere?
 func get_logical_from_physical(pos : Vector3) -> DVector3:
 	var dv_temp_logical_position = DVector3.FromVector3(pos)
 	var dv_raw_position = DVector3.FromVector3(position)
