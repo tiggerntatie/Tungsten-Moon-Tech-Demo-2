@@ -46,3 +46,31 @@ func point_on_moon(point_on_sphere : Vector3, unit_sphere_out : bool = false) ->
 		return output / radius
 	return output
 	
+# this returns a unit vector pointing to the position on the moon surface for a given
+# latitude and longitude
+func get_vector_position(lat: float, lon: float) -> Vector3:
+	var lat_rad : float = deg_to_rad(lat)
+	var lon_rad : float = deg_to_rad(lon)
+	return Vector3(
+		cos(lat_rad)*sin(lon_rad),
+		sin(lat_rad),
+		cos(lat_rad)*cos(lon_rad))
+	
+# this returns a terrain altitude (relative to msl) for any vector position on the moon surface
+# it is generated from the 2d random field used to generate the mesh, but will *differ* from
+# actual height, especially near the center of a face
+func get_terrain_altitude(lat: float, lon: float, fscale: float) -> float:
+	var rel_position : Vector3 = get_vector_position(lat, lon)
+	var est_height = (point_on_moon(rel_position).length()-radius)*fscale
+	return est_height
+
+# get orientation of an object on the surface, given latitude, longitude and heading
+func get_object_surface_rotation(lat: float, lon: float, heading: float) -> Vector3:
+	# NOTE: Longitude zero is in the direction of +Z per Godot convention
+	# NOTE: Spacecraft rotation depends on spacecraft orientation facing +X
+	var phi: float = deg_to_rad(lon)
+	var theta: float = deg_to_rad(lat)
+	var gamma: float = deg_to_rad(-heading)
+	var q1 : Quaternion = Quaternion.from_euler(Vector3(0.0, phi+PI/2.0, PI/2.0-theta))
+	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, 0.0))
+	return (q1*q2).get_euler()	# This rotates the object to correspond to its position on the globe
