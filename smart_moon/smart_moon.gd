@@ -31,7 +31,13 @@ func _ready():
 	if not Engine.is_editor_hint():
 		Signals.add_user_signal(
 			"moon_position_changed", 
-			[{"name":"dv_position", "type": TYPE_OBJECT},{"name":"scale", "type":TYPE_VECTOR3}])
+			[{"name":"dv_position", "type": TYPE_OBJECT},{"name":"scale", "type":TYPE_VECTOR3}]
+			)
+		Signals.add_user_signal(
+			"moon_scale_changed", 
+			[{"name":"scale_factor", "type":TYPE_FLOAT}]
+			)
+
 		LEVEL =  get_node("/root/Level")
 	on_data_changed()
 			
@@ -61,8 +67,9 @@ func on_data_changed():
 const G = 6.674E-11
 
 const rhoW = 19250.0 # kg/m^3
-const SHRINK_ALTITUDE = 1000 # meters above ground
-const SHRINK_FACTOR = 4
+const SHRINK_ALTITUDE = 1500.0 
+const SHRINK_ALTITUDE_DEAD_ZONE = 100.0 # hysteresis
+const SHRINK_FACTOR = 10  # was 4
 const MOON_SCALE = 1000	
 var LEVEL : Node3D
 @onready var physical_radius = $".".moon_data.radius*1000
@@ -115,21 +122,24 @@ func get_logical_position(body: Spacecraft) -> DVector3:
 	return DVector3.FromVector3(body.position - scale_factor*position)
 
 # update the planet position based on spacecraft logical position
+# altitude agl is determined by spacecraft
 # optional xz_radius enforces an invariant radius in xz plane after de-rotating
 # view_offset is vector position of eye relative to CG
-func set_from_logical_position(body: Spacecraft, view_offset: Vector3, xz_radius: float = 0.0):
+func set_from_logical_position(body: Spacecraft, view_offset: Vector3, alt_agl: float, xz_radius: float = 0.0):
 	var p = DVector3.FromVector3(body.position)
-	#var offset = Vector3.ZERO
-	var r = body.dv_logical_position.length()
-	if  r - SHRINK_ALTITUDE > physical_radius: # above transition region
+	#var r = body.dv_logical_position.length()
+	if  alt_agl > SHRINK_ALTITUDE: # above transition region
 		if scale_factor < SHRINK_FACTOR:
 			scale_factor = SHRINK_FACTOR
 			var scalef = MOON_SCALE/scale_factor
 			scale = Vector3(scalef, scalef, scalef)
-	elif r - SHRINK_ALTITUDE <= physical_radius: # below transition region
+			Signals.emit_signal("moon_scale_changed", scale_factor)
+	elif alt_agl < SHRINK_ALTITUDE - SHRINK_ALTITUDE_DEAD_ZONE: # below transition region
 		if scale_factor > 1.0:
 			scale_factor = 1.0
 			scale = Vector3(MOON_SCALE, MOON_SCALE, MOON_SCALE)
+			Signals.emit_signal("moon_scale_changed", scale_factor)
+
 	
 	# p.sub(DVector3.Div(body.dv_logical_position, scale_factor))
 	# make a copy of logical position
@@ -152,17 +162,6 @@ func set_logical_position_from_physical(body: Spacecraft, xz_radius: float = 0.0
 	dv_temp_logical_position.sub(moon_position)		# now the UNrotated logical position
 	dv_temp_logical_position.rotate_y(LEVEL.current_moon_rotation, xz_radius)  # rotate the logical position according to moon rotation
 	body.dv_logical_position = dv_temp_logical_position	# stuff the logical position back on the spacecraft
-
-
-# convert a physical position to logical
-# is there no need to in  FIXME this isn't referenced anywhere?
-func get_logical_from_physical(pos : Vector3) -> DVector3:
-	var dv_temp_logical_position = DVector3.FromVector3(pos)
-	var dv_raw_position = DVector3.FromVector3(position)
-	var moon_position = DVector3.Div(dv_raw_position, scale.x/MOON_SCALE)
-	dv_temp_logical_position.sub(moon_position)
-	dv_temp_logical_position.rotate_y(LEVEL.current_moon_rotation)
-	return dv_temp_logical_position
 
 
 func _on_face_loaded(normal, total_meshes):

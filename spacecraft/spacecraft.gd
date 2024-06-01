@@ -67,6 +67,9 @@ var vertical_velocity_agl : float = 0.0
 var altitude_radar : float = NAN
 var terrain_altitude : float = NAN
 const RADAR_RANGE := 2000.0
+# height of transition from raycast to model based altitude above ground
+const RADAR_TRANSITION_LOW := RADAR_RANGE/4.0
+const RADAR_TRANSITION_HIGH := RADAR_RANGE/2.0
 
 # Sidestick State
 var sidestick_x : float = 0.0
@@ -156,6 +159,18 @@ func reset_viewpoint():
 		PITCHPIVOT.transform = reset_view_pitch
 		XRORIGIN.visible = false
 
+
+# compute a viewpoint offset, relative to ship cg
+func get_viewpoint_offset()-> Vector3:
+	var view_offset : Vector3
+	if XRCAMERA.current:
+		view_offset = XRCAMERA.global_position
+	else:
+		view_offset = CAMERA.global_position
+	view_offset -= global_position
+	return view_offset
+
+
 # Set spacecraft logical position to lat/long and heading (cw from N) (all in degrees)
 # Also sets rotation to be level with local ground, pointing at heading
 # Also sets linear velocity to match moon rotation at the given altitude
@@ -174,17 +189,27 @@ func set_logical_position(lat: float, lon: float, radius: float, altitude: float
 	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, 0.0))
 	rotation = (q1*q2).get_euler()	# This rotates the ship to correspond to its unrotated position on the globe
 	reset_spacecraft()
-	var view_offset : Vector3
-	if XRCAMERA.current:
-		view_offset = XRCAMERA.global_position
-	else:
-		view_offset = CAMERA.global_position
-	view_offset -= global_position
-	MOON.set_from_logical_position(self, view_offset)
+	MOON.set_from_logical_position(self, get_viewpoint_offset(), altitude)
 
 # get the current computed height above "msl"
 func get_altitude_msl() -> float:
 	return dv_logical_position.length()-MOON.physical_radius
+
+# compute a terrain height from Raycast (radar) and model data that favors radar
+# at low altitude, and model at high altitude
+func blend_terrain_altitude(msl_altitude : float, radar_altitude: float) -> float:
+		var model_based_altitude : float = MOON.moon_data.get_terrain_altitude_from_vector(-MOON.position, MOON.MOON_SCALE)
+		var radar_based_altitude = msl_altitude - radar_altitude
+		if msl_altitude - model_based_altitude < RADAR_TRANSITION_LOW:
+			return radar_based_altitude
+		elif msl_altitude - model_based_altitude > RADAR_TRANSITION_HIGH:
+			return model_based_altitude
+		else:
+			var blended : float = ((model_based_altitude*(model_based_altitude-RADAR_TRANSITION_LOW) +
+				radar_based_altitude*(RADAR_TRANSITION_HIGH-model_based_altitude))
+				/(RADAR_TRANSITION_HIGH-RADAR_TRANSITION_LOW))
+			return blended
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -215,6 +240,8 @@ func _process(delta):
 		return
 	var delta_fuel = 0.0
 	v_torque = Vector3.ZERO		# all torques to zero - we will add them as we discover them
+	# set up a view offset
+	var view_offset := get_viewpoint_offset()
 
 	# Fuel calculations
 	if fuel <= 0.0:
@@ -242,8 +269,8 @@ func _process(delta):
 	if GROUNDRADAR.is_colliding():
 		v_impact_point = GROUNDRADAR.get_collision_point()
 		v_impact_normal = GROUNDRADAR.get_collision_normal()
-		altitude_radar = GROUNDRADAR.to_local(v_impact_point).length()-GROUNDRADAR.position.y
-		terrain_altitude = get_altitude_msl() - altitude_radar
+		altitude_radar = (GROUNDRADAR.to_local(v_impact_point).length()-GROUNDRADAR.position.y)*MOON.scale_factor
+		terrain_altitude = blend_terrain_altitude(altitude_msl, altitude_radar)
 	else:
 		altitude_radar = NAN
 
@@ -259,7 +286,6 @@ func _process(delta):
 			vertical_velocity_agl = exponential_filter(
 				delta, VERTICAL_VELOCITY_TC, vertical_velocity_agl, vvel)
 		altitude_agl_previous = altitude_agl
-
 	else:
 		if not is_nan(altitude_agl):
 			Signals.emit_signal("DisplayRadarAltitude_set_valid", false)
@@ -313,13 +339,7 @@ func _process(delta):
 
 
 	process_physics(delta, dv_logical_position, dv_logical_velocity, v_thrust_global, net_mass)
-	var view_offset : Vector3
-	if XRCAMERA.current:
-		view_offset = XRCAMERA.global_position
-	else:
-		view_offset = CAMERA.global_position
-	view_offset -= global_position
-	MOON.set_from_logical_position(self, view_offset)
+	MOON.set_from_logical_position(self, view_offset, altitude_agl)
 		
 	# Input Polling
 	# view reset
