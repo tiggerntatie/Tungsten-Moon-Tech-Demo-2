@@ -39,6 +39,7 @@ var astronomy_seconds := 0.0
 const G = 6.674E-11
 const solar_diameter : float = 1.4E9 # m
 const solar_kepler_constant : float = 2.95E-19 # s^2/m^3
+const solar_shadow_distance := 1000.0
 ## Computed parameters
 var solar_distance : float
 var solar_orbit_rate : float
@@ -63,6 +64,7 @@ var solar_apparent_size : float # radians
 ## Constant Parameters
 const density_earth : float = 5515.0 # kg/m^3
 const mass_earth : float = 5.97E22 # kg
+const planet_shadow_distance := 1000.0
 ## Computed parameters
 var planet_diameter : float
 var planet_distance : float
@@ -183,6 +185,10 @@ func _ready():
 		if scenario_index >= scenario_list.size():
 			scenario_index = 0
 			save_scenario(scenario_index)
+			
+	# connect to scale change signal
+	Signals.connect("moon_scale_changed", _on_moon_scale_changed)
+
 		
 func save_scenario(index : int):
 	config.set_value("Scenario", "index", index)
@@ -290,3 +296,8 @@ func scenario_input(prev : bool, next : bool, restart : bool) -> bool:
 # find a way to bring this to the loading screen!
 func _on_smart_moon_meshes_loaded(value):
 	meshes_loaded.emit(value)
+
+# notified that moon scale has changed
+func _on_moon_scale_changed(scale_factor):
+	SUNLIGHT.directional_shadow_max_distance = solar_shadow_distance / scale_factor
+	PLANETLIGHT.directional_shadow_max_distance = planet_shadow_distance / scale_factor
