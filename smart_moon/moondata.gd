@@ -56,13 +56,20 @@ func get_vector_position(lat: float, lon: float) -> Vector3:
 		sin(lat_rad),
 		cos(lat_rad)*cos(lon_rad))
 	
-# this returns a terrain altitude (relative to msl) for any vector position on the moon surface
+# this returns a terrain altitude (relative to msl) for any lat/lon position on the moon surface
 # it is generated from the 2d random field used to generate the mesh, but will *differ* from
 # actual height, especially near the center of a face
 func get_terrain_altitude(lat: float, lon: float, fscale: float) -> float:
 	var rel_position : Vector3 = get_vector_position(lat, lon)
-	var est_height = (point_on_moon(rel_position).length()-radius)*fscale
+	return get_terrain_altitude_from_vector(rel_position, fscale)
+
+# this returns a terrain altitude (relative to msl) for any vector position on the moon surface
+# it is generated from the 2d random field used to generate the mesh, but will *differ* from
+# actual height, especially near the center of a face
+func get_terrain_altitude_from_vector(pos_vector : Vector3, fscale: float) -> float:
+	var est_height = (point_on_moon(pos_vector.normalized()).length()-radius)*fscale
 	return est_height
+
 
 # get orientation of an object on the surface, given latitude, longitude and heading
 func get_object_surface_rotation(lat: float, lon: float, heading: float) -> Vector3:
