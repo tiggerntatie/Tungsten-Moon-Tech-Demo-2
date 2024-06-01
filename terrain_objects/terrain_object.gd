@@ -16,28 +16,48 @@ class_name TerrainObject
 ## Altitude offset (increase/decrease height)
 @export var altitude_adjust : float = 0.0
 
-# range to ship at which global_position is managed directly
-const HIGH_PRECISION_RANGE := 500.0
+# range at which the object becomes invisible
+const VISIBLE_RANGE := 10000.0
 
 # default moon scale 
 var default_moon_scale_set : bool = false
-var default_moon_scale : float
+var default_moon_scale : Vector3
 var dv_relative_position : DVector3
-var dv_moon_position : DVector3
+var last_moon_scale : Vector3
+var check_visible : bool = true
+var run_timer : bool = false
 
 func _on_moon_position_changed(dv_position : DVector3, moon_scale: Vector3):
-	var fscale := 1.0
 	if not default_moon_scale_set:
 		position = position*moon_scale.x
-		default_moon_scale = moon_scale.x
+		default_moon_scale = moon_scale
+		last_moon_scale = moon_scale
 		dv_relative_position.multiply_scalar(moon_scale.x)
 		default_moon_scale_set = true
-	if global_position.length() < HIGH_PRECISION_RANGE:
-		top_level = true
-		dv_moon_position = dv_position
-		global_position = DVector3.Add(dv_moon_position, dv_relative_position).vector3()
-	else:
-		top_level = false
+	elif moon_scale != last_moon_scale:
+		# only reset scale when it changes
+		scale = Vector3.ONE*(moon_scale.x/default_moon_scale.x)
+		last_moon_scale = moon_scale
+	# only update global_position when it is visible
+	if visible or check_visible:
+		if check_visible:
+			check_visible = false
+		global_position = DVector3.Add(
+			dv_position, 
+			DVector3.Mul(scale.x, dv_relative_position)
+			).vector3()
+		if global_position.length()/scale.x < VISIBLE_RANGE:
+			if run_timer:
+				print("stop timer")
+				run_timer = false
+			visible = true
+		else:
+			visible = false
+			if not run_timer:
+				print("begin timers")
+				start_timer()
+			
+			
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -50,8 +70,18 @@ func _ready():
 	)
 	position = dv_relative_position.vector3()
 	$StaticBody3D.position.y = altitude_adjust
+	top_level = true
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
+# periodically update the object position and make visible if necessary
+func start_timer():
+	var scene := get_tree()
+	if scene != null:
+		run_timer = true
+		var timer := scene.create_timer(10.0)
+		timer.timeout.connect(_on_timer_timeout)
+	
+func _on_timer_timeout():
+	check_visible = true
+	if run_timer:
+		print("restart timer")
+		start_timer()

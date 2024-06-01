@@ -61,7 +61,7 @@ func on_data_changed():
 const G = 6.674E-11
 
 const rhoW = 19250.0 # kg/m^3
-const SHRINK_ALTITUDE = 10000 # meters above ground
+const SHRINK_ALTITUDE = 1000 # meters above ground
 const SHRINK_FACTOR = 4
 const MOON_SCALE = 1000	
 var LEVEL : Node3D
@@ -116,7 +116,8 @@ func get_logical_position(body: Spacecraft) -> DVector3:
 
 # update the planet position based on spacecraft logical position
 # optional xz_radius enforces an invariant radius in xz plane after de-rotating
-func set_from_logical_position(body: Spacecraft, xz_radius: float = 0.0):
+# view_offset is vector position of eye relative to CG
+func set_from_logical_position(body: Spacecraft, view_offset: Vector3, xz_radius: float = 0.0):
 	var p = DVector3.FromVector3(body.position)
 	#var offset = Vector3.ZERO
 	var r = body.dv_logical_position.length()
@@ -137,6 +138,8 @@ func set_from_logical_position(body: Spacecraft, xz_radius: float = 0.0):
 	dv_unrotated_logical_position.rotate_y(-LEVEL.current_moon_rotation, xz_radius)
 	# scale it and create a new position
 	p.sub(DVector3.Div(dv_unrotated_logical_position, scale_factor))
+	if scale_factor != 1.0:
+		p.add(DVector3.FromVector3(view_offset*((scale_factor-1.0)/scale_factor)))
 	dv_position = p
 	Signals.emit_signal("moon_position_changed", dv_position, scale)
 	scale_high_precision_chunks()

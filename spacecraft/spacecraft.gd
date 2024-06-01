@@ -31,16 +31,16 @@ const STICK_NULL := 0.1	# sidestick null zone
 
 @onready var LEVEL : Node3D = $".."
 @onready var MOON : Node3D = $"../SmartMoon"
-@onready var GROUNDRADAR : RayCast3D = $GroundRadar
+@onready var GROUNDRADAR : RayCast3D = $ShipV2/GroundRadar
 @onready var COLLISIONSHAPE : CollisionShape3D = $CollisionShape3D
-@onready var CAMERA : Camera3D = $YawPivot/PitchPivot/Camera3D
-@onready var XRREFERENCE : Marker3D = $XRReferencePosition
-@onready var XRCAMERA : XRCamera3D = $"XROrigin3D/XRCamera3D"
-@onready var XRORIGIN : XROrigin3D = $XROrigin3D
-@onready var YAWPIVOT : Node3D = $YawPivot
-@onready var PITCHPIVOT : Node3D = $YawPivot/PitchPivot
-@onready var THROTTLE : Node3D = $Throttle
-@onready var SIDESTICK : Node3D = $SideStick
+@onready var CAMERA : Camera3D = $ShipV2/YawPivot/PitchPivot/Camera3D
+@onready var XRREFERENCE : Marker3D = $ShipV2/XRReferencePosition
+@onready var XRCAMERA : XRCamera3D = $ShipV2/XROrigin3D/XRCamera3D
+@onready var XRORIGIN : XROrigin3D = $ShipV2/XROrigin3D
+@onready var YAWPIVOT : Node3D = $ShipV2/YawPivot
+@onready var PITCHPIVOT : Node3D = $ShipV2/YawPivot/PitchPivot
+@onready var THROTTLE : Node3D = $ShipV2/Throttle
+@onready var SIDESTICK : Node3D = $ShipV2/SideStick
 @onready var dv_logical_position := DVector3.new()
 @onready var dv_logical_velocity := DVector3.new(0,0,0)
 @onready var dv_gravity_force := DVector3.new()
@@ -174,7 +174,13 @@ func set_logical_position(lat: float, lon: float, radius: float, altitude: float
 	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, 0.0))
 	rotation = (q1*q2).get_euler()	# This rotates the ship to correspond to its unrotated position on the globe
 	reset_spacecraft()
-	MOON.set_from_logical_position(self)
+	var view_offset : Vector3
+	if XRCAMERA.current:
+		view_offset = XRCAMERA.global_position
+	else:
+		view_offset = CAMERA.global_position
+	view_offset -= global_position
+	MOON.set_from_logical_position(self, view_offset)
 
 # get the current computed height above "msl"
 func get_altitude_msl() -> float:
@@ -205,6 +211,8 @@ func _ready():
 
 # Called physics every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	if LEVEL == null:
+		return
 	var delta_fuel = 0.0
 	v_torque = Vector3.ZERO		# all torques to zero - we will add them as we discover them
 
@@ -304,9 +312,14 @@ func _process(delta):
 
 
 
-	
 	process_physics(delta, dv_logical_position, dv_logical_velocity, v_thrust_global, net_mass)
-	MOON.set_from_logical_position(self)
+	var view_offset : Vector3
+	if XRCAMERA.current:
+		view_offset = XRCAMERA.global_position
+	else:
+		view_offset = CAMERA.global_position
+	view_offset -= global_position
+	MOON.set_from_logical_position(self, view_offset)
 		
 	# Input Polling
 	# view reset
@@ -340,23 +353,23 @@ func _process(delta):
 			forward_vel = JOY_SENS * Input.get_axis("Viewpoint Backward", "Viewpoint Forward")
 			horiz_vel = JOY_SENS * Input.get_axis("Viewpoint Left", "Viewpoint Right")
 		else:
-			$YawPivot.rotation.y -= JOY_SENS * Input.get_axis("Viewpoint Pan Left", "Viewpoint Pan Right")
-			$YawPivot/PitchPivot.rotation.z += JOY_SENS * Input.get_axis("Viewpoint Pan Down", "Viewpoint Pan Up")
-			$YawPivot/PitchPivot.rotation.z = clamp($YawPivot/PitchPivot.rotation.z, -PI/2, PI/2)
+			YAWPIVOT.rotation.y -= JOY_SENS * Input.get_axis("Viewpoint Pan Left", "Viewpoint Pan Right")
+			PITCHPIVOT.rotation.z += JOY_SENS * Input.get_axis("Viewpoint Pan Down", "Viewpoint Pan Up")
+			PITCHPIVOT.rotation.z = clamp(PITCHPIVOT.rotation.z, -PI/2, PI/2)
 		if alternate_control:
 			SIDESTICK.set_sidestick(-(Input.get_axis("Yaw Right", "Yaw Left") - right_primary.x), Input.get_axis("Pitch Forward", "Pitch Backward") - right_primary.y)
 		else:
 			SIDESTICK.set_sidestick(-(Input.get_axis("Roll Right", "Roll Left") - right_primary.x), Input.get_axis("Pitch Forward", "Pitch Backward") - right_primary.y)
 		var v_move = Quaternion.from_euler(
-			Vector3(0.0, $YawPivot.rotation.y, $YawPivot/PitchPivot.rotation.z))*Vector3(forward_vel, 0.0, horiz_vel)
-		var new_eye = $YawPivot.position + v_move
+			Vector3(0.0, YAWPIVOT.rotation.y, PITCHPIVOT.rotation.z))*Vector3(forward_vel, 0.0, horiz_vel)
+		var new_eye = YAWPIVOT.position + v_move
 		if (new_eye.x < 1.8 and 
 			new_eye.x > 1.2 and
 			new_eye.y > 5 and
 			new_eye.y < 5.7 and 
 			new_eye.z > -0.3 and new_eye.z < 0.3):
 			#new_eye.y < (-5.0/6.0)*new_eye.x + 6.675):
-			$YawPivot.position = new_eye
+			YAWPIVOT.position = new_eye
 		
 		# oddly, this has to be here to keep the ship rotating		
 		v_torque = Vector3.ZERO
@@ -499,9 +512,9 @@ func _input(event: InputEvent) -> void:
 	elif (event is InputEventMouseButton and event.get_button_index() == MOUSE_BUTTON_RIGHT):
 		mouse_button_2 = event.is_pressed()
 	elif event is InputEventMouseMotion and mouse_button_2:
-		$YawPivot.rotation.y -= MOUSE_SENS * event.relative.x
-		$YawPivot/PitchPivot.rotation.z -= MOUSE_SENS * event.relative.y
-		$YawPivot/PitchPivot.rotation.z = clamp($YawPivot/PitchPivot.rotation.z, -PI/2, PI/2)
+		YAWPIVOT.rotation.y -= MOUSE_SENS * event.relative.x
+		PITCHPIVOT.rotation.z -= MOUSE_SENS * event.relative.y
+		PITCHPIVOT.rotation.z = clamp(PITCHPIVOT.rotation.z, -PI/2, PI/2)
 	elif event.is_action_pressed("Quit"):
 		get_tree().quit()
 

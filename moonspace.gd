@@ -3,8 +3,8 @@ extends Node3D
 signal meshes_loaded(value : float)
 
 @onready var SPACECRAFT : RigidBody3D = $Spacecraft
-@onready var CAMERA : Camera3D = $Spacecraft/YawPivot/PitchPivot/Camera3D
-@onready var XRCAMERA : XRCamera3D = $Spacecraft/XROrigin3D/XRCamera3D
+@onready var CAMERA : Camera3D = $Spacecraft/ShipV2/YawPivot/PitchPivot/Camera3D
+@onready var XRCAMERA : XRCamera3D = $Spacecraft/ShipV2/XROrigin3D/XRCamera3D
 @onready var ENVIRONMENT : WorldEnvironment = $WorldEnvironment
 @onready var SUNLIGHT : DirectionalLight3D = $DirectionalLightSun
 @onready var PLANETLIGHT : DirectionalLight3D = $DirectionalLightPlanet
@@ -200,7 +200,7 @@ func load_scenario(index : int)-> void:
 		scenario_list[index]["lat"], 
 		scenario_list[index]["long"], 
 		MOON.physical_radius, 
-		terrain_altitude + 4.0,
+		terrain_altitude + 7.5,  # FIXME we'll need to set this manually
 		scenario_list[index]["heading"],
 		moon_axis_rate)
 	MOON.reset_scenario()

@@ -2785,19 +2785,8 @@ inertia = Vector3(100000, 100000, 100000)
 continuous_cd = true
 script = ExtResource("1_b8yyq")
 
-[node name="ButtonPanel" parent="." instance=ExtResource("27_guree")]
-transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.97453, 5.50004, 0)
-metadata/_edit_lock_ = true
-
-[node name="IMUPanel" parent="." instance=ExtResource("3_8jw78")]
-transform = Transform3D(-4.14985e-08, 0.314142, -0.949376, 1.37316e-08, 0.949376, 0.314142, 1, 0, -4.37114e-08, 1.94432, 5.41221, -0.245326)
-metadata/_edit_lock_ = true
-
-[node name="RadarPanel" parent="." instance=ExtResource("26_bjwo4")]
-transform = Transform3D(-0.00383609, 0.313969, -0.949425, -0.0115991, 0.949355, 0.313992, 0.999926, 0.012217, -4.15007e-08, 1.944, 5.412, 0.245)
-metadata/_edit_lock_ = true
-
 [node name="ShipV2" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3.5, 0)
 
 [node name="ShipMesh" type="MeshInstance3D" parent="ShipV2"]
 layers = 3
@@ -2817,67 +2806,75 @@ transform = Transform3D(0.999941, 0, 0.0109013, 0, 1, 0, -0.0109013, 0, 0.999941
 script = ExtResource("29_8dxpt")
 leg_material = SubResource("StandardMaterial3D_iy5xx")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.928, -0.032)
-shape = SubResource("BoxShape3D_63e0r")
+[node name="ButtonPanel" parent="ShipV2" instance=ExtResource("27_guree")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.97453, 5.50004, 0)
+metadata/_edit_lock_ = true
 
-[node name="XRReferencePosition" type="Marker3D" parent="."]
+[node name="IMUPanel" parent="ShipV2" instance=ExtResource("3_8jw78")]
+transform = Transform3D(-4.14985e-08, 0.314142, -0.949376, 1.37316e-08, 0.949376, 0.314142, 1, 0, -4.37114e-08, 1.94432, 5.41221, -0.245326)
+metadata/_edit_lock_ = true
+
+[node name="RadarPanel" parent="ShipV2" instance=ExtResource("26_bjwo4")]
+transform = Transform3D(-0.00383609, 0.313969, -0.949425, -0.0115991, 0.949355, 0.313992, 0.999926, 0.012217, -4.15007e-08, 1.944, 5.412, 0.245)
+metadata/_edit_lock_ = true
+
+[node name="XRReferencePosition" type="Marker3D" parent="ShipV2"]
 editor_description = "A fixed location serving as the default XR Origin when resetting the XR Origin point"
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.45, 5.7, 0)
 
-[node name="XROrigin3D" type="XROrigin3D" parent="."]
+[node name="XROrigin3D" type="XROrigin3D" parent="ShipV2"]
 transform = Transform3D(-4.37114e-08, 0, -1, -2.30926e-14, 1, 0, 1, 0, -4.37114e-08, 1.45, 5.6, 0)
 
-[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+[node name="XRCamera3D" type="XRCamera3D" parent="ShipV2/XROrigin3D"]
 far = 600000.0
 
-[node name="VRCommonShaderCache" parent="XROrigin3D/XRCamera3D" instance=ExtResource("3_m2ksy")]
+[node name="VRCommonShaderCache" parent="ShipV2/XROrigin3D/XRCamera3D" instance=ExtResource("3_m2ksy")]
 
-[node name="XRLeft" type="XRController3D" parent="XROrigin3D"]
+[node name="XRLeft" type="XRController3D" parent="ShipV2/XROrigin3D"]
 tracker = &"left_hand"
 
-[node name="LeftPhysicsHand" parent="XROrigin3D/XRLeft" instance=ExtResource("3_k0geh")]
+[node name="LeftPhysicsHand" parent="ShipV2/XROrigin3D/XRLeft" instance=ExtResource("3_k0geh")]
 
-[node name="XRToolsFunctionPickup" type="Node3D" parent="XROrigin3D/XRLeft"]
+[node name="XRToolsFunctionPickup" type="Node3D" parent="ShipV2/XROrigin3D/XRLeft"]
 script = ExtResource("4_ltj2u")
 grab_distance = 0.1
 grab_collision_mask = 327684
 ranged_enable = false
 
-[node name="FunctionPoseDetector" parent="XROrigin3D/XRLeft" instance=ExtResource("6_bteek")]
+[node name="FunctionPoseDetector" parent="ShipV2/XROrigin3D/XRLeft" instance=ExtResource("6_bteek")]
 
-[node name="XRRight" type="XRController3D" parent="XROrigin3D"]
+[node name="XRRight" type="XRController3D" parent="ShipV2/XROrigin3D"]
 tracker = &"right_hand"
 
-[node name="RightPhysicsHand" parent="XROrigin3D/XRRight" instance=ExtResource("5_16q6j")]
+[node name="RightPhysicsHand" parent="ShipV2/XROrigin3D/XRRight" instance=ExtResource("5_16q6j")]
 
-[node name="XRToolsFunctionPickup" type="Node3D" parent="XROrigin3D/XRRight"]
+[node name="XRToolsFunctionPickup" type="Node3D" parent="ShipV2/XROrigin3D/XRRight"]
 script = ExtResource("4_ltj2u")
 grab_distance = 0.1
 grab_collision_mask = 327684
 ranged_enable = false
 
-[node name="FunctionPoseDetector" parent="XROrigin3D/XRRight" instance=ExtResource("6_bteek")]
+[node name="FunctionPoseDetector" parent="ShipV2/XROrigin3D/XRRight" instance=ExtResource("6_bteek")]
 
-[node name="YawPivot" type="Node3D" parent="."]
+[node name="YawPivot" type="Node3D" parent="ShipV2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.44, 5.6, 0)
 
-[node name="PitchPivot" type="Node3D" parent="YawPivot"]
+[node name="PitchPivot" type="Node3D" parent="ShipV2/YawPivot"]
 transform = Transform3D(0.882948, 0.469472, 0, -0.469472, 0.882948, 0, 0, 0, 0.999999, 0, 0, 0)
 
-[node name="Camera3D" type="Camera3D" parent="YawPivot/PitchPivot"]
+[node name="Camera3D" type="Camera3D" parent="ShipV2/YawPivot/PitchPivot"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
 fov = 60.0
 far = 300000.0
 
-[node name="SpotLight3D" type="SpotLight3D" parent="."]
-transform = Transform3D(0.167574, 0.353867, -0.920161, -0.064964, 0.935295, 0.347856, 0.983717, 0.00148564, 0.17972, 1.175, 5.543, 0.119)
+[node name="SpotLight3D" type="SpotLight3D" parent="ShipV2"]
+transform = Transform3D(0.167574, 0.353867, -0.920162, -0.064964, 0.935295, 0.347856, 0.983717, 0.00148578, 0.17972, 1.175, 5.543, 0.119)
 layers = 4
 light_cull_mask = 4293918724
 spot_range = 1.038
 spot_angle = 45.06
 
-[node name="LandingLight" type="SpotLight3D" parent="."]
+[node name="LandingLight" type="SpotLight3D" parent="ShipV2"]
 transform = Transform3D(-4.37114e-08, 0.707107, -0.707107, 0, 0.707107, 0.707107, 1, 3.09086e-08, -3.09086e-08, 1.67988, 3.6703, 0)
 visible = false
 light_energy = 32.0
@@ -2889,28 +2886,28 @@ spot_angle = 25.0
 spot_angle_attenuation = 0.5
 script = ExtResource("9_u56vm")
 
-[node name="GroundRadar" type="RayCast3D" parent="."]
+[node name="GroundRadar" type="RayCast3D" parent="ShipV2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
 target_position = Vector3(0, -1000, 0)
 collision_mask = 512
 
-[node name="Throttle" parent="." instance=ExtResource("6_7of32")]
+[node name="Throttle" parent="ShipV2" instance=ExtResource("6_7of32")]
 transform = Transform3D(0.957503, 0.0137543, -0.288095, 0.288278, -0.0139066, 0.957446, 0.0091626, -0.999808, -0.0172807, 1.81438, 5.166, -0.21)
 
-[node name="SideStick" parent="." instance=ExtResource("10_e5xbv")]
+[node name="SideStick" parent="ShipV2" instance=ExtResource("10_e5xbv")]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.75, 5.1, 0.21)
 
-[node name="FanHum" type="AudioStreamPlayer3D" parent="."]
+[node name="FanHum" type="AudioStreamPlayer3D" parent="ShipV2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.244, 5.593, 0)
 stream = ExtResource("13_huula")
 script = ExtResource("14_4f2dy")
 
-[node name="LandingRattle" type="AudioStreamPlayer3D" parent="."]
+[node name="LandingRattle" type="AudioStreamPlayer3D" parent="ShipV2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.27699, 0)
 stream = ExtResource("15_4rpjs")
 script = ExtResource("16_7xops")
 
-[node name="FlowClick" type="AudioStreamPlayer3D" parent="."]
+[node name="FlowClick" type="AudioStreamPlayer3D" parent="ShipV2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 5.377, 0)
 stream = ExtResource("17_4p3gk")
 volume_db = -19.0
@@ -2919,19 +2916,19 @@ attenuation_filter_cutoff_hz = 500.0
 attenuation_filter_db = -49.3
 script = ExtResource("18_eedt2")
 
-[node name="StartRotation" type="AudioStreamPlayer3D" parent="."]
+[node name="StartRotation" type="AudioStreamPlayer3D" parent="ShipV2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.97411, 0)
 stream = ExtResource("19_5elai")
 volume_db = -7.55556
 script = ExtResource("20_0u0mn")
 
-[node name="FlowSound" type="AudioStreamPlayer3D" parent="."]
+[node name="FlowSound" type="AudioStreamPlayer3D" parent="ShipV2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.03934, 0)
 stream = ExtResource("21_2fodt")
 volume_db = 0.714283
 script = ExtResource("22_g3a7g")
 
-[node name="HoldRotation" type="AudioStreamPlayer3D" parent="."]
+[node name="HoldRotation" type="AudioStreamPlayer3D" parent="ShipV2"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.974, 0)
 stream = ExtResource("23_bstsh")
 volume_db = -44.8
@@ -2949,18 +2946,22 @@ autostart = true
 [node name="Marker3D" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.89577, 5.2263, -0.200251)
 
-[connection signal="landed" from="." to="LandingRattle" method="_on_spacecraft_has_landed"]
-[connection signal="thrust_changed" from="." to="FlowClick" method="_on_spacecraft_thrust_changed"]
-[connection signal="thrust_changed" from="." to="FlowSound" method="_on_spacecraft_thrust_changed"]
-[connection signal="torque_changed" from="." to="StartRotation" method="_on_spacecraft_torque_changed"]
-[connection signal="torque_changed" from="." to="HoldRotation" method="_on_spacecraft_torque_changed"]
-[connection signal="button_pressed" from="XROrigin3D/XRLeft" to="." method="_on_xr_left_button_pressed"]
-[connection signal="button_released" from="XROrigin3D/XRLeft" to="." method="_on_xr_left_button_released"]
-[connection signal="input_vector2_changed" from="XROrigin3D/XRLeft" to="." method="_on_xr_left_input_vector_2_changed"]
-[connection signal="button_pressed" from="XROrigin3D/XRRight" to="." method="_on_xr_right_button_pressed"]
-[connection signal="button_released" from="XROrigin3D/XRRight" to="." method="_on_xr_right_button_released"]
-[connection signal="input_vector2_changed" from="XROrigin3D/XRRight" to="." method="_on_xr_right_input_vector_2_changed"]
-[connection signal="throttle_output_changed" from="Throttle" to="." method="_on_throttle_output_changed"]
-[connection signal="sidestick_output_changed" from="SideStick" to="." method="_on_sidestick_output_changed"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.928, -0.032)
+shape = SubResource("BoxShape3D_63e0r")
+
+[connection signal="landed" from="." to="ShipV2/LandingRattle" method="_on_spacecraft_has_landed"]
+[connection signal="thrust_changed" from="." to="ShipV2/FlowClick" method="_on_spacecraft_thrust_changed"]
+[connection signal="thrust_changed" from="." to="ShipV2/FlowSound" method="_on_spacecraft_thrust_changed"]
+[connection signal="torque_changed" from="." to="ShipV2/StartRotation" method="_on_spacecraft_torque_changed"]
+[connection signal="torque_changed" from="." to="ShipV2/HoldRotation" method="_on_spacecraft_torque_changed"]
+[connection signal="button_pressed" from="ShipV2/XROrigin3D/XRLeft" to="." method="_on_xr_left_button_pressed"]
+[connection signal="button_released" from="ShipV2/XROrigin3D/XRLeft" to="." method="_on_xr_left_button_released"]
+[connection signal="input_vector2_changed" from="ShipV2/XROrigin3D/XRLeft" to="." method="_on_xr_left_input_vector_2_changed"]
+[connection signal="button_pressed" from="ShipV2/XROrigin3D/XRRight" to="." method="_on_xr_right_button_pressed"]
+[connection signal="button_released" from="ShipV2/XROrigin3D/XRRight" to="." method="_on_xr_right_button_released"]
+[connection signal="input_vector2_changed" from="ShipV2/XROrigin3D/XRRight" to="." method="_on_xr_right_input_vector_2_changed"]
+[connection signal="throttle_output_changed" from="ShipV2/Throttle" to="." method="_on_throttle_output_changed"]
+[connection signal="sidestick_output_changed" from="ShipV2/SideStick" to="." method="_on_sidestick_output_changed"]
 [connection signal="timeout" from="DisplayTimer" to="." method="_on_display_timer_timeout"]
 [connection signal="timeout" from="NavballTimer" to="." method="_on_navball_timer_timeout"]
