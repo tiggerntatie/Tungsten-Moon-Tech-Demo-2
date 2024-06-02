@@ -1,16 +1,18 @@
-[gd_scene load_steps=9 format=3 uid="uid://vq08fdnsmq00"]
+[gd_scene load_steps=10 format=3 uid="uid://vq08fdnsmq00"]
 
 [ext_resource type="Script" path="res://terrain_objects/terrain_object.gd" id="1_7o3by"]
 [ext_resource type="Resource" uid="uid://cpyimrebtcomr" path="res://smart_moon/moon_data.tres" id="2_w8pd7"]
 [ext_resource type="Texture2D" uid="uid://bnykhr25w3fh0" path="res://terrain_objects/landing_pads/landing_pad.png" id="3_fr7sd"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_vuttc"]
+resource_local_to_scene = true
 lightmap_size_hint = Vector2i(473, 164)
 top_radius = 15.0
 bottom_radius = 15.0
 radial_segments = 32
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_hwhwj"]
+frequency = 0.046
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_tr5cx"]
 as_normal_map = true
@@ -19,9 +21,16 @@ noise = SubResource("FastNoiseLite_hwhwj")
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hu8kv"]
 albedo_color = Color(0.14902, 0.14902, 0.14902, 1)
 normal_enabled = true
-normal_scale = 3.33
+normal_scale = 2.89
 normal_texture = SubResource("NoiseTexture2D_tr5cx")
 uv1_triplanar = true
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_j6oki"]
+resource_local_to_scene = true
+lightmap_size_hint = Vector2i(473, 164)
+top_radius = 15.0
+bottom_radius = 15.0
+radial_segments = 32
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_n3r1q"]
 radius = 15.0
@@ -40,6 +49,14 @@ visibility_range_end = 2500.0
 visibility_range_end_margin = 500.0
 visibility_range_fade_mode = 1
 mesh = SubResource("CylinderMesh_vuttc")
+surface_material_override/0 = SubResource("StandardMaterial3D_hu8kv")
+
+[node name="Pedestal" type="MeshInstance3D" parent="StaticBody3D"]
+layers = 3
+visibility_range_end = 2500.0
+visibility_range_end_margin = 500.0
+visibility_range_fade_mode = 1
+mesh = SubResource("CylinderMesh_j6oki")
 surface_material_override/0 = SubResource("StandardMaterial3D_hu8kv")
 
 [node name="CollisionPadSurface" type="CollisionShape3D" parent="StaticBody3D"]

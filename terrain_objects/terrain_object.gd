@@ -18,6 +18,9 @@ class_name TerrainObject
 
 # range at which the object becomes invisible
 const VISIBLE_RANGE := 10000.0
+const BURIED_LENGTH := 10.0	# nominal length of pedestal buried beneath ground
+@onready var PAD : MeshInstance3D = $StaticBody3D/PadSurface
+@onready var PEDESTAL : MeshInstance3D = $StaticBody3D/Pedestal
 
 # default moon scale 
 var default_moon_scale_set : bool = false
@@ -70,6 +73,10 @@ func _ready():
 	)
 	position = dv_relative_position.vector3()
 	$StaticBody3D.position.y = altitude_adjust
+	PEDESTAL.mesh.top_radius = PAD.mesh.top_radius/4
+	PEDESTAL.mesh.bottom_radius = PEDESTAL.mesh.top_radius
+	PEDESTAL.mesh.height = altitude_adjust + BURIED_LENGTH
+	PEDESTAL.position = Vector3(0.0, -PEDESTAL.mesh.height/2.0, 0.0)
 	top_level = true
 
 # periodically update the object position and make visible if necessary
