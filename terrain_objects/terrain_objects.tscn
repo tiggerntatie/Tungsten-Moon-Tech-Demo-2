@@ -6,7 +6,18 @@
 [node name="TerrainObjects" type="Node3D"]
 script = ExtResource("1_avpaf")
 
-[node name="LandingPad1" parent="." instance=ExtResource("1_5jh7j")]
-latitude = 85.0
+[node name="LandingPad_0_1" parent="." instance=ExtResource("1_5jh7j")]
+longitude = 161.0
+latitude = 89.9
+altitude_adjust = 4.0
+
+[node name="LandingPad_1_1" parent="." instance=ExtResource("1_5jh7j")]
+
+[node name="LandingPad_2_1" parent="." instance=ExtResource("1_5jh7j")]
+
+[node name="LandingPad_3_1" parent="." instance=ExtResource("1_5jh7j")]
 longitude = 0.2
+latitude = 85.0
 altitude_adjust = 12.0
+
+[node name="LandingPad_4_1" parent="." instance=ExtResource("1_5jh7j")]

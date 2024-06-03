@@ -4,11 +4,11 @@ class_name TerrainObject
 
 @export var moon_data : MoonData
 
-## Latitude of the object in degrees
-@export var latitude : float
-
 ## Longitude of the object in degrees
 @export var longitude : float
+
+## Latitude of the object in degrees
+@export var latitude : float
 
 ## Heading of the object in degrees
 @export var heading : float
@@ -51,13 +51,11 @@ func _on_moon_position_changed(dv_position : DVector3, moon_scale: Vector3):
 			).vector3()
 		if global_position.length()/scale.x < VISIBLE_RANGE:
 			if run_timer:
-				print("stop timer")
 				run_timer = false
 			visible = true
 		else:
 			visible = false
 			if not run_timer:
-				print("begin timers")
 				start_timer()
 			
 			
@@ -90,5 +88,4 @@ func start_timer():
 func _on_timer_timeout():
 	check_visible = true
 	if run_timer:
-		print("restart timer")
 		start_timer()

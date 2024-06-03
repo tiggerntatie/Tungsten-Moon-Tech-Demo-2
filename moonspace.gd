@@ -96,11 +96,11 @@ var current_solar_rotation : float
 ## GAME STATE
 @export_group("Spacecraft Start Scenarios")
 @export var scenario_list : Array = [
-	{"long": 161.0, "lat": 89.9, "heading": 0.0},
-	{"long": 224.0, "lat": 30.0, "heading": 90.0},
-	{"long": 45.1, "lat": -10.0, "heading": 0.0},
-	{"long": 0.1, "lat": 85.0, "heading": 180.0},
-	{"long": 280.0, "lat": -10.0, "heading": 0.0},
+	{"long": 161.0, "lat": 89.9, "heading": 0.0, "altitude_offset": 9.0},
+	{"long": 224.0, "lat": 30.0, "heading": 90.0, "altitude_offset": 17.0},
+	{"long": 45.1, "lat": -10.0, "heading": 0.0, "altitude_offset": 17.0},
+	{"long": 0.2, "lat": 85.0, "heading": 180.0, "altitude_offset": 17.0},
+	{"long": 280.0, "lat": -10.0, "heading": 0.0, "altitude_offset": 17.0},
 ]
 var scenario_index : int = 0
 var scenario_loaded : bool = false
@@ -206,7 +206,7 @@ func load_scenario(index : int)-> void:
 		scenario_list[index]["lat"], 
 		scenario_list[index]["long"], 
 		MOON.physical_radius, 
-		terrain_altitude + 7.5,  # FIXME we'll need to set this manually
+		terrain_altitude + scenario_list[index]["altitude_offset"], 
 		scenario_list[index]["heading"],
 		moon_axis_rate)
 	MOON.reset_scenario()
