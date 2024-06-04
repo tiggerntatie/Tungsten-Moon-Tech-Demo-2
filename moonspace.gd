@@ -97,10 +97,10 @@ var current_solar_rotation : float
 @export_group("Spacecraft Start Scenarios")
 @export var scenario_list : Array = [
 	{"long": 161.0, "lat": 89.9, "heading": 0.0, "altitude_offset": 9.0},
-	{"long": 224.0, "lat": 30.0, "heading": 90.0, "altitude_offset": 17.0},
-	{"long": 45.1, "lat": -10.0, "heading": 0.0, "altitude_offset": 17.0},
+	{"long": 224.0, "lat": 30.0, "heading": 90.0, "altitude_offset": 14.0},
+	{"long": 45.1, "lat": -10.0, "heading": 0.0, "altitude_offset": 10.0},
 	{"long": 0.2, "lat": 85.0, "heading": 180.0, "altitude_offset": 17.0},
-	{"long": 280.0, "lat": -10.0, "heading": 0.0, "altitude_offset": 17.0},
+	{"long": 280.0, "lat": -10.0, "heading": 0.0, "altitude_offset": 10.0},
 ]
 var scenario_index : int = 0
 var scenario_loaded : bool = false

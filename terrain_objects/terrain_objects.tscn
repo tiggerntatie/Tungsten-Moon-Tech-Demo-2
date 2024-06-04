@@ -12,8 +12,14 @@ latitude = 89.9
 altitude_adjust = 4.0
 
 [node name="LandingPad_1_1" parent="." instance=ExtResource("1_5jh7j")]
+longitude = 224.0
+latitude = 30.0
+altitude_adjust = 8.0
 
 [node name="LandingPad_2_1" parent="." instance=ExtResource("1_5jh7j")]
+longitude = 45.1
+latitude = -10.0
+altitude_adjust = 4.0
 
 [node name="LandingPad_3_1" parent="." instance=ExtResource("1_5jh7j")]
 longitude = 0.2
@@ -21,3 +27,6 @@ latitude = 85.0
 altitude_adjust = 12.0
 
 [node name="LandingPad_4_1" parent="." instance=ExtResource("1_5jh7j")]
+longitude = 280.0
+latitude = -10.0
+altitude_adjust = 4.0
