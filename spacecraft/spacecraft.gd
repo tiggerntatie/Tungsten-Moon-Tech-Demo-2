@@ -144,6 +144,7 @@ func reset_spacecraft():
 	rotation_rate_mode = true
 	Signals.emit_signal("ButtonAlternateControl_set_state", alternate_control)
 	Signals.emit_signal("ButtonRateMode_set_state", rotation_rate_mode)
+	Signals.emit_signal("Spacecraft_reset")
 	is_landed = false
 	set_thrust(0.0)
 	reset_viewpoint()
@@ -188,8 +189,8 @@ func set_logical_position(lat: float, lon: float, radius: float, altitude: float
 	var q1 : Quaternion = Quaternion.from_euler(Vector3(0.0, phi_physical+PI/2.0, PI/2.0-theta))
 	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, 0.0))
 	rotation = (q1*q2).get_euler()	# This rotates the ship to correspond to its unrotated position on the globe
-	reset_spacecraft()
 	MOON.set_from_logical_position(self, get_viewpoint_offset(), altitude)
+	reset_spacecraft()
 
 # get the current computed height above "msl"
 func get_altitude_msl() -> float:

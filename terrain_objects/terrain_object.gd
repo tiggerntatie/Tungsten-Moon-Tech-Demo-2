@@ -58,11 +58,16 @@ func _on_moon_position_changed(dv_position : DVector3, moon_scale: Vector3):
 			if not run_timer:
 				start_timer()
 			
-			
+# when the position is reset, every one needs to check visibility right away!
+func _on_spacecraft_reset() -> void:
+	check_visible = true		
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	if not Signals.has_signal("Spacecraft_reset"):
+		Signals.add_user_signal("Spacecraft_reset")
 	Signals.connect("moon_position_changed", _on_moon_position_changed)
+	Signals.connect("Spacecraft_reset", _on_spacecraft_reset)
 	rotation = moon_data.get_object_surface_rotation(latitude, longitude, heading)
 	dv_relative_position = DVector3.FromVector3(moon_data.get_vector_position(latitude, longitude))
 	dv_relative_position.multiply_scalar(
