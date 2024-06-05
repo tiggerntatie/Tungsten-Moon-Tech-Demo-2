@@ -81,3 +81,54 @@ func get_object_surface_rotation(lat: float, lon: float, heading: float) -> Vect
 	var q1 : Quaternion = Quaternion.from_euler(Vector3(0.0, phi+PI/2.0, PI/2.0-theta))
 	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, 0.0))
 	return (q1*q2).get_euler()	# This rotates the object to correspond to its position on the globe
+
+# get longitude and latitude of from bearing/distance from starting long/lat.
+# distance measured in meters, ASSUMES a 1000x moon sccale unless otherwise given
+# longitude/latitude measured in degrees
+# lat/long returned as a list
+func get_destination_from_bearing_and_distance(
+	lat: float, 
+	lon: float, 
+	heading: float, 
+	dist: float,
+	fscale: float = 1000.0) -> Array[float]:
+	var A : float = deg_to_rad(heading)
+	var b = PI/2.0 - deg_to_rad(lat)
+	var c = dist/(radius * fscale)	# great circle angle in radians
+	# solve cosine rule for a in spherical trigonometry
+	var a = acos(cos(b)*cos(c) + sin(b)*sin(c)*cos(A))	
+	# infer latitude of destination from a:
+	var dest_lat = 90.0 - rad_to_deg(a)
+	# solve half angle formula for angle C
+	var s = (a + b + c)/2.0
+	var C = 2*acos(sqrt((sin(s)*sin(s-c))/(sin(a)*sin(b))))
+	if heading > 180.0:
+		C *= -1.0
+	# infer longitude of destination from C
+	var dest_lon = lon + rad_to_deg(C)
+	return [dest_lat, dest_lon]
+
+# get distance and bearing from one lat/lon position to another lat/lon
+# ASSUMES a 1000x moon sccale unless otherwise given
+# lat/lon measured in degrees
+# distance/bearing returned as a list
+# distance measured in meters
+# bearing measured in degrees
+func get_distance_and_bearing(
+	lat1 : float,
+	lon1 : float,
+	lat2 : float,
+	lon2 : float,
+	fscale: float = 1000.0) -> Array[float]:
+	var C : float = deg_to_rad(lon2 - lon1)
+	var b : float = PI/2.0 - deg_to_rad(lat1)
+	var a : float = PI/2.0 - deg_to_rad(lat2)
+	var c : float = acos(cos(a)*cos(b) + sin(a)*sin(b)*cos(C))
+		# solve half angle formula for angle A
+	var s : float = (a + b + c)/2.0
+	var A : float = 2*acos(sqrt((sin(s)*sin(s-a))/(sin(b)*sin(c))))
+	if C < 0:
+		A = 2*PI - A
+	var dist : float = c * radius * fscale
+	var bearing : float = rad_to_deg(A)
+	return [dist, bearing]
