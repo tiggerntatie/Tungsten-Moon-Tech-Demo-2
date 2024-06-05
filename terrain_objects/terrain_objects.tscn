@@ -1,32 +1,72 @@
-[gd_scene load_steps=3 format=3 uid="uid://ck2yjbdsp2r72"]
+[gd_scene load_steps=4 format=3 uid="uid://ck2yjbdsp2r72"]
 
 [ext_resource type="PackedScene" uid="uid://vq08fdnsmq00" path="res://terrain_objects/landing_pads/landing_pad.tscn" id="1_5jh7j"]
 [ext_resource type="Script" path="res://terrain_objects/terrain_objects.gd" id="1_avpaf"]
+[ext_resource type="Resource" uid="uid://cpyimrebtcomr" path="res://smart_moon/moon_data.tres" id="3_rh7nr"]
 
 [node name="TerrainObjects" type="Node3D"]
 script = ExtResource("1_avpaf")
 
-[node name="LandingPad_0_1" parent="." instance=ExtResource("1_5jh7j")]
+[node name="LandingPad_0_0" parent="." node_paths=PackedStringArray("other_pads_array") instance=ExtResource("1_5jh7j")]
+other_pads_array = [NodePath("LandingPad_0_1")]
+moon_data = ExtResource("3_rh7nr")
+identifier = "Pad 0:0"
 longitude = 161.0
 latitude = 89.9
 altitude_adjust = 4.0
 
-[node name="LandingPad_1_1" parent="." instance=ExtResource("1_5jh7j")]
+[node name="LandingPad_0_1" parent="LandingPad_0_0" node_paths=PackedStringArray("other_pads_array", "reference_object") instance=ExtResource("1_5jh7j")]
+other_pads_array = [NodePath("../LandingPad_0_2")]
+moon_data = ExtResource("3_rh7nr")
+identifier = "Pad 0:1"
+altitude_adjust = 4.0
+relative_position = true
+reference_object = NodePath("..")
+departure_bearing = 90.0
+
+[node name="LandingPad_0_2" parent="LandingPad_0_0" node_paths=PackedStringArray("other_pads_array", "reference_object") instance=ExtResource("1_5jh7j")]
+other_pads_array = [NodePath("../LandingPad_0_3")]
+moon_data = ExtResource("3_rh7nr")
+identifier = "Pad 0:2"
+altitude_adjust = 4.0
+relative_position = true
+reference_object = NodePath("../LandingPad_0_1")
+distance_from_reference = 200.0
+
+[node name="LandingPad_0_3" parent="LandingPad_0_0" node_paths=PackedStringArray("other_pads_array", "reference_object") instance=ExtResource("1_5jh7j")]
+other_pads_array = [NodePath("..")]
+moon_data = ExtResource("3_rh7nr")
+identifier = "Pad 0:3"
+altitude_adjust = 4.0
+relative_position = true
+reference_object = NodePath("../LandingPad_0_2")
+departure_bearing = 270.0
+distance_from_reference = 300.0
+
+[node name="LandingPad_1_0" parent="." instance=ExtResource("1_5jh7j")]
+moon_data = ExtResource("3_rh7nr")
+identifier = "Pad 1:0"
 longitude = 224.0
 latitude = 30.0
 altitude_adjust = 8.0
 
-[node name="LandingPad_2_1" parent="." instance=ExtResource("1_5jh7j")]
+[node name="LandingPad_2_0" parent="." instance=ExtResource("1_5jh7j")]
+moon_data = ExtResource("3_rh7nr")
+identifier = "Pad 2:0"
 longitude = 45.1
 latitude = -10.0
 altitude_adjust = 4.0
 
-[node name="LandingPad_3_1" parent="." instance=ExtResource("1_5jh7j")]
+[node name="LandingPad_3_0" parent="." instance=ExtResource("1_5jh7j")]
+moon_data = ExtResource("3_rh7nr")
+identifier = "Pad 3:0"
 longitude = 0.2
 latitude = 85.0
 altitude_adjust = 12.0
 
-[node name="LandingPad_4_1" parent="." instance=ExtResource("1_5jh7j")]
+[node name="LandingPad_4_0" parent="." instance=ExtResource("1_5jh7j")]
+moon_data = ExtResource("3_rh7nr")
+identifier = "Pad 4:0"
 longitude = 280.0
 latitude = -10.0
 altitude_adjust = 4.0
