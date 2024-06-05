@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://vq08fdnsmq00"]
+[gd_scene load_steps=14 format=3 uid="uid://vq08fdnsmq00"]
 
 [ext_resource type="Script" path="res://terrain_objects/landing_pads/landing_pad.gd" id="1_2vr0b"]
 [ext_resource type="Texture2D" uid="uid://bnykhr25w3fh0" path="res://terrain_objects/landing_pads/landing_pad.png" id="3_fr7sd"]
@@ -36,6 +36,21 @@ radial_segments = 32
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_n3r1q"]
 radius = 15.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_xt7gn"]
+top_radius = 0.8
+bottom_radius = 0.8
+height = 0.2
+radial_segments = 16
+rings = 2
+cap_bottom = false
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sij6d"]
+resource_local_to_scene = true
+albedo_color = Color(0.611765, 0.611765, 0.611765, 1)
+metallic_specular = 0.0
+emission_enabled = true
+emission_energy_multiplier = 9.0
 
 [node name="LandingPad" type="Node3D"]
 script = ExtResource("1_2vr0b")
@@ -92,3 +107,11 @@ outline_size = 0
 horizontal_alignment = 0
 uppercase = true
 script = ExtResource("5_71t6t")
+
+[node name="Beacon" type="MeshInstance3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+mesh = SubResource("CylinderMesh_xt7gn")
+surface_material_override/0 = SubResource("StandardMaterial3D_sij6d")
+
+[node name="BeaconSpot" type="SpotLight3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 3, 0)
