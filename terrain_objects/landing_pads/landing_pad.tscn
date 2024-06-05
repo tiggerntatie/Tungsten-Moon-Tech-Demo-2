@@ -1,8 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://vq08fdnsmq00"]
+[gd_scene load_steps=12 format=3 uid="uid://vq08fdnsmq00"]
 
-[ext_resource type="Script" path="res://terrain_objects/terrain_object.gd" id="1_7o3by"]
-[ext_resource type="Resource" uid="uid://cpyimrebtcomr" path="res://smart_moon/moon_data.tres" id="2_w8pd7"]
+[ext_resource type="Script" path="res://terrain_objects/landing_pads/landing_pad.gd" id="1_2vr0b"]
 [ext_resource type="Texture2D" uid="uid://bnykhr25w3fh0" path="res://terrain_objects/landing_pads/landing_pad.png" id="3_fr7sd"]
+[ext_resource type="Script" path="res://terrain_objects/landing_pads/pedestal.gd" id="3_h84du"]
+[ext_resource type="Script" path="res://terrain_objects/landing_pads/position_label.gd" id="4_p38qw"]
+[ext_resource type="Script" path="res://terrain_objects/landing_pads/other_pads_label.gd" id="5_71t6t"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_vuttc"]
 resource_local_to_scene = true
@@ -36,8 +38,7 @@ radial_segments = 32
 radius = 15.0
 
 [node name="LandingPad" type="Node3D"]
-script = ExtResource("1_7o3by")
-moon_data = ExtResource("2_w8pd7")
+script = ExtResource("1_2vr0b")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0)
@@ -58,11 +59,36 @@ visibility_range_end_margin = 500.0
 visibility_range_fade_mode = 1
 mesh = SubResource("CylinderMesh_j6oki")
 surface_material_override/0 = SubResource("StandardMaterial3D_hu8kv")
+script = ExtResource("3_h84du")
 
 [node name="CollisionPadSurface" type="CollisionShape3D" parent="StaticBody3D"]
 shape = SubResource("CylinderShape3D_n3r1q")
 
 [node name="Decal" type="Decal" parent="StaticBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0020771, 1.10419, -0.0350428)
-size = Vector3(30, 1, 30)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0020771, 0.857608, -0.0350428)
+size = Vector3(30, 0.506836, 30)
 texture_albedo = ExtResource("3_fr7sd")
+
+[node name="PositionLabel" type="Label3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 1.05, -6.6)
+visibility_range_end = 200.0
+double_sided = false
+modulate = Color(0, 0, 0, 1)
+text = "POSITION"
+font_size = 128
+outline_size = 0
+uppercase = true
+script = ExtResource("4_p38qw")
+
+[node name="OtherPadsLabel" type="Label3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -9, 1.05, -5.3)
+visibility_range_end = 200.0
+double_sided = false
+modulate = Color(0, 0, 0, 1)
+text = "OTHER PADS
+"
+font_size = 128
+outline_size = 0
+horizontal_alignment = 0
+uppercase = true
+script = ExtResource("5_71t6t")
