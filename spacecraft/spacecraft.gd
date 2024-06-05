@@ -217,7 +217,6 @@ func _ready():
 	# locally owned global signals
 	Signals.add_user_signal(name + "_state_changed", [{"name":"ship", "type": TYPE_OBJECT}])
 	Signals.add_user_signal(name + "_lifted_off")
-	Signals.add_user_signal(name + "_landed")
 	Signals.add_user_signal(
 		"astronomy_tick", 
 		[{"name":"sidereal_days", "type": TYPE_INT},{"name":"seconds", "type":TYPE_INT}])
