@@ -198,15 +198,11 @@ func save_scenario(index : int):
 func load_scenario(index : int)-> void:
 	# Supply initial spacecraft position
 	print("Locating to long: ", scenario_list[index]["long"], " lat: ", scenario_list[index]["lat"], " hdg: ", scenario_list[index]["heading"])
-	var terrain_altitude : float = MOON.moon_data.get_terrain_altitude(
-		scenario_list[index]["lat"], 
-		scenario_list[index]["long"],
-		MOON.scale.x)
 	SPACECRAFT.set_logical_position(
 		scenario_list[index]["lat"], 
 		scenario_list[index]["long"], 
 		MOON.physical_radius, 
-		terrain_altitude + scenario_list[index]["altitude_offset"], 
+		scenario_list[index]["altitude_offset"], 
 		scenario_list[index]["heading"],
 		moon_axis_rate)
 	MOON.reset_scenario()

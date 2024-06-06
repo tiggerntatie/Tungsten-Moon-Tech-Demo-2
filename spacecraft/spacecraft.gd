@@ -175,13 +175,15 @@ func get_viewpoint_offset()-> Vector3:
 # Set spacecraft logical position to lat/long and heading (cw from N) (all in degrees)
 # Also sets rotation to be level with local ground, pointing at heading
 # Also sets linear velocity to match moon rotation at the given altitude
-func set_logical_position(lat: float, lon: float, radius: float, altitude: float, heading: float, moon_rate: float):
+func set_logical_position(lat: float, lon: float, radius: float, alt_agl: float, heading: float, moon_rate: float):
 	# NOTE: Longitude zero is in the direction of +Z per Godot convention
 	# NOTE: Spacecraft rotation depends on spacecraft orientation facing +X
 	var phi_physical: float = deg_to_rad(lon)
 	var phi_logical: float =  phi_physical + LEVEL.current_moon_rotation
 	var theta: float = deg_to_rad(lat)
 	var gamma: float = deg_to_rad(-heading)
+	var terrain_altitude : float = MOON.moon_data.get_terrain_altitude(lat, lon, MOON.scale.x)
+	var altitude = terrain_altitude + alt_agl
 	dv_logical_position.x = (radius + altitude) * cos(theta)*sin(phi_logical)
 	dv_logical_position.y = (radius + altitude) * sin(theta)
 	dv_logical_position.z = (radius + altitude) * cos(theta)*cos(phi_logical)
@@ -189,7 +191,7 @@ func set_logical_position(lat: float, lon: float, radius: float, altitude: float
 	var q1 : Quaternion = Quaternion.from_euler(Vector3(0.0, phi_physical+PI/2.0, PI/2.0-theta))
 	var q2 : Quaternion = Quaternion.from_euler(Vector3(0.0, gamma, 0.0))
 	rotation = (q1*q2).get_euler()	# This rotates the ship to correspond to its unrotated position on the globe
-	MOON.set_from_logical_position(self, get_viewpoint_offset(), altitude)
+	MOON.set_from_logical_position(self, get_viewpoint_offset(), alt_agl)
 	reset_spacecraft()
 
 # get the current computed height above "msl"
