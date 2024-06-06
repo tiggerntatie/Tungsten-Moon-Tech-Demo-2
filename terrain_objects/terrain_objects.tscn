@@ -8,7 +8,7 @@
 script = ExtResource("1_avpaf")
 
 [node name="LandingPad_0_0" parent="." node_paths=PackedStringArray("other_pads_array") instance=ExtResource("1_5jh7j")]
-other_pads_array = [NodePath("../LandingPad_0_1")]
+other_pads_array = [NodePath("../LandingPad_0_1"), NodePath("../LandingPad_3_0")]
 moon_data = ExtResource("3_rh7nr")
 identifier = "Pad 0:0"
 longitude = 161.0
