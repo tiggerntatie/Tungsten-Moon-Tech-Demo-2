@@ -40,10 +40,7 @@ func _ready():
 
 		LEVEL =  get_node("/root/Level")
 	on_data_changed()
-			
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
+
 
 # get a list of faces (excludes non-face children!)
 func get_faces():

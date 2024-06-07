@@ -11,7 +11,3 @@ func _ready():
 func set_pedestal_height(altitude_adjust: float)-> void:
 	mesh.height = altitude_adjust + BURIED_LENGTH
 	position = Vector3(0.0, -mesh.height/2.0, 0.0)
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
