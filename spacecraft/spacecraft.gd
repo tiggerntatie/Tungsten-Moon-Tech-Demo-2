@@ -182,7 +182,7 @@ func set_logical_position(lat: float, lon: float, radius: float, alt_agl: float,
 	var phi_logical: float =  phi_physical + LEVEL.current_moon_rotation
 	var theta: float = deg_to_rad(lat)
 	var gamma: float = deg_to_rad(-heading)
-	var terrain_altitude : float = MOON.moon_data.get_terrain_altitude(lat, lon, MOON.scale.x)
+	var terrain_altitude : float = MOON.moon_data.get_terrain_altitude(lat, lon, MOON.MOON_SCALE)
 	var altitude = terrain_altitude + alt_agl
 	dv_logical_position.x = (radius + altitude) * cos(theta)*sin(phi_logical)
 	dv_logical_position.y = (radius + altitude) * sin(theta)
