@@ -12,8 +12,9 @@ Tungsten Moon will run in VR mode if a VR headset is detected. You can use full 
 * Star field brightness is automatically adjusted between barely visible and brilliant, depending on whether the sun or planet are visible in the sky.
 * The motion simulation accounts for the tungsten moon itself spinning on its axis. The current rotation period is ten hours. This should give rise to Coriolis effects if you know where to look, although this has not been carefully verified yet.
 * The input scheme supports not only keyboard and mouse, but also the Xbox, Playstation and Steam Deck controllers. All control keys have been assigned to make the experience of moving between keyboard and controller more intuitive. There is no user re-configuration possible yet.
-* The executable file currently works with the Valve Steam Deck, using the latest Proton emulation layer. The performance is excellent.
-* There are several starting locations on the moon that you can choose from, with a very primitive UI. 
+* The executable file currently works with the Valve Steam Deck, using the latest Proton emulation layer. The performance is excellent, though it runs hot.
+* There are five starting locations on the moon that you can choose from, with a very primitive UI. Each starting location consists of a set of four landing pads for a total of twenty in the game. Each pad has an identifier and location label, and directions and distance to several other pads.
+* Landing pads have a red flashing beacon that turns green once you have landed safely on them. Can you find and land on all twenty pads?
 * A "radar altimeter" mode activates below 2000 meters altitude and will read correctly down to the surface of the planet.
 * Velocity is reported as ground-relative horizontal and vertical components.
 * An attitude "nav ball" helps to orient the pilot.
@@ -65,7 +66,7 @@ These starting positions provide various combinations of sun and/or planet shine
 ## Road Map
 * UI for save/load and different scenarios
 * UI for graphics settings
-* Add landing pads at various locations.
-* Objectives, challenges, achievements.
+* Automatic refueling on landing pads.
+* Richer objectives, challenges, achievements.
 * Limited resources, requiring resource gathering (survival mode).
 * A story.
